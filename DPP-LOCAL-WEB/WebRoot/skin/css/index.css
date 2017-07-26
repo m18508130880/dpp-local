@@ -1,0 +1,42 @@
+body,td,th {
+	margin: 0px;
+	padding: 0px; 
+		}
+
+input{
+        border-left:0px;
+        border-right:0px;
+        border-top:0px;
+        background-color:#000;
+        border-bottom:0px #ff0000 solid;
+        }
+.center {
+	width:100%;
+	background-color: #085F9C;
+	}
+.center .top1{
+	width:789px;
+        margin:0 auto;/*DIV水平居中这里的0可以任意值*/ 
+}
+.center .top1 .top3{
+	width:789px;
+	height:240px;
+	background-image:url(../images/t3.gif)
+}
+.center .top1 .top3 .fontsz{
+	font-size:12px;
+	text-align:left;
+	padding:29px 0px 10px 368px;
+	line-height: 28px;
+	background:none;
+}
+.center .top1 .top3 .fontsz2{
+	text-align:left;
+	padding:0px 0px 10px 368px;
+}
+.center .top1 .top3 .fontsz3{
+font-size:12px;
+color:#0571D6;
+	text-align:center;
+		line-height: 14px;
+}

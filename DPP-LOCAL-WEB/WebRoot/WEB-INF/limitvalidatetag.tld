@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <taglib>
+    <tlibversion>1.0</tlibversion>
+    <jspversion>1.1</jspversion>
+    <tag>
+    	<name>limitValidate</name>
+    	<tagclass>tag.LimitValidateTag</tagclass>
+    	<bodycontent>empty</bodycontent>    	
+    	<attribute>
+    		<name>userrole</name>
+    		<required>false</required>
+    		<rtexprvalue>true</rtexprvalue>
+    	</attribute>
+    	<attribute>
+    		<name>fpid</name>
+    		<required>false</required>
+    		<rtexprvalue>true</rtexprvalue>
+    	</attribute>
+    	<attribute>
+    		<name>ctype</name>
+    		<required>false</required>
+    		<rtexprvalue>true</rtexprvalue>
+    	</attribute>  	
+    </tag>
+  </taglib>

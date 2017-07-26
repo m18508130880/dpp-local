@@ -1,0 +1,135 @@
+﻿@charset "utf-8";
+@import url(golbal.css);
+
+/*=============登录页面=================*/
+.center {
+	width:100%;
+	background:url(../images/bg.gif);
+	background-repeat:repeat-x;
+	}
+.center .topgg{
+	width:100%;
+}
+.center .top1{
+	width:648px;
+        margin:68px auto;/*DIVˮƽ0ֵ*/ 
+}
+.center .top2{
+	width:100%;
+	height:34px;
+  margin:0px auto;/*DIVˮƽ0ֵ*/ 
+	background:url(../images/login/bg333.gif);
+	background-repeat:repeat-x;
+	text-align:center;
+}
+.center .top1 .top3{
+	width:648px;
+	height:273px;
+	background-image:url(../images/login/t3.gif)
+	
+}
+.center .top1 .top3 .fontsz{
+	font-size:12px;
+	text-align:left;
+	padding:14px 0px 10px 230px;
+	line-height: 28px;
+	background:none;
+  color:#f7da0d;
+}
+.center .top1 .top3 .fontsz2{
+	text-align:left;
+	padding:0px 0px 10px 290px;
+	color:#f7da0d;
+}
+.center .top1 .top3 .fontsz3{
+  font-size:12px;
+  color:#f7da0d;
+	text-align:center;
+	line-height: 14px;
+}
+.center input{
+  border-left:0px;
+  border-right:0px;
+  border-top:0px;
+  background-color:#fff;
+	padding-left:5px;
+	padding-top:2px;
+	color:#125850;
+  border:0px #979797 solid;
+}
+
+/*=============top.jsp=================*/
+#top_bg{
+	background:url(../images/top/top_bg.gif) repeat-x;
+	width:100%;
+	height:58px;
+}
+#top_r{
+	background:url(../images/top/top_r.gif)  right bottom  no-repeat;
+	width:100%;
+	height:58px;
+}
+#top_logo{
+	width:998px;
+}
+#banner_bg{
+	background:url(../images/top/banner_bg.gif) repeat-x;
+	width:100%;
+	height:47px;
+}
+#banner_l{
+	float:left;
+	line-height:47px;
+	padding-left:25px;
+	background:url(../images/top/index_img.gif) no-repeat;
+}
+#banner_r{
+	float:right;
+	line-height:47px;
+}
+#banner_r li{
+	float:left;
+	padding:4px 5px 0 5px;
+}
+#bar_irsp{
+	float:left;
+	background:url(../images/top/y_bg.gif) repeat-x;
+	width:100%;
+	height:5px;
+}
+#top_bottom_bg{
+  float:left;
+	background:url(../images/top/top_bottom_bg.gif) repeat-x;
+	width:100%;
+	height:38px;
+}
+#player_top_bg{
+	background:url(../images/main/player_top_bg.gif) repeat-x;
+	width:500px;
+	height:28px;
+}
+
+#player_top_bg ul li{
+  font-size:12px;
+
+}
+/*Medium btn*/
+.btnM{ background-position:0 -319px; height:26px; font-size:12px; padding-left:15px; font-weight:bold;}
+.btnM .inner{ background-position:right -357px; height:25px; line-height:25px; padding-top:1px; padding-right:14px;}
+.btnM:hover{ background-position:0 -394px;}
+.btnM:hover .inner{ background-position:right -431px;}
+
+.btnM_strong{ background-position:0 -468px;}
+.btnM_strong .inner{ background-position:right -505px;}
+.btnM_strong:hover{ background-position:0 -542px;}
+.btnM_strong:hover .inner{ background-position:right -579px;}
+
+.btnM_disable{ background-position:0 -616px;}
+.btnM_disable .inner{ background-position:right -653px;}
+.btnM_disable:hover{ background-position:0 -616px;}
+.btnM_disable:hover .inner{ background-position:right -653px;}
+
+/*icon按钮*/
+.btnM_icon{padding-left:8px;}
+.btnM_icon .inner_icon{ padding-left:14px;}
+.btnM_icon_add .inner_icon{ background-position:0 -1490px;}

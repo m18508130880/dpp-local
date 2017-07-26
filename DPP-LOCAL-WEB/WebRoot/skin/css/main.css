@@ -1,0 +1,95 @@
+@charset "utf-8";
+/*
+vincent
+*/
+*{margin:0;padding:0;font-size:12px;}
+body{color:#fff;background:#595957;}/*ie5.5不支持margin的居中对齐*/
+a:focus{outline:none;}
+/*总容器*/
+.box{float:left;overflow:hidden;width:987px;min-width:987px;_width:987px;margin:5px 0 0 10px;background:#595957;}
+/**html .box{width:expression( document.body.clientWidth > 630 ? "630px" : "auto" );} 为IE6以下浏览器设置最小宽值*/
+.box span{display:block;}
+
+/*顶部样式*/
+.top{height:27px;padding:0 15px;}
+.t_l,.t_r{width:15px;height:27px;font-size:0%;margin-top:-27px;}
+.t_l{float:left;background:url(../images/player/round.gif) no-repeat left top;}/*左上角*/
+.t_r{float:right;background:url(../images/player/round.gif) no-repeat right top;}/*右上角*/
+.t_m{height:27px;line-height:27px;font-size:0%;width:100%;background:url(../images/player/u_dborder.gif) no-repeat center top;color:#65FF00;font-size:9px;text-align:left;padding-left:10px;}/*这是可左右伸展的区域，两例留出空白便于放置左右角容器*/
+.t_m b{display:block;height:27px;width:100%;background:url(../images/player/name.gif) no-repeat left center;text-indent:-9999px;}
+
+/*中间样式*/
+.m_l,.m_r{width:15px;padding-bottom:30000px;margin-bottom:-30000px;}/*两列等高*/
+.m_l{float:left;margin-left:0px;+margin-left:-15px;_margin-left:-15px;background:url(../images/player/l_rborder.gif) repeat-y left top;} /*左边框*/  
+.m_r{float:right;margin-right:0px;+margin-right:-15px;_margin-right:-15px;background:url(../images/player/l_rborder.gif) repeat-y right top;} /*右边框*/
+
+/*底部样式*/
+.b_m{padding:0 15px;height:48px;}/*这是可左右伸展的区域，两例留出空白便于放置左右列同高容器*/
+.b_m_m{width:100%;height:48px;font-size:0%;background:url(../images/player/u_dborder.gif) no-repeat center bottom;} 
+ 
+.b_l,.b_r{height:48px;font-size:0%;width:15px;margin-top:-48px;}
+.b_l{float:left;background:url(../images/player/round.gif) no-repeat left bottom;}/*左下角*/
+.b_r{float:right;background:url(../images/player/round.gif) no-repeat right bottom;}/*右下角*/     
+
+/*内容区*/ 
+.context{background:url(../images/player/flashbg.gif) repeat-x center top;}
+
+h3{text-align:center;font-size:14px;width:80%;margin:0 auto;line-height:26px;}
+p{line-height:22px;padding:0 20px;text-align:left;}
+a:link,a:visited{color:#fff;font-weight:bold;}
+a:hover{color:green;}
+
+/*控制容器*/
+#control{height:37px;width:100%;padding-left:85px;position:relative;top:5px;overflow:hidden;}
+/*播放控制按钮*/
+.btnplay{width:65px;height:37px;background:url(../images/player/play.gif) no-repeat left top;position:absolute;left:0px;top:0;}
+.play{width:37px;float:left;}
+.play a:link,.play a:visited{display:block;width:37px;height:37px;text-indent:-9999px;}
+.play a:hover{background:url(../images/player/play.gif) no-repeat left -37px;}
+.stop{width:28px;float:left;}
+.stop a:link,.stop a:visited{display:block;width:28px;height:37px;text-indent:-9999px;}
+.stop a:hover{background:url(../images/player/play.gif) no-repeat right -37px;}
+
+.rightcontrol{float:left;height:37px;width:90%;position:relative;}
+
+/*播放进度栏*/
+.progressbar{float:left;width:95%;height:5px;margin-top:3px;margin-bottom:5px; position:relative;}
+.leftbar{width:100%;height:5px;font-size:0%;background:url(../images/player/splitbar.gif) repeat-x left bottom;}
+.rightbar{float:right;width:50%;position:relative;height:5px;font-size:0%;background:url(../images/player/splitbar.gif) repeat-x left top;}
+.drawbar{display:block;width:11px;height:11px;position:absolute;top:-3px;left:0;background:url(../images/player/bar.gif) no-repeat left top;text-indent:-9999px;}
+
+/*音量控制和播放状态栏*/
+.leftcontrol{float:left;width:280px;height:24px;overflow:hidden;}
+
+/*音量控制栏*/
+.sound{float:left;width:50px;height:12px;margin-top:6px;padding-left:20px;background:url(../images/player/ico.gif) no-repeat left top;}
+.sound span{display:block;width:100%;height:11px;background:url(../images/player/sound.gif) repeat-x left -11px;}
+.sound span b{display:block;float:right;width:50%;height:11px;font-size:0%;background:url(../images/player/sound.gif) repeat-x left top;text-indent:-9999px;}
+
+/*播放状态栏*/
+.playtime{float:right;width:197px;height:24px;background:url(../images/player/panel.gif) no-repeat left top;}
+.playstae{display:block;float:left;width:80px;height:24px;line-height:24px;color:#5DFF1E;font-size:11px;padding-left:10px;}
+.palytimeinf{display:block;float:right;width:70px;height:24px;line-height:24px;color:#5DFF1E;font-size:11px;padding-right:10px;}
+
+/*状态控制栏*/
+.btndiv{float:right;width:220px;height:17px;margin-top:4px;padding-right:30px;}
+.btndiv span{display:block;float:left;width:60px;height:17px;}
+.btndiv span a:link,.btndiv span a:visited{display:block;height:17px;line-height:17px;padding-left:10px;font-size:11px;color:#666; text-decoration:none;font-weight:normal;}
+.btndiv span a:hover{color:#44BF0C;}
+
+/*宽屏按钮*/
+.widescreen a:link,.widescreen a:visited{background:url(../images/player/button.gif) no-repeat left top;font-size:11px;}    
+.widescreen a:hover{background:url(../images/player/button.gif) no-repeat left -17px;}	
+
+/*全屏按钮*/
+.fullscreen a:link,.fullscreen a:visited{background:url(../images/player/button.gif) no-repeat left -34px;font-size:11px;}    
+.fullscreen a:hover{background:url(../images/player/button.gif) no-repeat left -51px;}
+
+/*关闭状态信息按钮*/
+#closeinfo{float:right;width:95px;} 
+#closeinfo a:link,#closeinfo a:visited{padding-left:20px;background:url(../images/player/button.gif) no-repeat left -68px;font-size:11px;}    
+#closeinfo a:hover{background:url(../images/player/button.gif) no-repeat left -85px;}
+
+.logo{margin:0 auto;height:350px;}
+.flashbg{width:282px;height:90px;margin:0 auto;padding-bottom:40%;margin-bottom:-90px;background:url(../images/player/logo.png) no-repeat center center;}
+

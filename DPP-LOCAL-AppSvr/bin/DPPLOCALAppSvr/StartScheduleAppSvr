@@ -1,0 +1,10 @@
+export JAVA_HOME=/usr/local/jdk1.6
+export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar:./lib/classes12.jar:./lib/dom4j-1.6.1.jar:./lib/log4j-1[1].2.15.jar:.
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JAVA_HOME/jre/lib/amd64:$JAVA_HOME/jre/lib/amd64/native_threads:$JAVA_HOME/jre/lib/amd64/client:$JAVA_HOME/jre/lib/amd64/server:./
+
+$JAVA_HOME/bin/javac bean/*.java
+$JAVA_HOME/bin/javac container/*.java
+$JAVA_HOME/bin/javac net/*.java
+$JAVA_HOME/bin/javac util/*.java
+$JAVA_HOME/bin/javac ScheduleAppSvr/Main.java
+$JAVA_HOME/bin/java ScheduleAppSvr.Main

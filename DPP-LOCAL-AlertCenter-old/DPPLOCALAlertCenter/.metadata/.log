@@ -1,0 +1,26 @@
+!SESSION 2008-02-14 09:54:14.226 -----------------------------------------------
+eclipse.buildId=unknown
+java.version=1.4.2
+java.vendor=Sun Microsystems Inc.
+BootLoader constants: OS=win32, ARCH=x86, WS=win32, NL=zh_CN
+Framework arguments:  -product org.eclipse.sdk.ide -pdelaunch
+Command-line arguments:  -product org.eclipse.sdk.ide -data D:\ISMP(普天)\ISMS\isms -dev file:D:/workspace/J2EE/.metadata/.plugins/org.eclipse.pde.core/New_configuration/dev.properties -pdelaunch -os win32 -ws win32 -arch x86
+
+!ENTRY org.eclipse.osgi 2 0 2008-02-14 09:54:19.263
+!MESSAGE The following is a complete list of bundles which are not resolved, see the prior log entry for the root cause if it exists:
+!SUBENTRY 1 org.eclipse.osgi 2 0 2008-02-14 09:54:19.263
+!MESSAGE Bundle update@plugins/org.eclipse.jdt.apt.core_3.2.1.R32x_v20060822-2100.jar [39] was not resolved.
+!SUBENTRY 2 org.eclipse.jdt.apt.core 2 0 2008-02-14 09:54:19.263
+!MESSAGE Missing Constraint: Bundle-RequiredExecutionEnvironment: J2SE-1.5
+!SUBENTRY 1 org.eclipse.osgi 2 0 2008-02-14 09:54:19.263
+!MESSAGE Bundle update@plugins/org.eclipse.jdt.apt.ui_3.2.1.R32x_v20060822-2100.jar [40] was not resolved.
+!SUBENTRY 2 org.eclipse.jdt.apt.ui 2 0 2008-02-14 09:54:19.263
+!MESSAGE Missing required bundle org.eclipse.jdt.apt.core_[3.2.0,4.0.0).
+!SUBENTRY 1 org.eclipse.osgi 2 0 2008-02-14 09:54:19.263
+!MESSAGE Bundle update@plugins/org.eclipse.jdt.junit4.runtime_1.0.1.r321_v20060905.jar [49] was not resolved.
+!SUBENTRY 2 org.eclipse.jdt.junit4.runtime 2 0 2008-02-14 09:54:19.263
+!MESSAGE Missing required bundle org.junit4_[4.1.0,4.2.0).
+!SUBENTRY 1 org.eclipse.osgi 2 0 2008-02-14 09:54:19.263
+!MESSAGE Bundle update@plugins/org.junit4_4.1.0.1 [114] was not resolved.
+!SUBENTRY 2 org.junit4 2 0 2008-02-14 09:54:19.263
+!MESSAGE Missing Constraint: Bundle-RequiredExecutionEnvironment: J2SE-1.5

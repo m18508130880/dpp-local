@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <config>
+    	<ThreadPoolSize>100</ThreadPoolSize>
+    </config>
+    <app_server>
+    	<server_prot>61020</server_prot>
+    	<server_timeout>60</server_timeout>
+    </app_server>
+    <app_client>
+    	<client_ip>192.168.0.230</client_ip>
+    	<client_prot>50000</client_prot>
+    	<client_timeout>60</client_timeout>
+    	<client_id>0000000001</client_id>
+    	<client_pwd>111111</client_pwd>
+    	<client_sta>0</client_sta>
+    </app_client>
+    <db>
+    	<url>jdbc:mysql://192.168.0.225:3306/LNG-LOCAL</url>
+    	<id>root</id>
+    	<pwd>111111</pwd>
+    	<flag>3001</flag>
+    </db>
+    <sqlser>
+    	<url>jdbc:sqlserver://192.168.0.144:1590;DatabaseName=AYJK</url>
+    	<id>ayjk</id>
+    	<pwd>ayjk</pwd>
+    	<flag>2001</flag>
+    	<status>0</status>
+    </sqlser>
+</root>

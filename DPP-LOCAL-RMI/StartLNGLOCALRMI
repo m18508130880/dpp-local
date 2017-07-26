@@ -1,0 +1,5 @@
+export JAVA_HOME=/usr/local/jdk_64
+export CLASSPATH=$CLASSPATH:$JAVA_HOME/lib/tools.jar:$JAVA_HOME/lib/dt.jar:./lib/classes12.jar:./lib/servlet.jar:./lib/jspSmartUpload.jar:./lib/jxl.jar:./lib/mysql-connector-java-5.1.15-bin.jar
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$JAVA_HOME/jre/lib/amd64:$JAVA_HOME/jre/lib/amd64/native_threads:$JAVA_HOME/jre/lib/amd64/client:$JAVA_HOME/jre/lib/amd64/server:./
+
+$JAVA_HOME/bin/java LNGLOCALRMI.Main

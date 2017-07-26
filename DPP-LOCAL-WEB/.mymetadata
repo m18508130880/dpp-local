@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-module
+  type="WEB"
+  name="DPP-LOCAL-WEB"
+  id="myeclipse.1310625329453"
+  context-root="/ZNWL-WEB"
+  j2ee-spec="5.0"
+  archive="DPP-LOCAL-WEB.war">
+  <attributes>
+    <attribute name="webrootdir" value="WebRoot" />
+  </attributes>
+</project-module>
+

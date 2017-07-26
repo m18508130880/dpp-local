@@ -1,0 +1,39 @@
+﻿*{
+	margin:0;
+	padding:0
+}
+html{
+	border:0;
+}
+body,div,p,th,td,li,dd,a,span{
+	font-size:13px;font-family:Verdana,"宋体";white-space:normal;
+}
+#body_bg{
+	background:url(../images/main_bg.gif) #B6D7FF top repeat-x;
+}
+ul{
+	list-style:none;
+}
+a img{
+	border:0;
+}
+a{
+	font-size:12px;
+	color:#000;
+	text-decoration:none;
+}
+a:hover{
+	color:#0F7E00;
+	text-decoration:underline;
+}
+select{
+	border:1px #686868 solid;
+	height:16px;
+	font-size:12px;
+}
+h3{
+	text-align:center;
+	font-size:14px;
+	font-weight:bold;
+	color:#0657B1;
+}
