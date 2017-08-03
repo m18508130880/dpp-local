@@ -33,10 +33,12 @@ public class Cmd_Sta
 
 //	==========================AppSvr ~ Alert========================================
 	public static final int CMD_SUBMIT_2001	 				= 2001;//更新数据
+	public static final int CMD_SUBMIT_2002	 				= 2002;//告警计算
 	
 //	==========================AppSvr ~ CPM========================================
 	public static final String DATA_041101_0001			= "0411010001";			//星仪液位041101,水位高度0001;精度0.005
 	public static final String DATA_041102_0001			= "0411020001";			//星仪液位041102,水位高度0001;精度0.0025
+	public static final String DATA_00000_0001			= "0000000001";			//告警中心
 	
 //	==================系统状态=====================================================
 	public static final int STA_SUCCESS						= 0000;	//成功

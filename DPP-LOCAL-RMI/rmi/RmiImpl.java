@@ -535,6 +535,19 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 				}
 				break;
 			}
+			case Cmd_Sta.CMD_UPDATE_DATA:
+			{
+				String SendData = CommUtil.StrBRightFillSpace(" ", 20)
+						+ "0000"
+						+ Cmd_Sta.CMD_UPDATE_DATA
+						+ CommUtil.StrBRightFillSpace(pClient_Id, 10);
+				System.out.println("SendData["+SendData+"]");
+				if(m_TPCClient.SetSendMsg(SendData, 1))
+				{
+					ret = "0000";
+				}
+				break;
+			}
 		}	
 		return ret;
 	}

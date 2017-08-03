@@ -120,6 +120,55 @@ public class DBUtil
 		return rslt;
 	}
 	
+	public String GetProject_IdAndGJ_Id(String strCpm_Id, String strId)
+	{
+		String rslt = null;
+		Connection conn = null;
+		CallableStatement cstat = null;
+		try
+		{
+			conn = objConnPool.getConnection();
+			if(null != conn)
+			{
+				conn.setAutoCommit(false);
+				cstat = conn.prepareCall("{? = call Func_App_GetPIdGId(?,?)}");
+				cstat.setString(2, strCpm_Id);
+				cstat.setString(3, strId);
+				cstat.registerOutParameter(1, java.sql.Types.VARCHAR);
+				cstat.execute();
+				rslt = cstat.getString(1);
+				conn.commit();	
+			}
+		}
+		catch(SQLException ex)
+		{
+			ex.printStackTrace();
+			return  CommUtil.IntToStringLeftFillSpace(Cmd_Sta.STA_UNKHOWN_ERROR, 4);
+		}
+		finally
+		{
+			try
+			{
+				if(null != cstat)
+				{
+					cstat.close();
+					cstat = null;					
+				}
+				if(null != conn)
+				{
+					conn.close();
+					conn = null;	
+				}
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		CommUtil.PRINT("DB_IN["+strCpm_Id+","+strId+"] DB_OUT[" + rslt + "]");	
+		return rslt;
+	}
+	
 	public  boolean doUpdate(String pSql)
 	{
 		System.out.println("[" + pSql + "]");

@@ -61,6 +61,11 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 		{
 			Dev_RealData = Dev_CData;
 		}
+		//增加水位值判断,水位计量程为0-5m
+		if(Double.valueOf(Dev_RealData) < 0.0 || Double.valueOf(Dev_RealData) > 5.0)
+		{
+			Dev_RealData = "0.0";
+		}
 		
 		Dev_Unit      = CommUtil.BSubstring(strRequest, 240, 10).trim();
 	}
@@ -71,6 +76,7 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 		// TODO Auto-generated method stub
 		int ret = Cmd_Sta.STA_ERROR;
 		String Sql = "";
+		String sendStr = "";
 		if(!Dev_CData.equalsIgnoreCase("NULL") && Dev_CData.length() > 0)
 		{
 			if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_041101_0001))		//星仪液位，精度0.005
@@ -122,9 +128,14 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			if(m_MsgCtrl.getM_DBUtil().doUpdate(Sql))
 			{
 				ret = Cmd_Sta.STA_SUCCESS;
+				String Project_IdAndGJ_Id = m_MsgCtrl.getM_DBUtil().GetProject_IdAndGJ_Id(this.getActionSource().trim(),Dev_Id);
+				sendStr = CommUtil.StrBRightFillSpace("", 20);									//保留字
+				sendStr += CommUtil.StrBRightFillSpace("0000", 4);								//命令发送状态
+				sendStr += CommUtil.StrBRightFillSpace(Cmd_Sta.CMD_SUBMIT_2002 + "", 4);		//处理指令
+				sendStr += CommUtil.StrBRightFillSpace(Project_IdAndGJ_Id, 10);					//项目和子系统ID
+				m_MsgCtrl.getM_TcpSvr().DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Cmd_Sta.DATA_00000_0001, 20), sendStr);
+				
 			}
-			
-			
 		}
 		
 		//回复

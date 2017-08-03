@@ -34,7 +34,7 @@ public class AlertCtrl extends Thread
 			m_EquipInfo = new EquipInfoBean();
 
 			m_CmdBean.execRequest(this);
-			this.start();
+			//this.start();
 			Is_OK = true;
 		}
 		catch(Exception e)
@@ -85,6 +85,12 @@ public class AlertCtrl extends Thread
 				e.printStackTrace();
 			}
 		}//while
+	}
+	
+	public void doAlert(String projectAndSysId)
+	{
+		objGJGXTable = m_CmdBean.getObjGJGXTable();
+		m_EquipInfo.doAlert(this, projectAndSysId, objGJGXTable);
 	}
 	
 	public synchronized String getSeq()

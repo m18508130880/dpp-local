@@ -266,6 +266,7 @@ public class TcpSvr extends Thread
 	
 	public void ClientStatusNotify(String strClientKey, int iStatus)
 	{
+		String sql = "";
 		switch(iStatus)
 		{
 			case STATUS_CLIENT_ONLINE:
@@ -283,6 +284,7 @@ public class TcpSvr extends Thread
 					   + CommUtil.StrBRightFillSpace((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()), 20)
 					   + CommUtil.StrBRightFillSpace("网关恢复在线", 128);
 				SetRecvMsgList((strClientKey + new String(EnCode(Cmd_Sta.COMM_SUBMMIT, OffStr))).getBytes());
+				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢复在线')";
 				break;
 			}
 			case STATUS_CLIENT_OFFLINE:
@@ -300,9 +302,11 @@ public class TcpSvr extends Thread
 					   + CommUtil.StrBRightFillSpace((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()), 20)
 					   + CommUtil.StrBRightFillSpace("网关离线", 128);
 				SetRecvMsgList((strClientKey + new String(EnCode(Cmd_Sta.COMM_SUBMMIT, OffStr))).getBytes());
+				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢离线')";
 				break;
 			}
 		}
+		m_DbUtil.doUpdate(sql);
 	}
 	
 	//如果收到关闭指令，就关闭SOCKET和释放资源

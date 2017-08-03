@@ -62,8 +62,9 @@ public class DevGXBean extends RmiBean
 		{
 			case 12://删除
 			case 11://编辑	
-				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);  
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
+				pRmi.Client(2001,"0000000001","");
 			case 0://admin管线分页查询
 				msgBean = pRmi.RmiExec(0, this,  currStatus.getCurrPage(), 25);
 				currStatus.setTotalRecord(msgBean.getCount());
@@ -613,9 +614,12 @@ public class DevGXBean extends RmiBean
 					}
 				}
 				currStatus.setResult(Resp);
+				pRmi.Client(2001,"0000000001","");
 			}
-			currStatus.setResult("上传失败！每次上传最多5个文件!");
-			
+			else
+			{
+				currStatus.setResult("上传失败！每次上传最多5个文件!");
+			}
 			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);	
 		   	response.sendRedirect(currStatus.getJsp());
@@ -718,9 +722,12 @@ public class DevGXBean extends RmiBean
 					}
 				}
 				currStatus.setResult(Resp);
+				pRmi.Client(2001,"0000000001","");
 			}
-			currStatus.setResult("上传失败！每次上传最多5个文件!");
-			
+			else
+			{
+				currStatus.setResult("上传失败！每次上传最多5个文件!");
+			}
 			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);	
 		   	response.sendRedirect(currStatus.getJsp());

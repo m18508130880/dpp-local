@@ -46,7 +46,7 @@ public class EquipInfoBean
 					blockingOne(bean, alertCtrl);	// 阻塞分析 单个设备
 					if(!Sys_Id.contains(bean.getGJ_Id().substring(0, 5)))	// 判断子系统计算过，则不计算
 					{
-						Sys_Id = blockingAll(bean, equipInfo, alertCtrl, GJGXTable);	// 阻塞分析 多个设备
+						Sys_Id = blockingAll_1(bean, equipInfo, alertCtrl, GJGXTable);	// 阻塞分析 多个设备
 					}
 				}
 			}
@@ -148,6 +148,105 @@ public class EquipInfoBean
 			}
 		}
 	
+	}
+	
+	/*
+	 * 阻塞分析 一个以上设备 2017-7-31更改
+	 * return 计算的子系统
+	 */
+	@SuppressWarnings("unchecked")
+	public String blockingAll_1(EquipInfoBean pEquipInfo, ArrayList<EquipInfoBean> pEquipObj, AlertCtrl alertCtrl, Hashtable objGJGXTable)
+	{
+		String projectAndSysId = "";
+		String newDate = CommUtil.getDateTime();
+		String Sys_Id = pEquipInfo.getGJ_Id().substring(0,5);
+		ArrayList<EquipInfoBean> equipList = new ArrayList<EquipInfoBean>();
+		Iterator<?> iterator = pEquipObj.iterator();
+		while (iterator.hasNext())
+		{
+			EquipInfoBean bean = (EquipInfoBean) iterator.next();
+			if(bean.getGJ_Id().contains(Sys_Id) && bean.getProject_Id().equals(pEquipInfo.getProject_Id()))
+			{
+				equipList.add(bean);
+				projectAndSysId = bean.getProject_Id()+bean.getGJ_Id().substring(0,5);
+				if(CommUtil.getHoursBetween(pEquipInfo.getCTime(), newDate) > 1) // 所有数据，在一个小时以内上传的才进行计算
+				{
+					return Sys_Id;
+				}
+			}
+		}
+		if(equipList.size() <= 1) 	// 多个设备才计算
+		{
+			return Sys_Id;
+		}
+		CommUtil.PRINT("-----阻塞检测--子系统["+projectAndSysId+"]--多个--");
+		// 取到子系统管井
+		ArrayList<DevGJAlertBean> gjList = (ArrayList<DevGJAlertBean>) objGJGXTable.get(projectAndSysId);
+		// 将管井list转为hashtable
+		Hashtable<String, DevGJAlertBean> objGJTable = listToHashtable(gjList, 1);
+		// 管井编号变为管线编号
+		projectAndSysId = dealGXID(projectAndSysId);
+		// 取到子系统管线
+		ArrayList<DevGXAlertBean> gxList = (ArrayList<DevGXAlertBean>) objGJGXTable.get(projectAndSysId);
+		// 将管线list转为hashtable
+		Hashtable<String, DevGXAlertBean> objGXTable = listToHashtable(gxList, 2);
+		// 将设备list转为hashtable
+		Hashtable<String, DevGXAlertBean> objEquipTable = listToHashtable(equipList, 3);
+		// 开始遍历设备
+		iterator = equipList.iterator();
+		while (iterator.hasNext())
+		{
+			int option = 0; 		// 退出条件
+			float allLength = 0;	// 两设备间管线总长度
+			float equipSlope = 0;	// 水位的坡度
+			float gjSlope = 0;		// 管井的坡度
+			EquipInfoBean stratEquip = (EquipInfoBean) iterator.next();		// 开始设备井
+			EquipInfoBean endEquip = null;									// 结束设备井
+			String gj_Id = stratEquip.getGJ_Id();							
+			do{
+				DevGJAlertBean gjBean = (DevGJAlertBean) HashGet(objGJTable, gj_Id);  	// 取到第一个设备管井
+				if(Float.valueOf(gjBean.getValue()) > 0)	// value>0,则证明有设备
+				{
+					endEquip = (EquipInfoBean) HashGet(objEquipTable, gjBean.getId());
+					option = 1;			// 取到下一个设备即跳出循环
+				}
+				if( gjBean.getFlag().equals("2"))	// 遇到终点，还没有遇到设备，跳出循环
+				{
+					option = 2;
+				}
+				DevGXAlertBean gxBean = (DevGXAlertBean) HashGet(objGXTable, gjBean.getOut_Id());	// 根据管井出口找管线
+				if(null != gxBean)
+				{
+					allLength += Float.valueOf(gxBean.getSize());	// 管线长度相加
+					gj_Id = gxBean.getEnd_Id();		// 设置下一个管井的编号
+				}
+				else
+				{
+					option = 3;
+				}
+			}while(option == 0);
+			if(option == 1 && allLength > 0) 	// 找到设备的正常退出
+			{
+				equipSlope = (Float.valueOf(stratEquip.getValue()) - Float.valueOf(endEquip.getValue())) / allLength;
+				//gjSlope = (Float.valueOf(stratEquip.getBase_Height()) - Float.valueOf(endEquip.getBase_Height())) / allLength;
+				if(Math.abs(equipSlope) > 0.001)
+				{
+					String Sql = " insert INTO alert_info(CPM_ID, ID, CNAME, ATTR_ID, ATTR_NAME, LEVEL, CTIME, CDATA, GJ_ID, STATUS, UNIT, DES)"+
+							     " VALUES('"+pEquipInfo.getPid()+"', '"+pEquipInfo.getTid()+"', '"+pEquipInfo.getCName()+"', '0012', '阻塞', '"+
+							     " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"')";
+						if(alertCtrl.getM_DBUtil().doUpdate(Sql))
+						{
+							CommUtil.PRINT("管线[" + stratEquip.getGJ_Id() + "->"+endEquip.getGJ_Id()+"]水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]");
+						}
+				}
+			}
+			else		// 未找到下一个设备 非正常退出
+			{
+				continue;
+			}
+		}
+		
+		return Sys_Id;	// 返回计算子系统
 	}
 	
 	/*

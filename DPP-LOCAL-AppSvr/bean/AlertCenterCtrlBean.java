@@ -52,7 +52,7 @@ public class AlertCenterCtrlBean extends BaseCmdBean {
 		String ret = null;
 		ret = CommUtil.StrBRightFillSpace(getReserve(), 20);		//保留字
 		ret += CommUtil.StrBRightFillSpace(getDev_Status(), 4);		//命令发送状态
-		ret += CommUtil.StrBRightFillSpace("2001", 4);				//处理指令
+		ret += CommUtil.StrBRightFillSpace(getDev_Deal(), 4);		//处理指令
 		ret += CommUtil.StrBRightFillSpace(getDev_Id(), 10);		//DTU的ID
 		return ret;
 	}

@@ -24,6 +24,7 @@ public class Cmd_Sta
 
 //	==========================AppSvr ~ Alert========================================
 	public static final int CMD_SUBMIT_2001	 				= 2001;//更新数据
+	public static final int CMD_SUBMIT_2002	 				= 2002;//告警计算
 
 //	==========================AppSvr ~ CPM========================================
 	public static final String DATA_041101_0001			= "0411010001";			//星仪液位041101,水位高度0001;精度0.005

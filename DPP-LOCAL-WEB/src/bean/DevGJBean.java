@@ -84,11 +84,13 @@ public class DevGJBean extends RmiBean
 			case 10:// 添加
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25); // 得到一个封装了结果集的MsgBean对象
+				pRmi.Client(2001,"0000000001","");
 				break;
 			case 12:// 删除
 			case 11:// 编辑
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25); // 得到一个封装了结果集的MsgBean对象
+				pRmi.Client(2001,"0000000001","");
 			case 0:// Admin查询
 				msgBean = pRmi.RmiExec(0, this, currStatus.getCurrPage(), 25);
 				currStatus.setTotalRecord(msgBean.getCount());
@@ -531,9 +533,12 @@ public class DevGJBean extends RmiBean
 					}
 				}
 				currStatus.setResult(Resp);
+				pRmi.Client(2001,"0000000001","");
 			}
-			currStatus.setResult("上传失败！每次上传最多5个文件!");
-
+			else
+			{
+				currStatus.setResult("上传失败！每次上传最多5个文件!");
+			}
 			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 			response.sendRedirect(currStatus.getJsp());
@@ -654,8 +659,12 @@ public class DevGJBean extends RmiBean
 					}
 				}
 				currStatus.setResult(Resp);
+				pRmi.Client(2001,"0000000001","");
 			}
-			currStatus.setResult("上传失败！每次上传最多5个文件!");
+			else
+			{
+				currStatus.setResult("上传失败！每次上传最多5个文件!");
+			}
 
 			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
@@ -1027,13 +1036,8 @@ public class DevGJBean extends RmiBean
 				Sql = "insert into dev_gj(id, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road) " + "values('" + Id + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "')";
 				break;
 			case 11:// 编辑
-<<<<<<< db67a7d21daa7f6b261107dc9d023f97533166ca
-				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "' " + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
-=======
 				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
->>>>>>> 2017-7-26
 				break;
-
 			case 12:// 删除
 				Sql = " delete from dev_gj where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;

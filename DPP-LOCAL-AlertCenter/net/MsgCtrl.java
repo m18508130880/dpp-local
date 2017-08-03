@@ -18,8 +18,8 @@ import bean.*;
 
 public class MsgCtrl extends Thread
 {	
-	private TcpSvr m_TcpSvr = null;//TCP 服务器
-	private DBUtil m_DBUtil = null;
+	private TcpClient m_TcpClient = null;//TCP 服务器
+	private AlertCtrl m_AlertCtrl = null;
 
 	private int m_Seq = (int)new Date().getTime();
 
@@ -31,10 +31,10 @@ public class MsgCtrl extends Thread
 	InetAddress addr = InetAddress.getLocalHost();
 	public String m_LocalIp = addr.getHostAddress().toString();//获得本机IP
 	
-	public MsgCtrl(TcpSvr pTcpSvr, DBUtil dbUtil)throws Exception
+	public MsgCtrl(TcpClient TcpClient, AlertCtrl alertCtrl)throws Exception
 	{	    
-		m_TcpSvr = pTcpSvr;
-		m_DBUtil = dbUtil;
+		m_TcpClient = TcpClient;
+		m_AlertCtrl = alertCtrl;
 	} 
 	public boolean Initialize()
 	{
@@ -64,37 +64,28 @@ public class MsgCtrl extends Thread
 		{  			
 			try
 			{
-				byte[] data = (byte[])m_TcpSvr.GetRecvMsgList();
+				byte[] data = (byte[])m_TcpClient.GetRecvMsgList();
 				if(null ==  data || data.length < Cmd_Sta.CONST_MSGHDRLEN)
 				{
 					sleep(10);
 					continue;
 				}
-				String strClientKey = new String(data, 0, 20);	
-				DataInputStream DinStream = new DataInputStream(new ByteArrayInputStream(data));
-				DinStream.skip(20);
-				MsgHeadBean msgHead = new MsgHeadBean();			
-				msgHead.setUnMsgLen(CommUtil.converseInt(DinStream.readInt()));
-				msgHead.setUnMsgCode(CommUtil.converseInt(DinStream.readInt()));
-				msgHead.setUnStatus(CommUtil.converseInt(DinStream.readInt()));
-				msgHead.setUnMsgSeq(CommUtil.converseInt(DinStream.readInt()));
-				msgHead.setUnReserve(CommUtil.converseInt(DinStream.readInt()));
-				DinStream.close();
+				String strClientKey = new String(data, 0, 20);
 				
-				dealData = new String(data, 40, data.length - 40);
-				String dealReserve = dealData.substring(0,  20);
-				String dealCmd = dealData.substring(24, 28);	
-				switch(msgHead.getUnMsgCode())
+				dealData = new String(data, 20, data.length - 20);
+				//String dealReserve = dealData.substring(0,  20);
+				String dealCmd = dealData.substring(24, 28);
+				switch(Integer.valueOf(dealCmd))
 				{
-					case Cmd_Sta.COMM_SUBMMIT://提交
+					case Cmd_Sta.CMD_SUBMIT_2001://更新数据
 					{
-						CommUtil.LOG("Submit [" + strClientKey + "] " + "[" + dealData + "]");
+						//CommUtil.LOG("Submit [" + strClientKey + "] " + "[" + dealData + "]");
 						BaseCmdBean cmdBean = BaseCmdBean.getBean(Integer.parseInt(dealCmd), getSeq());	
 						if(null != cmdBean)
 						{
 							CommUtil.PRINT("Bean[" + cmdBean.getBeanName() + "]");
 							cmdBean.parseReqest(strClientKey, dealData, data);
-							cmdBean.execRequest(this);
+							cmdBean.execRequest(m_AlertCtrl);
 						}
 						else
 						{
@@ -103,22 +94,10 @@ public class MsgCtrl extends Thread
 							
 						break;
 					}
-					case Cmd_Sta.COMM_DELIVER://回应
-					{
-						CommUtil.LOG("Deliver [ " + strClientKey + "] " + "[" + dealData + "]");
-						BaseCmdBean cmdBean = GetAction(dealReserve);
-						if(null != cmdBean)
-						{
-							CommUtil.PRINT("Bean[" + cmdBean.getBeanName() + "]");
-							cmdBean.parseReponse(dealData);
-							cmdBean.execResponse(this);
-						}
-						else
-						{
-							CommUtil.LOG("找不到actiion");
-						}
+					case Cmd_Sta.CMD_SUBMIT_2002://告警计算
+						String Project_IdAndSysId = dealData.substring(28, 39);
+						m_AlertCtrl.doAlert(Project_IdAndSysId);
 						break;
-					}
 				}
 			}
 			catch(Exception ex)
@@ -137,31 +116,13 @@ public class MsgCtrl extends Thread
 			m_Seq++;
 		return CommUtil.IntToStringLeftFillZero(m_Seq, 20);
 	}
-	public boolean DisPatch(int msgCode, String clientKey, String pData)
-	{
-		boolean ret = false;
-		try
-		{
-			ret = m_TcpSvr.DisPatch(msgCode, clientKey, pData);
-		}
-		catch(Exception e)
-		{	
-		}
-		return ret;
-	}
 	
-	public TcpSvr getM_TcpSvr() {
-		return m_TcpSvr;
+	public TcpClient getM_TcpClient() {
+		return m_TcpClient;
 	}
-	public void setM_TcpSvr(TcpSvr m_TcpSvr) {
-		this.m_TcpSvr = m_TcpSvr;
+	public void setM_TcpSvr(TcpClient m_TcpClient) {
+		this.m_TcpClient = m_TcpClient;
 	}
-	public DBUtil getM_DBUtil() {
-		return m_DBUtil;
-	}
-	public void setM_DBUtil(DBUtil m_DBUtil) {
-		this.m_DBUtil = m_DBUtil;
-	}	
 
 	/*
 	 * 获取

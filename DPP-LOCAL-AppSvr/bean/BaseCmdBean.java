@@ -34,6 +34,9 @@ public abstract class BaseCmdBean
 			case Cmd_Sta.CMD_SUBMIT_0002:
 				retBean = new DTUUpdateTimeBean(Cmd, Seq);
 				break;
+			case Cmd_Sta.CMD_SUBMIT_2001:
+				retBean = new AlertCenterCtrlBean(Cmd, Seq);
+				break;
 		}
 		return retBean;
 	}

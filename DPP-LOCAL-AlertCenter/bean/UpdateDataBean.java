@@ -42,6 +42,7 @@ public class UpdateDataBean extends BaseCmdBean {
 	public int execRequest(AlertCtrl alertCtrl)
 	{
 		// TODO Auto-generated method stub
+		System.out.println("\n加载管井管线数据....");
 		int ret = Cmd_Sta.STA_ERROR;
 		if(Integer.valueOf(Dev_Deal) == Cmd_Sta.CMD_SUBMIT_2001)
 		{
@@ -49,7 +50,7 @@ public class UpdateDataBean extends BaseCmdBean {
 			String Sql = "";
 			try
 			{
-				Sql = " SELECT project_id, LEFT(id,5) FROM dev_gj WHERE LENGTH(equip_id) > 1 GROUP BY LEFT(id,5)";
+				Sql = " SELECT project_id, LEFT(id,5) FROM dev_gj WHERE LENGTH(equip_id) > 1 GROUP BY Project_Id, LEFT(id,5)";
 				String[] Project_SysId = alertCtrl.getM_DBUtil().doSelectStr(Sql, 2).split(";");
 				for(int i = 0; i < Project_SysId.length; i ++)
 				{
@@ -70,6 +71,7 @@ public class UpdateDataBean extends BaseCmdBean {
 				e.printStackTrace();
 			}
 		}
+		System.out.println("加载成功!\n");
 		return ret;
 	}
 	

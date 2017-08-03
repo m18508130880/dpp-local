@@ -15,6 +15,7 @@ public class Main extends Thread
 	private DBUtil m_DBUtil = null;				//数据库
 	private TcpClient m_TcpClient = null;		//客户端链接
 	private AlertCtrl m_AlertCtrl = null;		//告警中心
+	private MsgCtrl m_MsgCtrl = null;		//告警中心
 	public static void main(String[] args) 
 	{
 		objMain = new Main();
@@ -47,7 +48,13 @@ public class Main extends Thread
 				System.out.println("m_TcpClient Failed======");
 				System.exit(-3);
 			}
-
+			//m_MsgCtrl初始化
+			m_MsgCtrl = new MsgCtrl(m_TcpClient, m_AlertCtrl);
+			if(!m_MsgCtrl.Initialize())
+			{
+				System.out.println("m_MsgCtrl Failed======");
+				System.exit(-3);
+			}
 			this.start();
 			Runtime.getRuntime().addShutdownHook(new Thread(){
 				public void run() {

@@ -269,6 +269,15 @@ public class TcpClient extends Thread
 		return ret;
 	}
 	
+	//设置接收线程列表
+	public void SetRecvMsgList(Object  object)
+	{
+		synchronized(markRecv)
+		{
+			recvMsgList.addLast(object);
+		}
+	}
+	
 	public byte[] GetRecvMsgList()
 	{		
 		byte[] data = null;
@@ -407,20 +416,7 @@ public class TcpClient extends Thread
 								data = (byte[])vectData.get(2);
 								if(null != data && data.length > Cmd_Sta.CONST_MSGHDRLEN)
 								{
-									String dealData = new String(data, 40, data.length - 40);
-									String strClientKey = new String(data, 0, 20);	
-									//接收
-									CommUtil.LOG("Submit [" + strClientKey + "] " + "[" + dealData + "]");
-									BaseCmdBean cmdBean = m_AlertCtrl.getM_CmdBean();
-									if(cmdBean != null)
-									{
-										cmdBean.parseReqest(strClientKey, dealData, data);
-										cmdBean.execRequest(m_AlertCtrl);
-									}
-									//回应
-//									if(SetSendMsg(new String(data, 20, 28), 2))
-//									{
-//									}
+									SetRecvMsgList(data);
 								}
 								nCursor += nLen;
 								break;
@@ -520,7 +516,6 @@ public class TcpClient extends Thread
 				DinStream.close();
 				boutStream.close();
 				doutStream.close();	 
-    	
 				switch(unMsgCode)
 				{
 					case Cmd_Sta.COMM_ACTIVE_TEST:
@@ -530,6 +525,7 @@ public class TcpClient extends Thread
 						break;
 					}
 					case Cmd_Sta.COMM_SUBMMIT:
+					case Cmd_Sta.COMM_DELIVER:
 					{
 						ByteArrayOutputStream bout = new ByteArrayOutputStream();
 						DataOutputStream dout = new DataOutputStream(bout);
@@ -537,12 +533,6 @@ public class TcpClient extends Thread
 						data.insertElementAt(bout.toByteArray(), 2);
 						dout.close();
 						bout.close();	
-						RetVal = Cmd_Sta.CODEC_CMD;
-						break;
-					}
-					case Cmd_Sta.COMM_DELIVER:
-					{
-						data.insertElementAt(null, 2);
 						RetVal = Cmd_Sta.CODEC_CMD;
 						break;
 					}
