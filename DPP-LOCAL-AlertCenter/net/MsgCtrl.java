@@ -96,6 +96,7 @@ public class MsgCtrl extends Thread
 					}
 					case Cmd_Sta.CMD_SUBMIT_2002://¸æ¾¯¼ÆËã
 						String Project_IdAndSysId = dealData.substring(28, 39);
+						System.out.println(CommUtil.getDateTime());
 						m_AlertCtrl.doAlert(Project_IdAndSysId);
 						break;
 				}
