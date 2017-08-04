@@ -561,6 +561,7 @@ public class TcpSvr extends Thread
 				byte ctRslt = 0;
 				boolean bContParse = true;
 				byte[] cBuff = new byte[Cmd_Sta.CONST_MAX_BUFF_SIZE];
+				String sql = "";
 				
 				while (true)
 				{
@@ -576,6 +577,8 @@ public class TcpSvr extends Thread
 						{ 
 							ClientClose(m_ClientKey);
 							CommUtil.LOG("closed the socket in TcpSvr Recvs" + m_ClientKey);
+							sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + m_ClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), 'Õ¯πÿª÷¿Îœﬂ')";
+							m_DbUtil.doUpdate(sql);
 							break;
 						}
 						m_TestSta = 0;
