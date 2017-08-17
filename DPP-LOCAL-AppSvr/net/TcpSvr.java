@@ -272,36 +272,12 @@ public class TcpSvr extends Thread
 			case STATUS_CLIENT_ONLINE:
 			{
 				//CPM网关恢复在线
-				String OffStr = "";
-				OffStr = CommUtil.StrBRightFillSpace("", 20)
-					   + "0000"
-					   + "1004"
-					   + CommUtil.StrBRightFillSpace("", 10)
-					   + CommUtil.StrBRightFillSpace("", 30)
-					   + CommUtil.StrBRightFillSpace("", 4)
-					   + CommUtil.StrBRightFillSpace("", 20)
-					   + "7"
-					   + CommUtil.StrBRightFillSpace((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()), 20)
-					   + CommUtil.StrBRightFillSpace("网关恢复在线", 128);
-				SetRecvMsgList((strClientKey + new String(EnCode(Cmd_Sta.COMM_SUBMMIT, OffStr))).getBytes());
 				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢复在线')";
 				break;
 			}
 			case STATUS_CLIENT_OFFLINE:
 			{
 				//CPM网关离线
-				String OffStr = "";
-				OffStr = CommUtil.StrBRightFillSpace("", 20)
-					   + "0000"
-					   + "1004"
-					   + CommUtil.StrBRightFillSpace("", 10)
-					   + CommUtil.StrBRightFillSpace("", 30)
-					   + CommUtil.StrBRightFillSpace("", 4)
-					   + CommUtil.StrBRightFillSpace("", 20)
-					   + "6"
-					   + CommUtil.StrBRightFillSpace((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")).format(new Date()), 20)
-					   + CommUtil.StrBRightFillSpace("网关离线", 128);
-				SetRecvMsgList((strClientKey + new String(EnCode(Cmd_Sta.COMM_SUBMMIT, OffStr))).getBytes());
 				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢离线')";
 				break;
 			}
@@ -323,6 +299,7 @@ public class TcpSvr extends Thread
 					{
 						objChannel.objSocket.close();		//关掉SOCKET连接
 						objChannel.objSocket = null;
+						ClientStatusNotify(pClientKey, STATUS_CLIENT_OFFLINE);
 					}
 					objClientTable.remove(pClientKey);		//在哈希表里移除客户端
 					ClientContainer.Remove(pClientKey);
@@ -561,7 +538,6 @@ public class TcpSvr extends Thread
 				byte ctRslt = 0;
 				boolean bContParse = true;
 				byte[] cBuff = new byte[Cmd_Sta.CONST_MAX_BUFF_SIZE];
-				String sql = "";
 				
 				while (true)
 				{
@@ -577,8 +553,6 @@ public class TcpSvr extends Thread
 						{ 
 							ClientClose(m_ClientKey);
 							CommUtil.LOG("closed the socket in TcpSvr Recvs" + m_ClientKey);
-							sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + m_ClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢离线')";
-							m_DbUtil.doUpdate(sql);
 							break;
 						}
 						m_TestSta = 0;

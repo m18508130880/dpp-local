@@ -34,7 +34,7 @@ public class AlertCtrl extends Thread
 			m_EquipInfo = new EquipInfoBean();
 
 			m_CmdBean.execRequest(this);
-			//this.start();
+			this.start();
 			Is_OK = true;
 		}
 		catch(Exception e)
@@ -58,17 +58,14 @@ public class AlertCtrl extends Thread
 				while(e.hasMoreElements())
 				{
 					String projectAndSysId = String.valueOf(e.nextElement());
-					if(projectAndSysId.contains("YJ"))
-					{
-						m_EquipInfo.doAlert(this, projectAndSysId, objGJGXTable);
-					}
+					m_EquipInfo.doEquipStuats(this, projectAndSysId, objGJGXTable);
 				}
 //				for(Entry<String, ArrayList> entry : objGJGXTable.entrySet())
 //				{
 //					m_EquipInfo.doAlert(this, entry.getKey(), entry.getValue());
 //			        //System.out.println(entry.getKey() + entry.getValue());  
 //			    }  
-				CommUtil.PRINT("循环次数["+(i ++)+"] Time["+CommUtil.getDateTime()+"]");
+				CommUtil.PRINT("设备离线计算["+(i ++)+"] Time["+CommUtil.getDateTime()+"]");
 			}
 			catch(Exception ex)
 			{

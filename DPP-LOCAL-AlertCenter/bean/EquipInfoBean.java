@@ -53,6 +53,26 @@ public class EquipInfoBean
 		}
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public void doEquipStuats(AlertCtrl alertCtrl, String projectAndSysId, Hashtable GJGXTable)
+	{
+		String Sql = " SELECT tid, pid, CNAME, Project_Id, g_id, CTIME,VALUE,Top_Height, Base_Height,equip_height " + 
+				" FROM view_equip_info " + 
+				" where project_id = '" + projectAndSysId.substring(0, 6) + "'" +
+				" and g_id like '" + projectAndSysId.substring(6) + "%'" +
+				" GROUP BY tid";
+		equipInfo = (ArrayList<EquipInfoBean>) alertCtrl.getM_DBUtil().doSelect(Sql, 3);
+		if(equipInfo != null)
+		{
+			Iterator<?> iterator = equipInfo.iterator();
+			while (iterator.hasNext())
+			{
+				EquipInfoBean bean = (EquipInfoBean) iterator.next();
+				equipStuats(bean, alertCtrl);	// 判断是否为最新数据
+			}
+		}
+	}
+	
 	/*
 	 * 设备状态，若超过两个小时不传数据，则设备出现问题，需检查
 	 */
