@@ -39,6 +39,7 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_WATERACC				= 33;
 	public static final int	RMI_MAP_IMAGE				= 34;
 	public static final int	RMI_ALERT					= 35;
+	public static final int	RMI_DEVBZ					= 36;
 
 	public MsgBean    msgBean = null;
 	public String     className;

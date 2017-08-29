@@ -289,6 +289,10 @@ public class MainServlet extends HttpServlet
         	new AlertInfoBean().ExecCmd(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("Alert_Now.do"))				    			//×îÐÂ¸æ¾¯
         	new AlertInfoBean().AlertNow(request, response, m_Rmi, false); 
+        
+        /************************************user-±ÃÕ¾*****************************************************/
+        else if (strUrl.equalsIgnoreCase("Admin_DevBZ_Info.do"))				    			
+        	new DevBZBean().ExecCmd(request, response, m_Rmi, false); 
     }
     
     private class Connect extends Thread
