@@ -60,7 +60,7 @@ public class DevBZBean extends RmiBean
 		devGJBean.setIn_Id(In_Id);
 		devGJBean.setOut_Id(Out_Id);
 		devGJBean.setSign(Sign);
-		devGJBean.setProject_Id(Project_Id);
+		devGJBean.setProject_Id(currStatus.getFunc_Project_Id());
 		devGJBean.setEquip_Id(Equip_Id);
 		devGJBean.setEquip_Name(Equip_Name);
 		devGJBean.setEquip_Tel(Equip_Tel);
@@ -72,7 +72,6 @@ public class DevBZBean extends RmiBean
 		devGJBean.setMaterial("");
 		devGJBean.setFlag("");
 		devGJBean.setData_Lev("");
-		
 		switch (currStatus.getCmd())
 		{
 			case 12:// 删除
@@ -97,20 +96,33 @@ public class DevBZBean extends RmiBean
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
 				pRmi.Client(2001,"0000000001","");
 			case 1:// admin单个查询
-				msgBean = pRmi.RmiExec(1, this, currStatus.getCurrPage(), 25);
+				msgBean = pRmi.RmiExec(1, this, 0, 0);
 				request.getSession().setAttribute("Admin_DevBZ_Info_" + Sid, (ArrayList<?>) msgBean.getMsg());
 				currStatus.setJsp("Dev_BZ.jsp?Sid=" + Sid);
 				break;
 			case 2:// user单个查询
-				msgBean = pRmi.RmiExec(1, this, currStatus.getCurrPage(), 25);
+				msgBean = pRmi.RmiExec(1, this, 0, 0);
 				request.getSession().setAttribute("User_DevBZ_Info_" + Sid, (DevBZBean)((ArrayList<?>) msgBean.getMsg()).get(0));
-				currStatus.setJsp("User_One_GJ.jsp?Sid=" + Sid + "&Id=" + Id);
+				currStatus.setJsp("User_DevBZ_Info.jsp?Sid=" + Sid + "&Id=" + Id);
 				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
 	}
-
+	public void CutData(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		switch (currStatus.getCmd())
+		{
+			
+		}
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		response.sendRedirect(currStatus.getJsp());
+	}
+	
 	/**
 	 * 管线命名
 	 * 
@@ -146,18 +158,18 @@ public class DevBZBean extends RmiBean
 				break;
 			case 1:// 查询（单个）
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.in_name, t.out_id, t.out_name, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road" + 
-					  " from view_dev_bz t " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
+					  " from view_dev_bz t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 2:// 查询（多个）
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.in_name, t.out_id, t.out_name, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road" + 
 					  " from view_dev_bz t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
-				Sql = " insert into dev_bz(id, in_name, out_name, Flag, project_id) " + 
-					  " values('" + Id + "','" + In_Name + "','" + Out_Name + "','" + Flag + "','" + Project_Id + "')";
+				Sql = " insert into dev_bz(id, Flag, project_id) " + 
+					  " values('" + Id + "','" + Flag + "','" + currStatus.getFunc_Project_Id() + "')";
 				break;
 			case 11:// 编辑
-				Sql = " update dev_bz t set t.in_name = '" + In_Name + "', t.out_Name = '" + Out_Name + "', t.Flag = '" + Flag + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				Sql = " update dev_bz t set t.Flag = '" + Flag + "' where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;
 			case 12:// 删除
 				Sql = " delete from dev_bz where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
@@ -182,20 +194,38 @@ public class DevBZBean extends RmiBean
 			setTop_Height(pRs.getString(4));
 			setBase_Height(pRs.getString(5));
 			setIn_Id(pRs.getString(6));
-			setIn_Name(pRs.getString(7));
-			setOut_Id(pRs.getString(8));
-			setOut_Name(pRs.getString(9));
-			setSign(pRs.getString(10));
-			setProject_Id(pRs.getString(11));
-			setProject_Name(pRs.getString(12));
-			setFlag(pRs.getString(13));
-			setEquip_Id(pRs.getString(14));
-			setEquip_Name(pRs.getString(15));
-			setEquip_Height(pRs.getString(16));
-			setEquip_Tel(pRs.getString(17));
-			setCurr_Data(pRs.getString(18));
-			setEquip_Time(pRs.getString(19));
-			setRoad(pRs.getString(20));
+			setOut_Id(pRs.getString(7));
+			setSign(pRs.getString(8));
+			setProject_Id(pRs.getString(9));
+			setProject_Name(pRs.getString(10));
+			setFlag(pRs.getString(11));
+			setEquip_Id(pRs.getString(12));
+			setEquip_Name(pRs.getString(13));
+			setEquip_Height(pRs.getString(14));
+			setEquip_Tel(pRs.getString(15));
+			setCurr_Data(pRs.getString(16));
+			setEquip_Time(pRs.getString(17));
+			setRoad(pRs.getString(18));
+			setFront_Name(pRs.getString(19));
+			setFront_Top(pRs.getString(20));
+			setFront_Base(pRs.getString(21));
+			setFront_Diameter(pRs.getString(22));
+			setFront_Size(pRs.getString(23));
+			setFront_Start(pRs.getString(24));
+			setFront_End(pRs.getString(25));
+			setFront_Equip(pRs.getString(26));
+			setFront_Height(pRs.getString(27));
+			setFront_Tel(pRs.getString(28));
+			setBack_Name(pRs.getString(29));
+			setBack_Top(pRs.getString(30));
+			setBack_Base(pRs.getString(31));
+			setBack_Diameter(pRs.getString(32));
+			setBack_Size(pRs.getString(33));
+			setBack_Start(pRs.getString(34));
+			setBack_End(pRs.getString(35));
+			setBack_Equip(pRs.getString(36));
+			setBack_Height(pRs.getString(37));
+			setBack_Tel(pRs.getString(38));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -217,17 +247,36 @@ public class DevBZBean extends RmiBean
 		{
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 			setId(CommUtil.StrToGB2312(request.getParameter("Id")));
+			setFlag(CommUtil.StrToGB2312(request.getParameter("Flag")));
+			setProject_Id(CommUtil.StrToGB2312(request.getParameter("Project_Id")));
+			setFront_Name(CommUtil.StrToGB2312(request.getParameter("Front_Name")));
+			setFront_Top(CommUtil.StrToGB2312(request.getParameter("Front_Top")));
+			setFront_Base(CommUtil.StrToGB2312(request.getParameter("Front_Base")));
+			setFront_Diameter(CommUtil.StrToGB2312(request.getParameter("Front_Diameter")));
+			setFront_Size(CommUtil.StrToGB2312(request.getParameter("Front_Size")));
+			setFront_Start(CommUtil.StrToGB2312(request.getParameter("Front_Start")));
+			setFront_End(CommUtil.StrToGB2312(request.getParameter("Front_End")));
+			setFront_Equip(CommUtil.StrToGB2312(request.getParameter("Front_Equip")));
+			setFront_Height(CommUtil.StrToGB2312(request.getParameter("Front_Height")));
+			setFront_Tel(CommUtil.StrToGB2312(request.getParameter("Front_Tel")));
+			setBack_Name(CommUtil.StrToGB2312(request.getParameter("Back_Name")));
+			setBack_Top(CommUtil.StrToGB2312(request.getParameter("Back_Top")));
+			setBack_Base(CommUtil.StrToGB2312(request.getParameter("Back_Base")));
+			setBack_Diameter(CommUtil.StrToGB2312(request.getParameter("Back_Diameter")));
+			setBack_Size(CommUtil.StrToGB2312(request.getParameter("Back_Size")));
+			setBack_Start(CommUtil.StrToGB2312(request.getParameter("Back_Start")));
+			setBack_End(CommUtil.StrToGB2312(request.getParameter("Back_End")));
+			setBack_Equip(CommUtil.StrToGB2312(request.getParameter("Back_Equip")));
+			setBack_Height(CommUtil.StrToGB2312(request.getParameter("Back_Height")));
+			setBack_Tel(CommUtil.StrToGB2312(request.getParameter("Back_Tel")));
+			
 			setLongitude(CommUtil.StrToGB2312(request.getParameter("Longitude")));
 			setLatitude(CommUtil.StrToGB2312(request.getParameter("Latitude")));
 			setTop_Height(CommUtil.StrToGB2312(request.getParameter("Top_Height")));
 			setBase_Height(CommUtil.StrToGB2312(request.getParameter("Base_Height")));
 			setIn_Id(CommUtil.StrToGB2312(request.getParameter("In_Id")));
-			setIn_Name(CommUtil.StrToGB2312(request.getParameter("In_Name")));
 			setOut_Id(CommUtil.StrToGB2312(request.getParameter("Out_Id")));
-			setOut_Name(CommUtil.StrToGB2312(request.getParameter("Out_Name")));
 			setSign(CommUtil.StrToGB2312(request.getParameter("Sign")));
-			setProject_Id(CommUtil.StrToGB2312(request.getParameter("Project_Id")));
-			setFlag(CommUtil.StrToGB2312(request.getParameter("Flag")));
 			setEquip_Id(CommUtil.StrToGB2312(request.getParameter("Equip_Id")));
 			setEquip_Name(CommUtil.StrToGB2312(request.getParameter("Equip_Name")));
 			setEquip_Height(CommUtil.StrToGB2312(request.getParameter("Equip_Height")));
@@ -244,9 +293,28 @@ public class DevBZBean extends RmiBean
 	}
 
 	private String	Id;
-	private String	In_Name;
-	private String	Out_Name;
 	private String	Flag;
+	private String	Project_Id;
+	private String	Front_Name;
+	private String	Front_Top;
+	private String	Front_Base;
+	private String	Front_Diameter;
+	private String	Front_Size;
+	private String	Front_Start;
+	private String	Front_End;
+	private String	Front_Equip;
+	private String	Front_Height;
+	private String	Front_Tel;
+	private String	Back_Name;
+	private String	Back_Top;
+	private String	Back_Base;
+	private String	Back_Diameter;
+	private String	Back_Size;
+	private String	Back_Start;
+	private String	Back_End;
+	private String	Back_Equip;
+	private String	Back_Height;
+	private String	Back_Tel;
 
 	private String	Longitude;
 	private String	Latitude;
@@ -255,7 +323,6 @@ public class DevBZBean extends RmiBean
 	private String	In_Id;
 	private String	Out_Id;
 	private String	Sign;
-	private String	Project_Id;
 	private String	Project_Name;
 	private String	Equip_Id;
 	private String	Equip_Name;
@@ -275,6 +342,206 @@ public class DevBZBean extends RmiBean
 	public void setId(String id)
 	{
 		Id = id;
+	}
+
+	public String getFront_Name()
+	{
+		return Front_Name;
+	}
+
+	public void setFront_Name(String front_Name)
+	{
+		Front_Name = front_Name;
+	}
+
+	public String getFront_Top()
+	{
+		return Front_Top;
+	}
+
+	public void setFront_Top(String front_Top)
+	{
+		Front_Top = front_Top;
+	}
+
+	public String getFront_Base()
+	{
+		return Front_Base;
+	}
+
+	public void setFront_Base(String front_Base)
+	{
+		Front_Base = front_Base;
+	}
+
+	public String getFront_Diameter()
+	{
+		return Front_Diameter;
+	}
+
+	public void setFront_Diameter(String front_Diameter)
+	{
+		Front_Diameter = front_Diameter;
+	}
+
+	public String getFront_Size()
+	{
+		return Front_Size;
+	}
+
+	public void setFront_Size(String front_Size)
+	{
+		Front_Size = front_Size;
+	}
+
+	public String getFront_Start()
+	{
+		return Front_Start;
+	}
+
+	public void setFront_Start(String front_Start)
+	{
+		Front_Start = front_Start;
+	}
+
+	public String getFront_End()
+	{
+		return Front_End;
+	}
+
+	public void setFront_End(String front_End)
+	{
+		Front_End = front_End;
+	}
+
+	public String getFront_Equip()
+	{
+		return Front_Equip;
+	}
+
+	public void setFront_Equip(String front_Equip)
+	{
+		Front_Equip = front_Equip;
+	}
+
+	public String getFront_Height()
+	{
+		return Front_Height;
+	}
+
+	public void setFront_Height(String front_Height)
+	{
+		Front_Height = front_Height;
+	}
+
+	public String getFront_Tel()
+	{
+		return Front_Tel;
+	}
+
+	public void setFront_Tel(String front_Tel)
+	{
+		Front_Tel = front_Tel;
+	}
+
+	public String getBack_Name()
+	{
+		return Back_Name;
+	}
+
+	public void setBack_Name(String back_Name)
+	{
+		Back_Name = back_Name;
+	}
+
+	public String getBack_Top()
+	{
+		return Back_Top;
+	}
+
+	public void setBack_Top(String back_Top)
+	{
+		Back_Top = back_Top;
+	}
+
+	public String getBack_Base()
+	{
+		return Back_Base;
+	}
+
+	public void setBack_Base(String back_Base)
+	{
+		Back_Base = back_Base;
+	}
+
+	public String getBack_Diameter()
+	{
+		return Back_Diameter;
+	}
+
+	public void setBack_Diameter(String back_Diameter)
+	{
+		Back_Diameter = back_Diameter;
+	}
+
+	public String getBack_Size()
+	{
+		return Back_Size;
+	}
+
+	public void setBack_Size(String back_Size)
+	{
+		Back_Size = back_Size;
+	}
+
+	public String getBack_Start()
+	{
+		return Back_Start;
+	}
+
+	public void setBack_Start(String back_Start)
+	{
+		Back_Start = back_Start;
+	}
+
+	public String getBack_End()
+	{
+		return Back_End;
+	}
+
+	public void setBack_End(String back_End)
+	{
+		Back_End = back_End;
+	}
+
+	public String getBack_Equip()
+	{
+		return Back_Equip;
+	}
+
+	public void setBack_Equip(String back_Equip)
+	{
+		Back_Equip = back_Equip;
+	}
+
+	public String getBack_Height()
+	{
+		return Back_Height;
+	}
+
+	public void setBack_Height(String back_Height)
+	{
+		Back_Height = back_Height;
+	}
+
+	public String getBack_Tel()
+	{
+		return Back_Tel;
+	}
+
+	public void setBack_Tel(String back_Tel)
+	{
+		Back_Tel = back_Tel;
 	}
 
 	public String getLongitude()
@@ -327,16 +594,6 @@ public class DevBZBean extends RmiBean
 		In_Id = in_Id;
 	}
 
-	public String getIn_Name()
-	{
-		return In_Name;
-	}
-
-	public void setIn_Name(String in_Name)
-	{
-		In_Name = in_Name;
-	}
-
 	public String getOut_Id()
 	{
 		return Out_Id;
@@ -345,16 +602,6 @@ public class DevBZBean extends RmiBean
 	public void setOut_Id(String out_Id)
 	{
 		Out_Id = out_Id;
-	}
-
-	public String getOut_Name()
-	{
-		return Out_Name;
-	}
-
-	public void setOut_Name(String out_Name)
-	{
-		Out_Name = out_Name;
 	}
 
 	public String getSign()

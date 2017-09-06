@@ -69,7 +69,7 @@ public class MainServlet extends HttpServlet
     	
         response.setContentType("text/html; charset=gbk");
         String strUrl = request.getRequestURI();
-        System.out.println(strUrl);
+        //System.out.println(strUrl);
         String strSid = request.getParameter("Sid");
         String[] str = strUrl.split("/");
         strUrl = str[str.length - 1];
@@ -293,6 +293,8 @@ public class MainServlet extends HttpServlet
         /************************************user-±√’æ*****************************************************/
         else if (strUrl.equalsIgnoreCase("Admin_DevBZ_Info.do"))				    			
         	new DevBZBean().ExecCmd(request, response, m_Rmi, false); 
+        else if (strUrl.equalsIgnoreCase("User_DevBZ_Cut.do"))				    			
+        	new DevBZBean().CutData(request, response, m_Rmi, false); 
     }
     
     private class Connect extends Thread

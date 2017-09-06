@@ -146,7 +146,7 @@ public class DevGJBean extends RmiBean
 			case 3:// User单个查询
 				msgBean = pRmi.RmiExec(3, this, 0, 25);
 				request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
-				currStatus.setJsp("Analog_DevGJ_Info.jsp?Sid=" + Sid + "&TimePeriod=" + timePeriod + "&Id=" + Id);
+				currStatus.setJsp("Analog_DevGJ_Info.jsp?Sid=" + Sid + "&TimePeriod=" + timePeriod + "&Id=" + Id +"&pSimu=" + pSimu);
 				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
@@ -220,8 +220,8 @@ public class DevGJBean extends RmiBean
 		
 		if(currStatus.getFunc_Type_Id().equals("YJ"))
 		{
-			currStatus.setJsp("Analog_Water_Map.jsp?Sid=" + Sid + "&Project_Id="+Project_Id);
-			if(currStatus.getFunc_Sub_Type_Id() != null && currStatus.getFunc_Sub_Type_Id().length() > 0)
+			currStatus.setJsp("Analog_Water_Map.jsp?Sid=" + Sid + "&Project_Id="+Project_Id + "&pSimu=" + pSimu);
+			if(pSimu != null && pSimu.length() > 0)
 			{
 				for (int i = 0; i < array.length; i++)
 				{
@@ -232,7 +232,7 @@ public class DevGJBean extends RmiBean
 						String WaterAccList = "";
 						String FileName = array[i].getName();
 						WaterAccBean waterAccBean = new WaterAccBean();
-						WaterAccList = waterAccBean.analog_Y(FileName.substring(0,12),currStatus.getFunc_Sub_Type_Id());
+						WaterAccList = waterAccBean.analog_Y(FileName.substring(0,12), pSimu);
 						if(WaterAccList.contains("|"))
 						{
 							String[] Water = WaterAccList.split(";");
@@ -259,8 +259,8 @@ public class DevGJBean extends RmiBean
 		//污井
 		else if(currStatus.getFunc_Type_Id().equals("WJ"))
 		{
-			currStatus.setJsp("Analog_Sewage_Map.jsp?Sid=" + Sid + "&Project_Id="+Project_Id);
-			if(currStatus.getFunc_Sub_Type_Id() != null && currStatus.getFunc_Sub_Type_Id().length() > 0)
+			currStatus.setJsp("Analog_Sewage_Map.jsp?Sid=" + Sid + "&Project_Id="+Project_Id + "&pSimu=" + pSimu);
+			if(pSimu != null && pSimu.length() > 0)
 			{
 				for (int i = 0; i < array.length; i++)
 				{
@@ -270,7 +270,7 @@ public class DevGJBean extends RmiBean
 						String SewageAccList = "";
 						String FileName = array[i].getName();
 						WaterAccBean waterAccBean = new WaterAccBean();
-						SewageAccList = waterAccBean.analog_W(FileName.substring(0,12),currStatus.getFunc_Sub_Type_Id());
+						SewageAccList = waterAccBean.analog_W(FileName.substring(0,12), pSimu);
 						if(SewageAccList.contains("|"))
 						{
 							String[] Water = SewageAccList.split(";");
@@ -700,7 +700,7 @@ public class DevGJBean extends RmiBean
 			Id = mySmartUpload.getRequest().getParameter("GJ_Id");
 			Project_Id = mySmartUpload.getRequest().getParameter("Project_Id");
 			int Cmd = CommUtil.StrToInt(mySmartUpload.getRequest().getParameter("Cmd"));
-			System.out.println("Cmd[" + Cmd + "]");
+			//System.out.println("Cmd[" + Cmd + "]");
 			if (mySmartUpload.getFiles().getCount() > 0 && mySmartUpload.getFiles().getFile(0).getFilePathName().trim().length() > 0)
 			{
 				if (mySmartUpload.getFiles().getFile(0).getSize() / 1024 <= 3072)// 最大3M
@@ -762,7 +762,7 @@ public class DevGJBean extends RmiBean
 			// currStatus.getVecDate().get(1).toString().substring(5, 10);
 			String SheetName = "管井信息表";
 			String UPLOAD_NAME = SimFormat.format(new Date());
-			System.out.println("SheetName [" + SheetName + "]");
+			//System.out.println("SheetName [" + SheetName + "]");
 			msgBean = pRmi.RmiExec(0, this, 0, 25);
 			ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
 			int row_Index = 0;
@@ -1152,6 +1152,7 @@ public class DevGJBean extends RmiBean
 			setOut_Img(CommUtil.StrToGB2312(request.getParameter("Out_Img")));
 			setEquip_Time(CommUtil.StrToGB2312(request.getParameter("Equip_Time")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
+			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 		}
 		catch (Exception Exp)
 		{
@@ -1182,6 +1183,18 @@ public class DevGJBean extends RmiBean
 	private String	Equip_Time;
 	private String	Road;
 	
+	private String	pSimu; //降雨强度
+
+	public String getpSimu()
+	{
+		return pSimu;
+	}
+
+	public void setpSimu(String pSimu)
+	{
+		this.pSimu = pSimu;
+	}
+
 	public String getRoad()
 	{
 		return Road;

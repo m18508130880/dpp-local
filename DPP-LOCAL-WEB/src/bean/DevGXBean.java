@@ -146,10 +146,11 @@ public class DevGXBean extends RmiBean
 				String WaterLev = "";
 				if(Id.substring(0,2).equals("YJ"))
 				{
-					WaterLev = analogBean.AnalogWaterLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+					//System.out.println("Func_Project_Id["+currStatus.getFunc_Project_Id()+"]Id["+Id+"]pSimu["+pSimu+"]");
+					WaterLev = analogBean.AnalogWaterLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
 				}else
 				{
-					WaterLev = analogBean.AnalogSewageLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+					WaterLev = analogBean.AnalogSewageLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
 				}
 				//System.out.println("WaterLev"+WaterLev);
 				request.getSession().setAttribute("Analog_WaterLev_" + Sid, WaterLev);				
@@ -173,23 +174,23 @@ public class DevGXBean extends RmiBean
 		String gxId = CommUtil.StrToGB2312(request.getParameter("gxId"));
 		
 		Id = gxId;
-		
+		//System.out.println("pSimu["+pSimu+"]");
 		AnalogBean analogBean = new AnalogBean();
 		switch(currStatus.getCmd())
 		{
 			case 0://查询单个gj信息
 				msgBean = pRmi.RmiExec(3, this, 0, 0);
 				request.getSession().setAttribute("Analog_DevGX_Info_" + Sid, (DevGXBean)((ArrayList<?>)msgBean.getMsg()).get(0));				
-				currStatus.setJsp("Analog_DevGX_Info.jsp?Sid=" + Sid + "&gjId="+gjId+"&gxId="+gxId+"&Project_Id="+currStatus.getFunc_Project_Id());
+				currStatus.setJsp("Analog_DevGX_Info.jsp?Sid=" + Sid + "&gjId="+gjId+"&gxId="+gxId+"&Project_Id="+currStatus.getFunc_Project_Id() + "&pSimu=" + pSimu);
 				break;
 			case 1://流量负荷
 				String WaterFlowLoad = "";
 				if(gjId.substring(0,2).equals("YJ"))
 				{
-					WaterFlowLoad = analogBean.AnalogFlowLoad(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+					WaterFlowLoad = analogBean.AnalogFlowLoad(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));
 				}else
 				{
-					WaterFlowLoad = analogBean.SewageFlowLoad(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));//污水
+					WaterFlowLoad = analogBean.SewageFlowLoad(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));//污水
 				}
 				request.getSession().setAttribute("Analog_Graph_FlowLoad_" + Sid, WaterFlowLoad);				
 				currStatus.setJsp("Analog_Graph_FlowLoad.jsp?Sid=" + Sid);
@@ -198,10 +199,10 @@ public class DevGXBean extends RmiBean
 				String WaterActualFlow = "";
 				if(gjId.substring(0,2).equals("YJ"))
 				{
-					WaterActualFlow = analogBean.AnalogActualFlow(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+					WaterActualFlow = analogBean.AnalogActualFlow(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));
 				}else
 				{
-					WaterActualFlow = analogBean.SewageActualFlow(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));//污水
+					WaterActualFlow = analogBean.SewageActualFlow(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));//污水
 				}
 				request.getSession().setAttribute("Analog_Graph_ActualFlow_" + Sid, WaterActualFlow);				
 				currStatus.setJsp("Analog_Graph_ActualFlow.jsp?Sid=" + Sid);
@@ -210,10 +211,10 @@ public class DevGXBean extends RmiBean
 				String WaterFlowRate = "";
 				if(gjId.substring(0,2).equals("YJ"))
 				{
-					WaterFlowRate = analogBean.AnalogFlowRate(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+					WaterFlowRate = analogBean.AnalogFlowRate(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));
 				}else
 				{
-					WaterFlowRate = analogBean.SewageFlowRate(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));//污水
+					WaterFlowRate = analogBean.SewageFlowRate(currStatus.getFunc_Project_Id()+"_"+gjId, gxId, Double.parseDouble(pSimu));//污水
 				}
 				request.getSession().setAttribute("Analog_Graph_FlowRate_" + Sid, WaterFlowRate);				
 				currStatus.setJsp("Analog_Graph_FlowRate.jsp?Sid=" + Sid);
@@ -259,7 +260,7 @@ public class DevGXBean extends RmiBean
 	    	output = response.getWriter();
 	    	output.write(jsonObj.toString());
 	    	output.flush();	    	
-	    	System.out.println(jsonObj.toString());
+	    	//System.out.println(jsonObj.toString());
 	    }
 	    catch (IOException e)
 	    {
@@ -756,7 +757,7 @@ public class DevGXBean extends RmiBean
 
 			String SheetName = "管线信息表";
 			String UPLOAD_NAME = SimFormat.format(new Date());
-			System.out.println("SheetName [" + SheetName + "]" );
+			//System.out.println("SheetName [" + SheetName + "]" );
 			msgBean = pRmi.RmiExec(0, this, 0, 25);
 			ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
 			int row_Index = 0;
@@ -1089,6 +1090,7 @@ public class DevGXBean extends RmiBean
 			setSubsys_Id(CommUtil.StrToGB2312(request.getParameter("Subsys_Id")));
 			setAfter_Project_Id(CommUtil.StrToGB2312(request.getParameter("After_Project_Id")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
+			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 			
 		}
 		catch (Exception Exp)
@@ -1119,7 +1121,18 @@ public class DevGXBean extends RmiBean
 	
 	private String Sid;	
 	private String After_Project_Id;
+	private String pSimu;
 	
+	public String getpSimu()
+	{
+		return pSimu;
+	}
+
+	public void setpSimu(String pSimu)
+	{
+		this.pSimu = pSimu;
+	}
+
 	public String getRoad()
 	{
 		return Road;

@@ -140,10 +140,10 @@ public class DataGJBean extends RmiBean
 		AnalogBean analog = new AnalogBean();
 		String WaterAccGJ = "";
 		if(GJ_Id.substring(0,2).equals("YJ")){
-			WaterAccGJ = analog.AnalogWaterAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+			WaterAccGJ = analog.AnalogWaterAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(pSimu));
 		}else
 		{
-			WaterAccGJ = analog.AnalogSewageAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(currStatus.getFunc_Sub_Type_Id()));
+			WaterAccGJ = analog.AnalogSewageAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(pSimu));
 		}
     	request.getSession().setAttribute("Analog_Graph_Curve_" + Sid, WaterAccGJ);	
     	
@@ -307,6 +307,7 @@ public class DataGJBean extends RmiBean
 			
 			setPageSize(CommUtil.StrToGB2312(request.getParameter("rows")));
 			setPageNum(CommUtil.StrToGB2312(request.getParameter("page")));
+			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 			
 		}
 		catch (Exception Exp) 
@@ -360,7 +361,18 @@ public class DataGJBean extends RmiBean
 	
 	private String PageSize;
 	private String PageNum;
+	private String pSimu;
 	
+	public String getpSimu()
+	{
+		return pSimu;
+	}
+
+	public void setpSimu(String pSimu)
+	{
+		this.pSimu = pSimu;
+	}
+
 	public String getPageSize() {
 		return PageSize;
 	}
