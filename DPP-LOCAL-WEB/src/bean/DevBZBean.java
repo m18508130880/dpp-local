@@ -117,30 +117,14 @@ public class DevBZBean extends RmiBean
 		
 		switch (currStatus.getCmd())
 		{
-			
+			case 1://剖面图
+				msgBean = pRmi.RmiExec(1, this, 0, 0);
+				request.getSession().setAttribute("User_DevBZ_Cut_" + Sid, (DevBZBean)((ArrayList<?>) msgBean.getMsg()).get(0));
+				currStatus.setJsp("User_DevBZ_Cut.jsp?Sid=" + Sid + "&Id=" + Id);
+				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
-	}
-	
-	/**
-	 * 管线命名
-	 * 
-	 * @param GJ_Id
-	 * @return
-	 */
-	public String dealGXID(String GJ_Id)
-	{
-		String temGJ_Id = ""; // "WJ", "WG" "YJ", "YG"
-		if (GJ_Id.contains("WJ"))
-		{
-			temGJ_Id = GJ_Id.replace("WJ", "WG");
-		}
-		if (GJ_Id.contains("YJ"))
-		{
-			temGJ_Id = GJ_Id.replace("YJ", "YG");
-		}
-		return temGJ_Id;
 	}
 
 	/**
@@ -153,15 +137,15 @@ public class DevBZBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0:// admin查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.in_name, t.out_id, t.out_name, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road" + 
+				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.out_id, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road, t.front_name, t.front_top, t.front_base, t.front_diameter, t.front_size, t.front_start, t.front_end, t.front_equip, t.front_height, t.front_tel, t.front_data, t.back_name, t.back_top, t.back_base, t.back_diameter, t.back_size, t.back_start, t.back_end, t.back_equip, t.back_height, t.back_tel, t.back_data " + 
 					  " from view_dev_bz t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
 				break;
 			case 1:// 查询（单个）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.in_name, t.out_id, t.out_name, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road" + 
+				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.out_id, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road, t.front_name, t.front_top, t.front_base, t.front_diameter, t.front_size, t.front_start, t.front_end, t.front_equip, t.front_height, t.front_tel, t.front_data, t.back_name, t.back_top, t.back_base, t.back_diameter, t.back_size, t.back_start, t.back_end, t.back_equip, t.back_height, t.back_tel, t.back_data " + 
 					  " from view_dev_bz t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 2:// 查询（多个）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.in_name, t.out_id, t.out_name, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road" + 
+				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.in_id, t.out_id, t.sign , t.project_id, t.project_name, t.Flag, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.curr_data, t.equip_time, t.road, t.front_name, t.front_top, t.front_base, t.front_diameter, t.front_size, t.front_start, t.front_end, t.front_equip, t.front_height, t.front_tel, t.front_data, t.back_name, t.back_top, t.back_base, t.back_diameter, t.back_size, t.back_start, t.back_end, t.back_equip, t.back_height, t.back_tel, t.back_data " + 
 					  " from view_dev_bz t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
@@ -216,16 +200,18 @@ public class DevBZBean extends RmiBean
 			setFront_Equip(pRs.getString(26));
 			setFront_Height(pRs.getString(27));
 			setFront_Tel(pRs.getString(28));
-			setBack_Name(pRs.getString(29));
-			setBack_Top(pRs.getString(30));
-			setBack_Base(pRs.getString(31));
-			setBack_Diameter(pRs.getString(32));
-			setBack_Size(pRs.getString(33));
-			setBack_Start(pRs.getString(34));
-			setBack_End(pRs.getString(35));
-			setBack_Equip(pRs.getString(36));
-			setBack_Height(pRs.getString(37));
-			setBack_Tel(pRs.getString(38));
+			setFront_Data(pRs.getString(29));
+			setBack_Name(pRs.getString(30));
+			setBack_Top(pRs.getString(31));
+			setBack_Base(pRs.getString(32));
+			setBack_Diameter(pRs.getString(33));
+			setBack_Size(pRs.getString(34));
+			setBack_Start(pRs.getString(35));
+			setBack_End(pRs.getString(36));
+			setBack_Equip(pRs.getString(37));
+			setBack_Height(pRs.getString(38));
+			setBack_Tel(pRs.getString(39));
+			setBack_Data(pRs.getString(40));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -305,6 +291,7 @@ public class DevBZBean extends RmiBean
 	private String	Front_Equip;
 	private String	Front_Height;
 	private String	Front_Tel;
+	private String	Front_Data;
 	private String	Back_Name;
 	private String	Back_Top;
 	private String	Back_Base;
@@ -315,6 +302,7 @@ public class DevBZBean extends RmiBean
 	private String	Back_Equip;
 	private String	Back_Height;
 	private String	Back_Tel;
+	private String	Back_Data;
 
 	private String	Longitude;
 	private String	Latitude;
@@ -342,6 +330,26 @@ public class DevBZBean extends RmiBean
 	public void setId(String id)
 	{
 		Id = id;
+	}
+
+	public String getFront_Data()
+	{
+		return Front_Data;
+	}
+
+	public void setFront_Data(String front_Data)
+	{
+		Front_Data = front_Data;
+	}
+
+	public String getBack_Data()
+	{
+		return Back_Data;
+	}
+
+	public void setBack_Data(String back_Data)
+	{
+		Back_Data = back_Data;
 	}
 
 	public String getFront_Name()
