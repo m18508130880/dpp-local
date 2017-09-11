@@ -149,11 +149,11 @@ public class DevBZBean extends RmiBean
 					  " from view_dev_bz t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 10:// Ìí¼Ó
-				Sql = " insert into dev_bz(id, Flag, project_id) " + 
-					  " values('" + Id + "','" + Flag + "','" + currStatus.getFunc_Project_Id() + "')";
+				Sql = " insert into dev_bz(id, Flag, project_id, front_name, front_top, front_base, front_diameter, front_size, front_start, front_end, front_equip, front_height, front_tel, back_name, back_top, back_base, back_diameter, back_size, back_start, back_end, back_equip, back_height, back_tel) " + 
+					  " values('" + Id + "','" + Flag + "','" + currStatus.getFunc_Project_Id() + "','"+ Front_Name + "','"+ Front_Top + "','"+ Front_Base + "','"+ Front_Diameter + "','"+ Front_Size + "','"+ Front_Start + "','"+ Front_End + "','"+ Front_Equip + "','"+ Front_Height + "','"+ Front_Tel + "','"+ Back_Name + "','"+ Back_Top + "','"+ Back_Base + "','"+ Back_Diameter + "','"+ Back_Size + "','"+ Back_Start + "','"+ Back_End + "','"+ Back_Equip + "','"+ Back_Height + "','"+ Back_Tel + "')";
 				break;
 			case 11:// ±à¼­
-				Sql = " update dev_bz t set t.Flag = '" + Flag + "' where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
+				Sql = " update dev_bz t set t.Flag = '" + Flag + "', front_name = '" + Front_Name + "', front_top = '" + Front_Top + "', front_base = '"+Front_Base+"', front_diameter = '" + Front_Diameter + "', front_size = '" + Front_Size + "', front_start = '" + Front_Start + "', front_end = '" + Front_End + "', front_equip = '" + Front_Equip + "', front_height = '" + Front_Height + "', front_tel = '" + Front_Tel + "', back_name = '" + Back_Name + "', back_top = '" + Back_Top + "', back_base = '" + Back_Base + "', back_diameter = '" + Back_Diameter + "', back_size = '" + Back_Size + "', back_start = '" + Back_Start + "', back_end = '" + Back_End + "', back_equip = '" + Back_Equip + "', back_height = '" + Back_Height + "', back_tel = '" + Back_Tel + "' where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;
 			case 12:// É¾³ý
 				Sql = " delete from dev_bz where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
