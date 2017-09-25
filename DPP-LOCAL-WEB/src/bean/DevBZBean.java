@@ -48,6 +48,7 @@ public class DevBZBean extends RmiBean
 	public void ExecCmd(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
 	{
 		getHtmlData(request);
+		System.out.println("Sid["+Sid+"]");
 		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
 		currStatus.getHtmlData(request, pFromZone);
 		
@@ -76,6 +77,7 @@ public class DevBZBean extends RmiBean
 		{
 			case 12:// É¾³ý
 			case 11:// ±à¼­
+				devGJBean.setProject_Id(Project_Id);
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(19, devGJBean, 0, 0);
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
@@ -91,6 +93,7 @@ public class DevBZBean extends RmiBean
 				currStatus.setJsp("Dev_BZ.jsp?Sid=" + Sid);
 				break;
 			case 10:// Ìí¼Ó
+				devGJBean.setProject_Id(Project_Id);
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), devGJBean, 0, 0);
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
@@ -103,7 +106,7 @@ public class DevBZBean extends RmiBean
 			case 2:// userµ¥¸ö²éÑ¯
 				msgBean = pRmi.RmiExec(1, this, 0, 0);
 				request.getSession().setAttribute("User_DevBZ_Info_" + Sid, (DevBZBean)((ArrayList<?>) msgBean.getMsg()).get(0));
-				currStatus.setJsp("User_DevBZ_Info.jsp?Sid=" + Sid + "&Id=" + Id);
+				currStatus.setJsp("User_DevBZ_Info.jsp?Sid=" + Sid + "&Id=" + Id + "&Project_Id=" + currStatus.getFunc_Project_Id());
 				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
@@ -150,13 +153,13 @@ public class DevBZBean extends RmiBean
 				break;
 			case 10:// Ìí¼Ó
 				Sql = " insert into dev_bz(id, Flag, project_id, front_name, front_top, front_base, front_diameter, front_size, front_start, front_end, front_equip, front_height, front_tel, back_name, back_top, back_base, back_diameter, back_size, back_start, back_end, back_equip, back_height, back_tel) " + 
-					  " values('" + Id + "','" + Flag + "','" + currStatus.getFunc_Project_Id() + "','"+ Front_Name + "','"+ Front_Top + "','"+ Front_Base + "','"+ Front_Diameter + "','"+ Front_Size + "','"+ Front_Start + "','"+ Front_End + "','"+ Front_Equip + "','"+ Front_Height + "','"+ Front_Tel + "','"+ Back_Name + "','"+ Back_Top + "','"+ Back_Base + "','"+ Back_Diameter + "','"+ Back_Size + "','"+ Back_Start + "','"+ Back_End + "','"+ Back_Equip + "','"+ Back_Height + "','"+ Back_Tel + "')";
+					  " values('" + Id + "','" + Flag + "','" + Project_Id + "','"+ Front_Name + "','"+ Front_Top + "','"+ Front_Base + "','"+ Front_Diameter + "','"+ Front_Size + "','"+ Front_Start + "','"+ Front_End + "','"+ Front_Equip + "','"+ Front_Height + "','"+ Front_Tel + "','"+ Back_Name + "','"+ Back_Top + "','"+ Back_Base + "','"+ Back_Diameter + "','"+ Back_Size + "','"+ Back_Start + "','"+ Back_End + "','"+ Back_Equip + "','"+ Back_Height + "','"+ Back_Tel + "')";
 				break;
 			case 11:// ±à¼­
 				Sql = " update dev_bz t set t.Flag = '" + Flag + "', front_name = '" + Front_Name + "', front_top = '" + Front_Top + "', front_base = '"+Front_Base+"', front_diameter = '" + Front_Diameter + "', front_size = '" + Front_Size + "', front_start = '" + Front_Start + "', front_end = '" + Front_End + "', front_equip = '" + Front_Equip + "', front_height = '" + Front_Height + "', front_tel = '" + Front_Tel + "', back_name = '" + Back_Name + "', back_top = '" + Back_Top + "', back_base = '" + Back_Base + "', back_diameter = '" + Back_Diameter + "', back_size = '" + Back_Size + "', back_start = '" + Back_Start + "', back_end = '" + Back_End + "', back_equip = '" + Back_Equip + "', back_height = '" + Back_Height + "', back_tel = '" + Back_Tel + "' where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;
 			case 12:// É¾³ý
-				Sql = " delete from dev_bz where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
+				Sql = " delete from dev_bz where id = '" + Id + "' and project_id = '" + Project_Id + "'";
 				break;
 
 		}

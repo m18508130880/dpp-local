@@ -161,7 +161,7 @@ public class EquipInfoBean
 		{
 			Sql = " insert INTO alert_info(CPM_ID, ID, CNAME, ATTR_ID, ATTR_NAME, LEVEL, CTIME, CDATA, GJ_ID, STATUS, UNIT, DES)"+
 				  " VALUES('"+pEquipInfo.getPid()+"', '"+pEquipInfo.getTid()+"', '"+pEquipInfo.getCName()+"', '0012', '阻塞', '"+
-				  " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '超过常水位,可能阻塞')";
+				  " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '超过常水位可能阻塞')";
 			if(alertCtrl.getM_DBUtil().doUpdate(Sql))
 			{
 				CommUtil.PRINT("管井[" + pEquipInfo.getGJ_Id() + "]水位偏高，可能阻塞！当前水深["+pEquipInfo.getValue()+"]超过常水位["+(Float.valueOf(pEquipInfo.getValue())-avg_30Day)+"]米");
@@ -253,7 +253,7 @@ public class EquipInfoBean
 				{
 					String Sql = " insert INTO alert_info(CPM_ID, ID, CNAME, ATTR_ID, ATTR_NAME, LEVEL, CTIME, CDATA, GJ_ID, STATUS, UNIT, DES)"+
 							     " VALUES('"+pEquipInfo.getPid()+"', '"+pEquipInfo.getTid()+"', '"+pEquipInfo.getCName()+"', '0012', '阻塞', '"+
-							     " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"')";
+							     " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '水位坡度偏高可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"')";
 						if(alertCtrl.getM_DBUtil().doUpdate(Sql))
 						{
 							CommUtil.PRINT("管线[" + stratEquip.getGJ_Id() + "->"+endEquip.getGJ_Id()+"]水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]");
@@ -352,7 +352,7 @@ public class EquipInfoBean
 				{
 					String Sql = " insert INTO alert_info(CPM_ID, ID, CNAME, ATTR_ID, ATTR_NAME, LEVEL, CTIME, CDATA, GJ_ID, STATUS, UNIT, DES)"+
 							     " VALUES('"+pEquipInfo.getPid()+"', '"+pEquipInfo.getTid()+"', '"+pEquipInfo.getCName()+"', '0012', '阻塞', '"+
-							     " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"')";
+							     " "+"', '"+CommUtil.getDateTime()+"', '"+pEquipInfo.getValue()+"', '"+pEquipInfo.getGJ_Id()+"', '0', '单位', '水位坡度偏高可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"')";
 						if(alertCtrl.getM_DBUtil().doUpdate(Sql))
 						{
 							CommUtil.PRINT("管井[" + pEquipInfo.getGJ_Id() + "]水位坡度偏高，可能阻塞！水位坡度["+equipSlope+"]管井坡度["+gjSlope+"]");

@@ -282,7 +282,10 @@ public class TcpSvr extends Thread
 				break;
 			}
 		}
-		m_DbUtil.doUpdate(sql);
+		if(!strClientKey.equals("0000000000") && !strClientKey.equals("0000000001"))
+		{
+			m_DbUtil.doUpdate(sql);
+		}
 	}
 	
 	//如果收到关闭指令，就关闭SOCKET和释放资源
