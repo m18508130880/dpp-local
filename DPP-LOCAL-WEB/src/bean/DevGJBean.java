@@ -446,6 +446,7 @@ public class DevGJBean extends RmiBean
 			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
 			currStatus.getHtmlData(request, pFromZone);
 			Project_Id = mySmartUpload.getRequest().getParameter("Project_Id");
+			String Timeout = mySmartUpload.getRequest().getParameter("Timeout");
 
 			if (mySmartUpload.getFiles().getCount() > 0 && mySmartUpload.getFiles().getCount() <= 5)
 			{
@@ -525,11 +526,11 @@ public class DevGJBean extends RmiBean
 								succCnt++;
 							}
 						}
-						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个/n";
+						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
 					}
 					else
 					{
-						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!/n";
+						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!\\n";
 					}
 				}
 				currStatus.setResult(Resp);
@@ -539,7 +540,7 @@ public class DevGJBean extends RmiBean
 			{
 				currStatus.setResult("上传失败！每次上传最多5个文件!");
 			}
-			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
+			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id + "&Timeout=" + Timeout);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 			response.sendRedirect(currStatus.getJsp());
 		}
@@ -572,6 +573,7 @@ public class DevGJBean extends RmiBean
 			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
 			currStatus.getHtmlData(request, pFromZone);
 			Project_Id = mySmartUpload.getRequest().getParameter("Project_Id");
+			String Timeout = mySmartUpload.getRequest().getParameter("Timeout");
 
 			if (mySmartUpload.getFiles().getCount() > 0 && mySmartUpload.getFiles().getCount() <=5)
 			{
@@ -651,11 +653,11 @@ public class DevGJBean extends RmiBean
 								succCnt++;
 							}
 						}
-						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个/n";
+						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
 					}
 					else
 					{
-						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!/n";
+						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!\\n";
 					}
 				}
 				currStatus.setResult(Resp);
@@ -666,7 +668,7 @@ public class DevGJBean extends RmiBean
 				currStatus.setResult("上传失败！每次上传最多5个文件!");
 			}
 
-			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id);
+			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id + "&Timeout=" + Timeout);
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 			response.sendRedirect(currStatus.getJsp());
 		}
@@ -1046,7 +1048,7 @@ public class DevGJBean extends RmiBean
 				break;
 
 			case 13:// 管井更新
-				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "' " + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 
 			case 14:// 窨井内图更新

@@ -19,6 +19,7 @@ import java.util.Scanner;
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.xml.crypto.Data;
 
 import jxl.Sheet;
 import jxl.Workbook;
@@ -3738,6 +3739,7 @@ public class AnalogBean
 	// 第五套版本
 	private String analog_Y5(String subSys, int timePeriod, String gjId, String gxId, String AnalogWaterType, double pSimu)
 	{
+		long startTime = System.currentTimeMillis();
 		int SubgjId = 0;
 		if (gjId != null)
 		{
@@ -4777,6 +4779,9 @@ public class AnalogBean
 			// *********************************************
 
 			printStream.println("------ 模型计算完成 ------");
+			long endTime = System.currentTimeMillis() - startTime;
+			
+			System.out.println("子系统["+subSys+"]["+NN+"]["+ endTime +"]");
 		}
 		catch (NumberFormatException e)
 		{
@@ -9163,6 +9168,10 @@ public class AnalogBean
 		int option = 0;
 		do
 		{
+			if (nextGJ.getFlag().equals("2"))
+			{
+				option = 1;
+			}
 			if (!nextGJ.getCurr_Data().equals("0.00"))
 			{
 				DevGJData devGJ = new DevGJData();
@@ -9173,21 +9182,20 @@ public class AnalogBean
 				devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height()) - CommUtil.StrToFloat(nextGJ.getEquip_Height()) + CommUtil.StrToFloat(nextGJ.getCurr_Data());
 				devList.add(devGJ);
 			}
-
 			String outGXId = nextGJ.getOut_Id();
 			nextGX = (DevGXBean) HashGet(objGXTable, outGXId);
-			String outGJId = nextGX.getEnd_Id();
-			nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
-			sn++;
-			gjList.add(nextGJ);
-			if (nextGJ.getFlag().equals("2"))
+			if(null != nextGX)
 			{
-				option = 1;
+				String outGJId = nextGX.getEnd_Id();
+				nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
+				sn++;
+				gjList.add(nextGJ);
 			}
 		}
 		while (option == 0);
 
 		// 如果没有设备井，返回由选择管井到终点的管井列表
+		System.out.println("devList.size()["+devList.size()+"]");
 		if (0 == devList.size())
 		{
 			return gjList;

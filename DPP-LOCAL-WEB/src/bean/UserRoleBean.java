@@ -73,7 +73,6 @@ public class UserRoleBean extends RmiBean
 		
 		PrintWriter outprint = response.getWriter();
 		String Resp = "9999";
-		
 		if(13 == currStatus.getCmd())
 		{
 			msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
