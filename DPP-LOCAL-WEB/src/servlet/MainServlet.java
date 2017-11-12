@@ -295,6 +295,11 @@ public class MainServlet extends HttpServlet
         	new DevBZBean().ExecCmd(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("User_DevBZ_Cut.do"))				    			
         	new DevBZBean().CutData(request, response, m_Rmi, false); 
+        /************************************user-河流*****************************************************/
+        else if (strUrl.equalsIgnoreCase("Admin_ToPo_HL.do"))				    			
+        	new DevMapBean().getHLData(request, response, m_Rmi, false);				//GIS地图获取
+        else if (strUrl.equalsIgnoreCase("Admin_Dev_HL.do"))				    			
+        	new DevMapBean().updateHLData(request, response, m_Rmi, false);				//编辑
     }
     
     private class Connect extends Thread

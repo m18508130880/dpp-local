@@ -70,31 +70,162 @@ public class DataGJBean extends RmiBean
 		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
 		currStatus.getHtmlData(request, pFromZone);
 		
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
-		Calendar c = Calendar.getInstance();    
-		/*switch(currStatus.getCmd())
+//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+//		Calendar c = Calendar.getInstance();    
+//		switch(currStatus.getCmd())
+//		{
+//    		case 1:  //日
+//    			SqlETime = df.format(c.getTime());
+//    			c.add(Calendar.HOUR_OF_DAY, -24);
+//    			SqlBTime = df.format(c.getTime());
+//				break;			
+//    		case 2:  //周
+//    			SqlETime = df.format(c.getTime());
+//    			c.add(Calendar.WEEK_OF_MONTH, -1);
+//    			SqlBTime = df.format(c.getTime());
+//				break;    		
+//    		case 3:  //月
+//    			SqlETime = df.format(c.getTime());
+//    			c.add(Calendar.MONTH, -1);
+//    			SqlBTime = df.format(c.getTime());
+//    	    	break;
+//    		case 4:  //年
+//    			SqlETime = df.format(c.getTime());
+//    			c.add(Calendar.MONTH, -1);
+//    			SqlBTime = df.format(c.getTime());
+//    	    	break;
+//		
+//		}   
+		switch(currStatus.getCmd())
 		{
-    		case 4:  //最近二十四小时折线图   			
-    			SqlETime = df.format(c.getTime());
-    			c.add(Calendar.HOUR_OF_DAY, -24);
-    			SqlBTime = df.format(c.getTime());
-				break;			
-    		case 5:  //最近一周折线图   			
-    			SqlETime = df.format(c.getTime());
-    			c.add(Calendar.WEEK_OF_MONTH, -1);
-    			SqlBTime = df.format(c.getTime());
-				break;    		
-    		case 6:  //最近一月折线图	
-    			SqlETime = df.format(c.getTime());
-    			c.add(Calendar.MONTH, -1);
-    			SqlBTime = df.format(c.getTime());
-    	    	break;
-		
-		}*/
+    		case 1:  //日
+    			msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+    	    	request.getSession().setAttribute("User_Graph_Curve_" + Sid, ((Object)msgBean.getMsg()));    	
+    			currStatus.setJsp("User_Graph_Curve.jsp?Sid=" + Sid + "&Id=" + GJ_Id);
+				break;
+    		case 2:  //周
+    			// 判断当月1号是星期几，若是星期五，作为第一周第一天，否则归上星期
+				String pBTime = "";
+				String pETime = "";
+				// 若某一月有第零周：表示有跨年
+				if (Week.equals("0")) // 表示跨年
+				{
+					Flag = true;
+					Year = (Integer.parseInt(Year) - 1) + "";
+					Month = "12";
+					Week = "5";
+				}
+				System.out.println("111111["+Integer.parseInt(CommUtil.getWeekDayString(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01")));
+				switch (Integer.parseInt(CommUtil.getWeekDayString(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01")))
+				{
+					case 5:// 星期天 星期五
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 6:// 星期一 星期六
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-07 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-07 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 0:// 星期二 星期日
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-06 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-06 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 1:// 星期三 星期一
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-05 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-05 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 2:// 星期四 星期二
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-04 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-04 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 3:// 星期五 星期三
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-03 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-03 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+					case 4:// 星期六 星期四
+						pBTime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-02 00:00:00", (Integer.parseInt(Week) - 1) * 7);
+						pETime = CommUtil.getDateAfter(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-02 00:00:00", (Integer.parseInt(Week)) * 7 - 1);
+						break;
+				}
+				System.out.println(Year + Month + Week);
+				pBTime = pBTime.substring(0, 10) + " 00:00:00";
+				pETime = pETime.substring(0, 10) + " 23:59:59";
+				currStatus.setVecDate(CommUtil.getDate(pBTime, pETime));
+				Flag_Year = pETime;
 
-		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
-    	request.getSession().setAttribute("User_Graph_Curve_" + Sid, ((Object)msgBean.getMsg()));    	
-		currStatus.setJsp("User_Graph_Curve.jsp?Sid=" + Sid + "&Id=" + GJ_Id);				
+				if (Flag) // 如果跨年
+				{
+					Year = (Integer.parseInt(Year) + 1) + "";
+					Month = "1";
+					Week = "0";
+				}
+				Level = 1;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Max_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 2;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Avg_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 3;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Min_" + Sid, ((Object) msgBean.getMsg()));
+				request.getSession().setAttribute("Year_" + Sid, Year);
+				request.getSession().setAttribute("Month_" + Sid, Month);
+				request.getSession().setAttribute("Week_" + Sid, Week);
+				currStatus.setJsp("User_Graph_Curve_W.jsp?Sid=" + Sid + "&Id=" + GJ_Id);
+				break;
+    		case 3:  //月
+    			pBTime = Year + "-" + Month + "-01 00:00:00";
+				pETime = Year + "-" + (Integer.valueOf(Month) + 1) + "-01 00:00:00";
+				currStatus.setVecDate(CommUtil.getDate(pBTime, pETime));
+				Level = 1;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Max_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 2;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Avg_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 3;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Min_" + Sid, ((Object) msgBean.getMsg()));
+				request.getSession().setAttribute("Year_" + Sid, Year);
+				request.getSession().setAttribute("Month_" + Sid, Month);
+				request.getSession().setAttribute("Week_" + Sid, Week);
+				currStatus.setJsp("User_Graph_Curve_M.jsp?Sid=" + Sid + "&Id=" + GJ_Id);
+				break;
+    		case 4:  //年
+    			Level = 1;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Max_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 2;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Avg_" + Sid, ((Object) msgBean.getMsg()));
+				Level = 3;
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				request.getSession().setAttribute("Water_Min_" + Sid, ((Object) msgBean.getMsg()));
+				request.getSession().setAttribute("Year_" + Sid, Year);
+				request.getSession().setAttribute("Month_" + Sid, Month);
+				request.getSession().setAttribute("Week_" + Sid, Week);
+				currStatus.setJsp("User_Graph_Curve_Y.jsp?Sid=" + Sid + "&Id=" + GJ_Id);
+				break;
+    		case 5: //比较
+    			SqlBTime = currStatus.getVecDate().get(0).toString();
+    			SqlETime = currStatus.getVecDate().get(1).toString();
+    			pBTime = SqlBTime + " 00:00:00";
+				pETime = SqlBTime + " 23:59:59";
+				currStatus.setVecDate(CommUtil.getDate(pBTime, pETime));
+    			msgBean = pRmi.RmiExec(1, this, 0, 25);
+    	    	request.getSession().setAttribute("Compare_One_" + Sid, ((Object)msgBean.getMsg()));
+    	    	
+    	    	pBTime = SqlETime + " 00:00:00";
+				pETime = SqlETime + " 23:59:59";
+				currStatus.setVecDate(CommUtil.getDate(pBTime, pETime));
+    			msgBean = pRmi.RmiExec(1, this, 0, 25);
+    	    	request.getSession().setAttribute("Compare_Two_" + Sid, ((Object)msgBean.getMsg()));
+    	    	
+    	    	currStatus.setVecDate(CommUtil.getDate(SqlBTime, SqlETime));
+    			currStatus.setJsp("User_Graph_Curve_L.jsp?Sid=" + Sid + "&Id=" + GJ_Id);
+    			break;
+		
+		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
 	}
@@ -220,38 +351,7 @@ public class DataGJBean extends RmiBean
 					  " and t.gj_id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " +
 					  " ORDER BY t.project_id, t.gj_id";
 				break;
-			
-			case 4://历史   最近二十四小时均值折线图
-				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-					  " FROM view_data_gj t  " +
-					  " where t.gj_id = '"+ GJ_Id +"'" + 
-					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-					  "   and t.ctime >= date_format('" + SqlBTime + "', '%Y-%m-%d %H-%i-%S')" +
-				  	  "   and t.ctime <= date_format('" + SqlETime + "', '%Y-%m-%d %H-%i-%S')" +
-					  " GROUP BY SUBSTR(ctime,1,13)" +
-					  " ORDER BY t.ctime " ;
-				break;
-			case 5://历史   最近一周均值折线图
-				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-					  " FROM view_data_gj t  " +
-					  " where t.gj_id = '"+ GJ_Id +"'" + 
-					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
-				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
-					  " GROUP BY SUBSTR(ctime,1,10)" +
-					  " ORDER BY t.ctime " ;
-				break;
-			case 6://历史  最近一月折线图	
-				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-					  " FROM view_data_gj t  " +
-					  " where t.gj_id = '"+ GJ_Id +"'" + 
-					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
-				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
-					  " GROUP BY SUBSTR(ctime,1,10)" +
-					  " ORDER BY t.ctime " ;
-				break;
-			case 7:
+			case 1:
 				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
 						  " FROM view_data_gj t  " +
 						  " where t.gj_id = '"+ GJ_Id +"'" + 
@@ -260,6 +360,144 @@ public class DataGJBean extends RmiBean
 					  	  "   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 						  " GROUP BY SUBSTR(ctime,1,13)" +
 						  " ORDER BY t.ctime " ;
+				break;
+			case 2: //周
+				switch (Level)
+				{
+					case 1:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+							" FROM view_data_gj t  " +
+							" where t.gj_id = '"+ GJ_Id +"'" + 
+							"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+							"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+							"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+							" GROUP BY SUBSTR(ctime,1,10)" +
+							" ORDER BY t.ctime " ;
+						break;
+					case 2:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,10)" +
+								" ORDER BY t.ctime " ;
+						break;
+					case 3:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,10)" +
+								" ORDER BY t.ctime " ;
+						break;
+				}
+				break;
+			case 3: //月
+				switch (Level)
+				{
+					case 1:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,10)" +
+								" ORDER BY t.ctime " ;
+						break;
+					case 2:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,10)" +
+								" ORDER BY t.ctime " ;
+						break;
+					case 3:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,10)" +
+								" ORDER BY t.ctime " ;
+						break;
+				}
+				break;
+			case 4: //年
+				switch (Level)
+				{
+					case 1:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,7)" +
+								" ORDER BY t.ctime " ;
+						break;
+					case 2:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,7)" +
+								" ORDER BY t.ctime " ;
+						break;
+					case 3:
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+								" FROM view_data_gj t  " +
+								" where t.gj_id = '"+ GJ_Id +"'" + 
+								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								" GROUP BY SUBSTR(ctime,1,7)" +
+								" ORDER BY t.ctime " ;
+						break;
+				}
+				break;
+				
+//			case 4://历史   最近二十四小时均值折线图
+//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+//					  " FROM view_data_gj t  " +
+//					  " where t.gj_id = '"+ GJ_Id +"'" + 
+//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+//					  "   and t.ctime >= date_format('" + SqlBTime + "', '%Y-%m-%d %H-%i-%S')" +
+//				  	  "   and t.ctime <= date_format('" + SqlETime + "', '%Y-%m-%d %H-%i-%S')" +
+//					  " GROUP BY SUBSTR(ctime,1,13)" +
+//					  " ORDER BY t.ctime " ;
+//				break;
+//			case 5://历史   最近一周均值折线图
+//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+//					  " FROM view_data_gj t  " +
+//					  " where t.gj_id = '"+ GJ_Id +"'" + 
+//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+//					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
+//				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
+//					  " GROUP BY SUBSTR(ctime,1,10)" +
+//					  " ORDER BY t.ctime " ;
+//				break;
+//			case 6://历史  最近一月折线图	
+//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+//					  " FROM view_data_gj t  " +
+//					  " where t.gj_id = '"+ GJ_Id +"'" + 
+//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+//					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
+//				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
+//					  " GROUP BY SUBSTR(ctime,1,10)" +
+//					  " ORDER BY t.ctime " ;
+//				break;
+			
 				
 				
 		}
@@ -301,9 +539,9 @@ public class DataGJBean extends RmiBean
 			setSN(CommUtil.StrToGB2312(request.getParameter("SN")));
 			setProject_Id(CommUtil.StrToGB2312(request.getParameter("Project_Id")));
 			setGJ_Id(CommUtil.StrToGB2312(request.getParameter("GJ_Id")));
-			setLevel(CommUtil.StrToGB2312(request.getParameter("Level")));
 			setYear(CommUtil.StrToGB2312(request.getParameter("Year")));
 			setMonth(CommUtil.StrToGB2312(request.getParameter("Month")));		
+			setWeek(CommUtil.StrToGB2312(request.getParameter("Week")));		
 			
 			setPageSize(CommUtil.StrToGB2312(request.getParameter("rows")));
 			setPageNum(CommUtil.StrToGB2312(request.getParameter("page")));
@@ -355,14 +593,48 @@ public class DataGJBean extends RmiBean
 	}
 
 	private String Sid;
-	private String Level;
+	private int Level;
 	private String Year;
 	private String Month;
+	
+	private String	Week;
+	private boolean	Flag;
+	private String	Flag_Year;
 	
 	private String PageSize;
 	private String PageNum;
 	private String pSimu;
-	
+
+	public String getFlag_Year()
+	{
+		return Flag_Year;
+	}
+
+	public void setFlag_Year(String flag_Year)
+	{
+		Flag_Year = flag_Year;
+	}
+
+	public String getWeek()
+	{
+		return Week;
+	}
+
+	public void setWeek(String week)
+	{
+		Week = week;
+	}
+
+	public boolean isFlag()
+	{
+		return Flag;
+	}
+
+	public void setFlag(boolean flag)
+	{
+		Flag = flag;
+	}
+
 	public String getpSimu()
 	{
 		return pSimu;
@@ -509,11 +781,13 @@ public class DataGJBean extends RmiBean
 		Sid = sid;
 	}
 
-	public String getLevel() {
+	public int getLevel()
+	{
 		return Level;
 	}
 
-	public void setLevel(String level) {
+	public void setLevel(int level)
+	{
 		Level = level;
 	}
 

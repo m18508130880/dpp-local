@@ -586,6 +586,7 @@ public class DevGXBean extends RmiBean
 				    		String buriedYear = rs.getCell(9, i).getContents().trim(); 
 				    		String data_Lev = rs.getCell(10, i).getContents().trim(); 
 				    		String road = rs.getCell(11, i).getContents().trim(); 
+				    		String flag = rs.getCell(12, i).getContents().trim(); 
 	
 				    		this.setId(id.toUpperCase());			    		
 				    		this.setDiameter(!CommUtil.isNumeric(diameter)?"0":diameter);
@@ -600,6 +601,7 @@ public class DevGXBean extends RmiBean
 				    		
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
+				    		this.setRoad(flag);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(10, this, 0, 25);
@@ -691,10 +693,11 @@ public class DevGXBean extends RmiBean
 				    		String endId = rs.getCell(5, i).getContents().trim(); 
 				    		String startHeight = rs.getCell(6, i).getContents().trim(); 
 				    		String endHeight = rs.getCell(7, i).getContents().trim();
-				    		String material = rs.getCell(8, i).getContents().trim(); 
-				    		String buriedYear = rs.getCell(9, i).getContents().trim(); 
-				    		String data_Lev = rs.getCell(10, i).getContents().trim(); 
-				    		String road = rs.getCell(11, i).getContents().trim(); 
+				    		String material = rs.getCell(8, i).getContents().trim();
+				    		String buriedYear = rs.getCell(9, i).getContents().trim();
+				    		String data_Lev = rs.getCell(10, i).getContents().trim();
+				    		String road = rs.getCell(11, i).getContents().trim();
+				    		String flag = rs.getCell(12, i).getContents().trim();
 	
 				    		this.setId(id.toUpperCase());			    		
 				    		this.setDiameter(!CommUtil.isNumeric(diameter)?"0":diameter);
@@ -709,6 +712,7 @@ public class DevGXBean extends RmiBean
 				    		
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
+				    		this.setRoad(flag);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(13, this, 0, 25);
@@ -820,11 +824,13 @@ public class DevGXBean extends RmiBean
 			    sheet.addCell(cell); 
 			    cell=new Label(9,0,"埋设年份",font1);  
 			    sheet.addCell(cell);
-			    cell=new Label(10,0,"数据等级",font1);  
+			    cell=new Label(10,0,"主/支管",font1);  
 			    sheet.addCell(cell);
-			    cell=new Label(11,0,"所属项目",font1);  
+			    cell=new Label(11,0,"数据等级",font1);  
+			    sheet.addCell(cell);
+			    cell=new Label(12,0,"所属项目",font1);  
 			    sheet.addCell(cell);  
-			    cell=new Label(12,0,"设备名称",font1);  
+			    cell=new Label(13,0,"设备名称",font1);  
 			    sheet.addCell(cell);  
 			    
 				
@@ -841,6 +847,31 @@ public class DevGXBean extends RmiBean
 					End_Height = devGXBean.getEnd_Height();
 					Material = devGXBean.getMaterial();
 					Buried_Year = devGXBean.getBuried_Year();
+					Flag = "";
+					try{
+						if(devGXBean.getFlag() != null && !devGXBean.getFlag().trim().equals("")){
+						  	switch(Integer.parseInt(devGXBean.getFlag())){
+					  		case 1:
+					  			Flag ="主管";
+					  			break;
+					  		case 2:
+					  			Flag ="支管";
+						  		break;
+					  		case 3:
+					  			Flag ="出口管";
+						  		break;
+					  		default:
+					  			Flag ="数据有误，需要更改！";
+							  		break;
+						  	}
+						}
+					}catch(Exception e){
+						Flag ="数据有误，需要更改！";
+					}finally{
+					  	if(Flag == null){
+					  		Flag ="";
+					  	}
+					}
 					Data_Lev = "";
 					try{
 						if(devGXBean.getData_Lev() != null && !devGXBean.getData_Lev().trim().equals("")){
@@ -903,11 +934,13 @@ public class DevGXBean extends RmiBean
 					sheet.addCell(cell);
 					cell = new Label(9, row_Index, Buried_Year, font2);
 					sheet.addCell(cell);
-					cell = new Label(10, row_Index, Data_Lev, font2);
+					cell = new Label(10, row_Index, Flag, font2);
 					sheet.addCell(cell);
-					cell = new Label(11, row_Index, Project_Name, font2);
+					cell = new Label(11, row_Index, Data_Lev, font2);
 					sheet.addCell(cell);
-					cell = new Label(12, row_Index, Equip_Name, font2);
+					cell = new Label(12, row_Index, Project_Name, font2);
+					sheet.addCell(cell);
+					cell = new Label(13, row_Index, Equip_Name, font2);
 					sheet.addCell(cell);
 
 				}
@@ -933,7 +966,7 @@ public class DevGXBean extends RmiBean
 		switch (pCmd)
 		{  
 			case 0://查询（类型&项目）
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 		    	 	   	  " from view_dev_gx t " +		
 		    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 		    	 	   	  " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " +
@@ -943,21 +976,21 @@ public class DevGXBean extends RmiBean
 		    	switch(Integer.parseInt(currStatus.getFunc_Sort_Id()))
 				{
 					case 1://按照ID排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 				    	 	   	  " from view_dev_gx t " +		
 				    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 				    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
 			 	 		          " order by t.id ";
 						break;
 					case 2://按照直径排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 			    	 	   	  " from view_dev_gx t " +		
 			    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 			    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
 		 	 		          " order by t.diameter ";
 				       break;
 				    case 3://按照材料排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 			    	 	   	  " from view_dev_gx t " +		
 			    	 	   	  " where t.id like '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +
 			    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
@@ -968,34 +1001,34 @@ public class DevGXBean extends RmiBean
   
 		    case 3://查询(单个)
 		    case 5:
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 	    	 	   	  " from view_dev_gx t " +		
 	    	 	   	  " where t.id = '"+ Id +"' and t.project_id='" + currStatus.getFunc_Project_Id() + "'";	 		         
 			   break;
 		    case 4://查询（项目&子系统）
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 				      " from view_dev_gx t " +	
 				      " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
 				      " and substr(t.id, 3, 3) = '"+ Id.substring(2,5) +"'" +
 				      " order by t.id ";
 			   break;
 		    case 7://查询（下载地图）
-		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road" +
+		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 		    			" from view_dev_gx t " +	
 		    			" where t.project_id = '" + Project_Id + "'" + 
 		    			" and substr(t.id, 3, 3) = '"+ Id.substring(2,5) +"'" +
 		    			" order by t.id ";
 		    	break;
 		    case 10://添加
-		    	Sql = " insert into dev_gx(id, diameter, length, start_id, end_id, start_height, end_height, material, buried_year, data_lev, project_id, road)" +
-		    			"values('"+ Id +"', '"+ Diameter +"', '"+ Length +"', '"+ Start_Id +"', '"+ End_Id +"',  '"+ Start_Height +"', '"+ End_Height +"',  '"+Material +"', '"+Buried_Year +"', '"+Data_Lev +"', '"+ Project_Id +"', '"+ Road +"')";
+		    	Sql = " insert into dev_gx(id, diameter, length, start_id, end_id, start_height, end_height, material, buried_year, data_lev, project_id, road, flag)" +
+		    			"values('"+ Id +"', '"+ Diameter +"', '"+ Length +"', '"+ Start_Id +"', '"+ End_Id +"',  '"+ Start_Height +"', '"+ End_Height +"',  '"+Material +"', '"+Buried_Year +"', '"+Data_Lev +"', '"+ Project_Id +"', '"+ Road +"', '"+ Flag +"')";
 		    	break;	
 		    case 13://管线更新
-				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material +"',t.road = '"+ Road + "' " +
+				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "' " +
 					  " where t.id = '"+ Id +"' and t.project_id = '" + Project_Id + "'";
 				break;
 		    case 11://编辑
-				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material  +"',t.road = '"+ Road + "' " +
+				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material  +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "' " +
 					  " where t.id = '"+ Id +"' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;
 		    case 12://删除
@@ -1061,6 +1094,7 @@ public class DevGXBean extends RmiBean
 			setEquip_Name(pRs.getString(14));
 			setCurr_Data(pRs.getString(15));
 			setRoad(pRs.getString(16));
+			setFlag(pRs.getString(17));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -1092,6 +1126,7 @@ public class DevGXBean extends RmiBean
 			setSubsys_Id(CommUtil.StrToGB2312(request.getParameter("Subsys_Id")));
 			setAfter_Project_Id(CommUtil.StrToGB2312(request.getParameter("After_Project_Id")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
+			setFlag(CommUtil.StrToGB2312(request.getParameter("Flag")));
 			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 			
 		}
@@ -1113,6 +1148,7 @@ public class DevGXBean extends RmiBean
 	private String Buried_Year;
 	private String Data_Lev;
 	private String Road;
+	private String Flag;
 	
 	private String Project_Id;	
 	private String Project_Name;	
@@ -1125,6 +1161,16 @@ public class DevGXBean extends RmiBean
 	private String After_Project_Id;
 	private String pSimu;
 	
+	public String getFlag()
+	{
+		return Flag;
+	}
+
+	public void setFlag(String flag)
+	{
+		Flag = flag;
+	}
+
 	public String getpSimu()
 	{
 		return pSimu;

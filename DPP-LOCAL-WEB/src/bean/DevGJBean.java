@@ -111,7 +111,7 @@ public class DevGJBean extends RmiBean
 			case 4:// User单个查询
 				msgBean = pRmi.RmiExec(3, this, 0, 25);
 				request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
-				currStatus.setJsp("User_One_GJ.jsp?Sid=" + Sid + "&Id=" + Id);
+				currStatus.setJsp("One_GJ.jsp?Sid=" + Sid + "&Id=" + Id);
 				break;
 			case 6:// Admin查询单个
 				msgBean = pRmi.RmiExec(6, this, 0, 25);
@@ -911,7 +911,13 @@ public class DevGJBean extends RmiBean
 									Flag = "终  点";
 									break;
 								case 3:
-									Flag = "主起点";
+									Flag = "水位站";
+									break;
+								case 4:
+									Flag = "泵站";
+									break;
+								case 5:
+									Flag = "排出口";
 									break;
 								default:
 									Flag = "数据有误，需要更改！";
