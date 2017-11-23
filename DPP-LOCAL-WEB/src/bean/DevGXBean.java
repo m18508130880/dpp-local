@@ -601,7 +601,7 @@ public class DevGXBean extends RmiBean
 				    		
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
-				    		this.setRoad(flag);
+				    		this.setFlag(flag);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(10, this, 0, 25);
@@ -712,7 +712,7 @@ public class DevGXBean extends RmiBean
 				    		
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
-				    		this.setRoad(flag);
+				    		this.setFlag(flag);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(13, this, 0, 25);

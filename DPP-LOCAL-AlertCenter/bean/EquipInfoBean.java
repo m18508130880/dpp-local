@@ -151,13 +151,17 @@ public class EquipInfoBean
 	public void blockingOne(EquipInfoBean pEquipInfo, AlertCtrl alertCtrl)
 	{
 		CommUtil.PRINT("-----×èÈû¼ì²â--["+pEquipInfo.getTid()+"]["+pEquipInfo.getGJ_Id()+"]--µ¥¸ö--");
-		String Sql = " SELECT AVG(VALUE) FROM DATA WHERE cpm_id = '"+pEquipInfo.getTid()+"' AND id = '"+pEquipInfo.getPid()+"' AND CTIME >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
+		String Sql = " SELECT AVG(VALUE) FROM DATA WHERE cpm_id = '"+pEquipInfo.getTid()+"' AND id = '"+pEquipInfo.getPid()+"'";
+		float avg_All = Float.valueOf(alertCtrl.getM_DBUtil().doSelectStr(Sql, 1).split(",")[0]);
+		Sql = " SELECT AVG(VALUE) FROM DATA WHERE cpm_id = '"+pEquipInfo.getTid()+"' AND id = '"+pEquipInfo.getPid()+"' AND CTIME >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)";
 		float avg_30Day = Float.valueOf(alertCtrl.getM_DBUtil().doSelectStr(Sql, 1).split(",")[0]);
 		Sql = " SELECT AVG(VALUE) FROM DATA WHERE cpm_id = '"+pEquipInfo.getTid()+"' AND id = '"+pEquipInfo.getPid()+"' AND CTIME >= DATE_SUB(NOW(), INTERVAL 6 HOUR)";
 		float avg_6Hour = Float.valueOf(alertCtrl.getM_DBUtil().doSelectStr(Sql, 1).split(",")[0]);
 		Sql = " SELECT AVG(VALUE) FROM DATA WHERE cpm_id = '"+pEquipInfo.getTid()+"' AND id = '"+pEquipInfo.getPid()+"' AND CTIME >= DATE_SUB(NOW(), INTERVAL 12 HOUR)";
 		float avg_12Hour = Float.valueOf(alertCtrl.getM_DBUtil().doSelectStr(Sql, 1).split(",")[0]);
-		if(avg_6Hour - avg_30Day > 0.5 || avg_12Hour - avg_30Day > 0.3)
+//		if(avg_6Hour - avg_30Day > 0.5 || avg_12Hour - avg_30Day > 0.3)
+//		{
+		if(avg_12Hour - avg_All > 1)
 		{
 			Sql = " insert INTO alert_info(CPM_ID, ID, CNAME, ATTR_ID, ATTR_NAME, LEVEL, CTIME, CDATA, GJ_ID, STATUS, UNIT, DES)"+
 				  " VALUES('"+pEquipInfo.getPid()+"', '"+pEquipInfo.getTid()+"', '"+pEquipInfo.getCName()+"', '0012', '×èÈû', '"+
