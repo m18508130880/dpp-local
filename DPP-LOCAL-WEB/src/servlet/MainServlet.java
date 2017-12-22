@@ -197,6 +197,8 @@ public class MainServlet extends HttpServlet
         	new DevGJBean().ToPo(request, response, m_Rmi, false);  
         else if (strUrl.equalsIgnoreCase("Admin_Drag_GJ.do"))					//GIS监控-管井-更新坐标
         	new DevGJBean().doDragging(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("User_Rotation_GJ.do"))				//GIS监控-管井-更新旋转角度
+        	new DevGJBean().doRotation(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_LZGX.do"))						//GIS监控-管井-管线拉直
         	new DevGXBean().straightenGX(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_HTLZ.do"))						//GIS监控-管井-管线拉直-回退

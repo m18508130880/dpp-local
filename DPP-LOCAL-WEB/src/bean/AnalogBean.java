@@ -9187,9 +9187,18 @@ public class AnalogBean
 			if(null != nextGX)
 			{
 				String outGJId = nextGX.getEnd_Id();
-				nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
-				sn++;
-				gjList.add(nextGJ);
+				String startGJId = nextGX.getStart_Id();
+				System.out.println("outGJId["+outGJId+"]startGJId["+startGJId+"]");
+				if(outGJId.substring(2,5).equals(startGJId.substring(2,5)))
+				{
+					nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
+					sn++;
+					gjList.add(nextGJ);
+				}
+				else
+				{
+					option = 1;
+				}
 			}
 		}
 		while (option == 0);

@@ -97,6 +97,7 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 				break;
 				
 			case 1://插入,更新,删除				
+			case 5://插入,更新,删除				
 				if(doUpdate(Sql))    
 				{		
 					objBean = new MsgBean(MsgBean.STA_SUCCESS, null, recordCount);
