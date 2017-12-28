@@ -109,9 +109,30 @@ public class DevGXBean extends RmiBean
 				currStatus.setJsp("User_Graph_Cut.jsp?Sid=" + Sid + "&Id=" + Id);
 				break;
 		}
-		
+		float a = Float.valueOf("2");
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	//管井管线统计
+	public void InTotal(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = ((String)msgBean.getMsg());
+		}
+		request.getSession().setAttribute("User_InTotal_" + Sid, Resp);
+		currStatus.setJsp("User_InTotal.jsp?Sid=" + Sid + "&Id=" + Id);
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		response.sendRedirect(currStatus.getJsp());
 	}
 	
 	/**
@@ -1063,6 +1084,9 @@ public class DevGXBean extends RmiBean
 				Sql = "{? = call Func_GX_Get('"+ Id + "', '" + Road +"')}";
 				break;
 
+			case 22://统计
+				Sql = "{? = call Func_InTotal_GJGX('"+ Id + "', '" + Project_Id +"')}";
+				break;
 			case 23://获取未标注企业
 				Sql = "{? = call Func_UnMark_GX_Get('')}";
 				break;
