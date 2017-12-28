@@ -217,6 +217,8 @@ public class MainServlet extends HttpServlet
         	new DevGJBean().XLQRExcel(request, response, m_Rmi, false);  
         else if (strUrl.equalsIgnoreCase("Admin_File_GX_Export.do"))			//管线Excel表导出
         	new DevGXBean().XLQRExcel(request, response, m_Rmi, false);  
+        else if (strUrl.equalsIgnoreCase("Admin_DevGJ_InTotal.do"))				//管井统计
+        	new DevGJBean().ExecCmd(request, response, m_Rmi, false); 
    
        /***************************************admin-管线**********************************************/ 
         else if (strUrl.equalsIgnoreCase("Admin_ToPo_GX.do"))						 //GIS监控-管线
@@ -227,6 +229,8 @@ public class MainServlet extends HttpServlet
         	new DevGXBean().GXSuggest(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("Admin_GJ_Scene.do"))	                     //窨井图片上传
         	new DevGJBean().DetailSenceUp(request, response, m_Rmi, false, Config); 
+        else if (strUrl.equalsIgnoreCase("Admin_DevGX_InTotal.do"))			         //管线统计
+        	new DevGXBean().ExecCmd(request, response, m_Rmi, false);
         
         /************************************user-管井**********************************************/  
         else if (strUrl.equalsIgnoreCase("User_ToPo_GJ.do"))				        //GIS监控-管井
