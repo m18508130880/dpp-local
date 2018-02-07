@@ -306,6 +306,8 @@ public class MainServlet extends HttpServlet
         /************************************user-统计*****************************************************/
         else if (strUrl.equalsIgnoreCase("User_InTotal.do"))			         		//管井管线统计
         	new DevGXBean().InTotal(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("User_InTotal_GX.do"))			         		//管线统计_详细
+        	new DevGXBean().InTotal_GX(request, response, m_Rmi, false);
     }
     
     private class Connect extends Thread

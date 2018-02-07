@@ -135,6 +135,50 @@ public class DevGXBean extends RmiBean
 		response.sendRedirect(currStatus.getJsp());
 	}
 	
+	//管线统计-详细
+	public void InTotal_GX(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
+		Iterator<?> gx_iterator = gx_List.iterator();
+		String Resp = Id;
+		String GX_DP = "";
+		String PD = "";
+		DecimalFormat df = new DecimalFormat("#.####");
+		while (gx_iterator.hasNext()) {
+			DevGXBean devGXBean = (DevGXBean) gx_iterator.next();
+			Id = devGXBean.getId();
+			Diameter = devGXBean.getDiameter();
+			Length = devGXBean.getLength();
+			Start_Id = devGXBean.getStart_Id();
+			End_Id = devGXBean.getEnd_Id();
+			Start_Height = devGXBean.getStart_Height();
+			End_Height = devGXBean.getEnd_Height();
+			Material = devGXBean.getMaterial();
+			Buried_Year = devGXBean.getBuried_Year();
+			Flag = "";
+			PD = df.format((Double.valueOf(Start_Height) - Double.valueOf(End_Height))/Double.valueOf(Length));
+			if(Double.valueOf(Start_Height) < Double.valueOf(End_Height))
+			{
+				GX_DP += Id + "(" + PD + "),";
+			}
+			else
+			{
+				Resp += Id + "(" + PD + "),";
+			}
+		}
+		Resp = Resp + ";" +GX_DP;
+		request.getSession().setAttribute("User_InTotal_GX_" + Sid, Resp);
+		currStatus.setJsp("User_InTotal_GX.jsp?Sid=" + Sid + "&Id=" + Id);
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		response.sendRedirect(currStatus.getJsp());
+	}
+	
 	/**
 	 * 时段水位深度剖面图
 	 * @param request
@@ -1033,6 +1077,13 @@ public class DevGXBean extends RmiBean
 				      " and substr(t.id, 3, 3) = '"+ Id.substring(2,5) +"'" +
 				      " order by t.id ";
 			   break;
+		    case 6://查询（项目&子系统）
+		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+		    			" from view_dev_gx t " +	
+		    			" where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
+		    			" and t.id like '"+ Id +"%'" +
+		    			" order by t.id ";
+		    	break;
 		    case 7://查询（下载地图）
 		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
 		    			" from view_dev_gx t " +	
@@ -1085,7 +1136,7 @@ public class DevGXBean extends RmiBean
 				break;
 
 			case 22://统计
-				Sql = "{? = call Func_InTotal_GJGX('"+ Id + "', '" + Project_Id +"')}";
+				Sql = "{? = call Func_InTotal_GJGX('"+ Id + "', '" + currStatus.getFunc_Project_Id() +"')}";
 				break;
 			case 23://获取未标注企业
 				Sql = "{? = call Func_UnMark_GX_Get('')}";
