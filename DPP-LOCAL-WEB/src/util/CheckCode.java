@@ -15,8 +15,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public class CheckCode {
-	public final static int WIDTH = 60;
-    public final static int HEIGHT = 20;
+	public final static int WIDTH = 80;
+    public final static int HEIGHT = 30;
     public static void  CreateCheckCode(HttpServletRequest request, HttpServletResponse response, String pSid) throws ServletException, IOException
     {
 		response.setContentType("image/jpeg"); 
@@ -78,18 +78,18 @@ public class CheckCode {
     public static void drawRands(Graphics g , char [] rands) 
     { 
        g.setColor(Color.darkGray); 
-       g.setFont(new Font(null,Font.ITALIC|Font.BOLD,18)); 
+       g.setFont(new Font(null,Font.ITALIC|Font.BOLD,28)); 
        // 在不同的高度上输出验证码的每个字符          
-       g.drawString("" + rands[0] + rands[1],1,18); 
+       g.drawString("" + rands[0] + rands[1],1,28); 
 //       g.drawString("" + rands[1],16,15); 
-       g.drawString("" + rands[2]+ rands[3],32,18); 
+       g.drawString("" + rands[2]+ rands[3],32,28); 
 //       g.drawString("" + rands[3],46,16); 
        //System.out.println(rands); 
     } 
     public static void drawBackground(Graphics g) 
 	{ 
     	// 画背景 
-    	g.setColor(new Color(0x87CEEB)); 
+    	g.setColor(new Color(0x7093DB)); 
     	g.fillRect(0, 0, WIDTH, HEIGHT); 
     	// 随机产生 120 个干扰点 
     	for(int i=0; i<222; i++) 

@@ -2,9 +2,7 @@ package bean;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
@@ -14,16 +12,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
-import java.util.Scanner;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.xml.crypto.Data;
 
 import jxl.Sheet;
 import jxl.Workbook;
-import jxl.read.biff.BiffException;
 import rmi.Rmi;
 import util.CommUtil;
 import util.CurrStatus;

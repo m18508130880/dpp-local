@@ -10,9 +10,23 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import rmi.*;
-import util.*;
-import bean.*;
+import rmi.Rmi;
+import util.CheckCode;
+import util.CommUtil;
+import bean.AlertInfoBean;
+import bean.AnalogBean;
+import bean.CorpInfoBean;
+import bean.DataGJBean;
+import bean.DataGXBean;
+import bean.DevBZBean;
+import bean.DevGJBean;
+import bean.DevGXBean;
+import bean.DevMapBean;
+import bean.EquipInfoBean;
+import bean.MapImageBean;
+import bean.ProjectInfoBean;
+import bean.UserInfoBean;
+import bean.UserRoleBean;
 
 ////0全部查询 2插入 3修改 4删除 10～19单个查询
 public class MainServlet extends HttpServlet
@@ -308,6 +322,8 @@ public class MainServlet extends HttpServlet
         	new DevGXBean().InTotal(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("User_InTotal_GX.do"))			         		//管线统计_详细
         	new DevGXBean().InTotal_GX(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("bd09ToGcj02.do"))			         		//百度坐标系转腾讯
+            	new DevGJBean().bd09ToGcj02(request, response, m_Rmi, false);
     }
     
     private class Connect extends Thread

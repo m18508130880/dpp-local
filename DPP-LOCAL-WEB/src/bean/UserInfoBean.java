@@ -57,7 +57,7 @@ public class UserInfoBean extends RmiBean
 			if(null == currStatus)
 				currStatus = new CurrStatus();
 			currStatus.getHtmlData(request, false);
-			
+
 			String Url = "index.jsp";
 			msgBean = pRmi.RmiExec(21, this, 0, 25);
 			if(msgBean.getStatus() == MsgBean.STA_SUCCESS)
@@ -152,7 +152,7 @@ public class UserInfoBean extends RmiBean
 			    	msgBean = pRmi.RmiExec(1, roleBeanManage, 0, 25);
 			    	request.getSession().setAttribute("User_Manage_Role_" + Sid, ((Object)msgBean.getMsg()));
 			    	
-			    	Url = "project_choose.jsp?Sid=" + Sid;
+			    	Url = "index.jsp?Sid=" + Sid;
 			    //	Url = "Project_choose.jsp?Sid=" + Sid;
 				//	Url = "user/MapMain.jsp?Sid=" + Sid;
 					

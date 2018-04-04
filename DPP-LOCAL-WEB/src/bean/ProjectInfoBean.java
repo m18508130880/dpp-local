@@ -11,7 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import rmi.Rmi;
 import rmi.RmiBean;
-import util.*;
+import util.CommUtil;
+import util.CurrStatus;
+import util.MsgBean;
 
 public class ProjectInfoBean extends RmiBean 
 {
@@ -87,7 +89,7 @@ public class ProjectInfoBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://查询
-				Sql = " select  t.id, t.cname, t.Longitude, t.Latitude, t.MapLev , t.MapAngle , t.Demo "
+				Sql = " select  t.id, t.cname, t.Longitude, t.Latitude, t.wx_lng, t.wx_lat, t.MapLev , t.MapAngle , t.Demo "
 						+ " from project_info t order by t.id";
 				break;
 			case 2://设备ID检测
@@ -103,6 +105,10 @@ public class ProjectInfoBean extends RmiBean
 				Sql = " update project_info t set t.cname= '"+ CName +"', t.Longitude= '"+ Longitude +"', t.Latitude= '"+ Latitude +"', t.MapLev= '"+ MapLev +"' , t.MapAngle= '"+ MapAngle +"' , t.Demo= '"+ Demo +"' " +
 					  " where t.id = '"+ Id +"'";
 				break;
+			case 12://百度坐标转腾讯坐标
+				Sql = " update project_info t set t.wx_lng = '"+ WX_Lng +"', t.wx_lat = '"+ WX_Lat +"' " +
+					  " where t.id = '"+ Id +"'";
+				break;
 		}
 		return Sql;
 	}
@@ -116,9 +122,11 @@ public class ProjectInfoBean extends RmiBean
 			setCName(pRs.getString(2));
 			setLongitude(pRs.getString(3));
 			setLatitude(pRs.getString(4));
-			setMapLev(pRs.getString(5));
-			setMapAngle(pRs.getString(6));
-			setDemo(pRs.getString(7));
+			setWX_Lng(pRs.getString(5));
+			setWX_Lat(pRs.getString(6));
+			setMapLev(pRs.getString(7));
+			setMapAngle(pRs.getString(8));
+			setDemo(pRs.getString(9));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -136,6 +144,8 @@ public class ProjectInfoBean extends RmiBean
 			setCName(CommUtil.StrToGB2312(request.getParameter("CName")));
 			setLongitude(CommUtil.StrToGB2312(request.getParameter("Longitude")));
 			setLatitude(CommUtil.StrToGB2312(request.getParameter("Latitude")));
+			setWX_Lng(CommUtil.StrToGB2312(request.getParameter("WX_Lng")));
+			setWX_Lat(CommUtil.StrToGB2312(request.getParameter("WX_Lat")));
 			setMapLev(CommUtil.StrToGB2312(request.getParameter("MapLev")));
 			setMapAngle(CommUtil.StrToGB2312(request.getParameter("MapAngle")));
 			setDemo(CommUtil.StrToGB2312(request.getParameter("Demo")));
@@ -152,12 +162,30 @@ public class ProjectInfoBean extends RmiBean
 	private String CName;
 	private String Longitude;
 	private String Latitude;
+	private String WX_Lng;
+	private String WX_Lat;
 	private String MapLev;
 	private String MapAngle;
 	private String Demo;
 	private String Sid;
 	
 	
+	public String getWX_Lng() {
+		return WX_Lng;
+	}
+
+	public void setWX_Lng(String wX_Lng) {
+		WX_Lng = wX_Lng;
+	}
+
+	public String getWX_Lat() {
+		return WX_Lat;
+	}
+
+	public void setWX_Lat(String wX_Lat) {
+		WX_Lat = wX_Lat;
+	}
+
 	public String getMapAngle() {
 		return MapAngle;
 	}

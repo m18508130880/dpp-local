@@ -1,44 +1,22 @@
 package bean;
 
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.rmi.RemoteException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.Iterator;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageReadParam;
-import javax.imageio.ImageReader;
-import javax.imageio.stream.ImageInputStream;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.jspsmart.upload.SmartUpload;
-
-import rmi.Rmi;
-import rmi.RmiBean;
-import util.*;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -51,6 +29,14 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+import rmi.Rmi;
+import rmi.RmiBean;
+import util.CommUtil;
+import util.CoordConv;
+import util.CurrStatus;
+import util.MsgBean;
+
+import com.jspsmart.upload.SmartUpload;
 
 public class DevGJBean extends RmiBean
 {
@@ -423,6 +409,66 @@ public class DevGJBean extends RmiBean
 		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
 		{
 			Resp = "0000";
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
+	/**
+	 * 百度坐标转GCJ02
+	 * @param request
+	 * @param response
+	 * @param pRmi
+	 * @param pFromZone
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void bd09ToGcj02(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		String Lng = request.getParameter("pLng");
+		String Lat = request.getParameter("pLat");
+
+		String [] coord;
+		
+		msgBean = pRmi.RmiExec(2, this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = "0000";
+			int succCnt = 0;
+			int tmpCnt = 0;
+			ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> gj_iterator = gj_List.iterator();
+			while (gj_iterator.hasNext())
+			{
+				DevGJBean devGJBean = (DevGJBean) gj_iterator.next();
+				Id = devGJBean.getId();
+				Project_Id = devGJBean.getProject_Id();
+				Longitude = devGJBean.getLongitude();
+				Latitude = devGJBean.getLatitude();
+				coord = CoordConv.BD_09ToGCJ_02(Longitude, Latitude, CoordConv.bd09ll, CoordConv.gcj02);
+				WX_Lng = coord[0];
+				WX_Lat = coord[1];
+				msgBean = pRmi.RmiExec(51, this, 0, 25);
+				if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+				{
+					succCnt ++;
+				}
+				tmpCnt ++;
+			}
+			Resp += "成功转换[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
+			ProjectInfoBean projectInfoBean = new ProjectInfoBean();
+			coord = CoordConv.BD_09ToGCJ_02(Lng, Lat, CoordConv.bd09ll, CoordConv.gcj02);
+			projectInfoBean.setId(currStatus.getFunc_Project_Id());
+			projectInfoBean.setWX_Lng(coord[0]);
+			projectInfoBean.setWX_Lat(coord[1]);			
+			msgBean = pRmi.RmiExec(12, projectInfoBean, 0, 25);
 		}
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
@@ -1049,9 +1095,9 @@ public class DevGJBean extends RmiBean
 			case 1:// 查询（全部）
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " order by t.id  ";
 				break;
-			/*case 2:// 查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.Scene_Img" + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
-				break;*/
+			case 2:// 查询（类型&项目）
+				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
+				break;
 
 			case 3:// 查询（单个）
 			case 6:
@@ -1109,6 +1155,9 @@ public class DevGJBean extends RmiBean
 				break;
 			case 50:// 地图拖拽更新旋转角度
 				Sql = " update dev_gj t set t.rotation = '" + Rotation + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				break;
+			case 51:// 百度坐标系转腾讯坐标系
+				Sql = " update dev_gj t set t.wx_lng = '" + WX_Lng + "',t.wx_lat = '" + WX_Lat + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 
 		}
@@ -1223,7 +1272,26 @@ public class DevGJBean extends RmiBean
 	private String	Road;
 	private String	Rotation;
 	
+	private String	WX_Lng;
+	private String	WX_Lat;
+	
 	private String	pSimu; //降雨强度
+
+	public String getWX_Lng() {
+		return WX_Lng;
+	}
+
+	public void setWX_Lng(String wX_Lng) {
+		WX_Lng = wX_Lng;
+	}
+
+	public String getWX_Lat() {
+		return WX_Lat;
+	}
+
+	public void setWX_Lat(String wX_Lat) {
+		WX_Lat = wX_Lat;
+	}
 
 	public String getpSimu()
 	{

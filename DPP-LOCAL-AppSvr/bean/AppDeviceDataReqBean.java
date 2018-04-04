@@ -1,12 +1,9 @@
 package bean;
 
 import net.MsgCtrl;
-import net.TcpSvr;
-import bean.BaseCmdBean;
 import util.CmdUtil;
 import util.Cmd_Sta;
 import util.CommUtil;
-import util.DBUtil;
 public class AppDeviceDataReqBean extends BaseCmdBean {	
 	
 	private String Dev_Id = "";
@@ -55,6 +52,11 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 		else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_041102_0001))		//星仪液位，水位高度，精度0.0025
 		{			
 			float fData = (float) (Integer.parseInt(CommUtil.BytesToHexString(byteData, 2), 16) * 0.0025);
+			Dev_RealData = String.valueOf(fData);
+		}
+		else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_041103_0001))		//星仪液位，水位高度，精度0.003
+		{			
+			float fData = (float) (Integer.parseInt(CommUtil.BytesToHexString(byteData, 2), 16) * 0.003);
 			Dev_RealData = String.valueOf(fData);
 		}
 		else

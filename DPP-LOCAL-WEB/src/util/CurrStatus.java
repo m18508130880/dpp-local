@@ -198,7 +198,7 @@ public class CurrStatus implements Serializable
 			
 		}
 		s+="到第<input name='ToPage' type='text' size='2'>页";
-		s+="<input type='button' style='width:40px;height:20px' onClick='GoPage(" + pForm + ".ToPage.value)' value='确定'/>";
+		s+="<input type='button' style='color:white;border:0;width:40px;height:20px;background-color:rgba(0,0,0,0.2);' onClick='GoPage(" + pForm + ".ToPage.value)' value='确定'/>";
 		return s; 
 	}
 }
