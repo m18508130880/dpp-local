@@ -115,6 +115,23 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			  	  	     "'"+ Dev_RealData +"', " +
 			  	  	     "'m')";
 			}
+			else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_041103_0001))		//星仪液位，精度0.0025
+			{
+//				Sql = "insert into data(cpm_id, project_id, id, cname, attr_id, attr_name, ctime, value, unit)" +
+//						"SELECT '"+ this.getActionSource().trim() +"', project_id, id, '水位仪', '" +
+//			  	  	     Dev_Attr_Id +"', '水位', date_format('"+ Dev_CTime +"', '%Y-%m-%d %H-%i-%S'), '"+ 
+//			  	  	     Dev_RealData +"', 'm' FROM dev_gj WHERE equip_id='" + 
+//			  	  	     Dev_Id + "'";
+				Sql = "insert into data(cpm_id, id, cname, attr_id, attr_name, ctime, value, unit)" +
+						"values('"+ this.getActionSource().trim() +"', " +
+			  	  	     "'"+ Dev_Id +"', " +
+			  	  	     "'水位仪', " +
+			  	  	     "'"+ Dev_Attr_Id +"', " +
+			  	  	     "'水位', " +
+			  	  	     "date_format('"+ Dev_CTime +"', '%Y-%m-%d %H-%i-%S'), " +
+			  	  	     "'"+ Dev_RealData +"', " +
+			  	  	     "'m')";
+			}
 			else
 			{
 				Sql = "insert into data(cpm_id, id, cname, attr_id, attr_name, ctime, value, unit)" +
