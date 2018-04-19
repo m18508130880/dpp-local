@@ -4,9 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +17,9 @@ import javax.servlet.http.HttpServletResponse;
 import net.sf.json.JSONObject;
 import rmi.Rmi;
 import rmi.RmiBean;
-import util.*;
+import util.CommUtil;
+import util.CurrStatus;
+import util.MsgBean;
 
 public class DataGJBean extends RmiBean 
 {	
@@ -69,33 +69,6 @@ public class DataGJBean extends RmiBean
 		getHtmlData(request);
 		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
 		currStatus.getHtmlData(request, pFromZone);
-		
-//		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
-//		Calendar c = Calendar.getInstance();    
-//		switch(currStatus.getCmd())
-//		{
-//    		case 1:  //日
-//    			SqlETime = df.format(c.getTime());
-//    			c.add(Calendar.HOUR_OF_DAY, -24);
-//    			SqlBTime = df.format(c.getTime());
-//				break;			
-//    		case 2:  //周
-//    			SqlETime = df.format(c.getTime());
-//    			c.add(Calendar.WEEK_OF_MONTH, -1);
-//    			SqlBTime = df.format(c.getTime());
-//				break;    		
-//    		case 3:  //月
-//    			SqlETime = df.format(c.getTime());
-//    			c.add(Calendar.MONTH, -1);
-//    			SqlBTime = df.format(c.getTime());
-//    	    	break;
-//    		case 4:  //年
-//    			SqlETime = df.format(c.getTime());
-//    			c.add(Calendar.MONTH, -1);
-//    			SqlBTime = df.format(c.getTime());
-//    	    	break;
-//		
-//		}   
 		switch(currStatus.getCmd())
 		{
     		case 1:  //日
@@ -226,6 +199,12 @@ public class DataGJBean extends RmiBean
     			break;
 		
 		}
+		DevGJBean dBean = new DevGJBean();
+		dBean.setId(GJ_Id);
+		dBean.setProject_Id(currStatus.getFunc_Project_Id());
+		msgBean = pRmi.RmiExec(7, dBean, 0, 25);
+		request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
 	}

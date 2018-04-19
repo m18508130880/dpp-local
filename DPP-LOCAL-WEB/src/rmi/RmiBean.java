@@ -2,7 +2,9 @@ package rmi;
 
 import java.io.Serializable;
 import java.sql.ResultSet;
-import util.*;
+
+import util.CurrStatus;
+import util.MsgBean;
 
 
 /**RmiBean 实现了 serializable 可序列化接口
@@ -41,6 +43,7 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_ALERT					= 35;
 	public static final int	RMI_DEVBZ					= 36;
 	public static final int	RMI_DEVMAP					= 37;
+	public static final int	RMI_DEVHAND					= 38;
 
 	public MsgBean    msgBean = null;
 	public String     className;

@@ -9175,7 +9175,9 @@ public class AnalogBean
 				devGJ.Top_Height = nextGJ.getTop_Height();
 				devGJ.Equip_Height = nextGJ.getEquip_Height();
 				devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height()) - CommUtil.StrToFloat(nextGJ.getEquip_Height()) + CommUtil.StrToFloat(nextGJ.getCurr_Data());
-				devList.add(devGJ);
+				if(devGJ.water - CommUtil.StrToFloat(devGJ.Base_Height) >= 0.06) {
+					devList.add(devGJ);
+				}
 			}
 			String outGXId = nextGJ.getOut_Id();
 			nextGX = (DevGXBean) HashGet(objGXTable, outGXId);

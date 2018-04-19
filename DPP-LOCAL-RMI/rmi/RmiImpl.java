@@ -2,19 +2,35 @@ package rmi;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.CallableStatement;//用于执行sql存储过程的接口
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.CallableStatement;//用于执行sql存储过程的接口
-
-import util.*;
-
-import java.util.*;
+import java.util.ArrayList;
 
 import net.TPCClient;
-import bean.*;
 import oracle.jdbc.OracleTypes;
+import util.Cmd_Sta;
+import util.CommUtil;
+import util.DBUtil;
+import util.MsgBean;
+import bean.AlertInfoBean;
+import bean.CorpInfoBean;
+import bean.DataBean;
+import bean.DataGJBean;
+import bean.DataGXBean;
+import bean.DataNowBean;
+import bean.DevBZBean;
+import bean.DevGJBean;
+import bean.DevGXBean;
+import bean.DevHandBean;
+import bean.DevMapBean;
+import bean.EquipInfoBean;
+import bean.MapImageBean;
+import bean.ProjectInfoBean;
+import bean.UserInfoBean;
+import bean.UserRoleBean;
 
 /** RmiImpl implements Rmi 
  * @author Cui
@@ -223,6 +239,9 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_DEVMAP:
 						rmiBean = new DevMapBean();
+						break;
+					case RmiBean.RMI_DEVHAND:
+						rmiBean = new DevHandBean();
 						break;
 						
 				}
