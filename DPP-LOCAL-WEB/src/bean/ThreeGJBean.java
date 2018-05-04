@@ -98,7 +98,7 @@ public class ThreeGJBean extends RmiBean
 			ThreeModel cenModel = new ThreeModel();
 			ThreeGJBean cenGJ= gjMap.get(Id);
 			cenHeight = (Float.valueOf(cenGJ.getTop_Height()) - Float.valueOf(cenGJ.getBase_Height()))*100;
-			cenRadii = Float.valueOf(cenGJ.getSize())/10;
+			cenRadii = Float.valueOf(cenGJ.getSize())/10/2;
 			cenModel = getGJModel(cenGJ, cenHeight, cenRadii);
 			modelList.add(cenModel);
 			String [] inIdList = cenGJ.getIn_Id().split(",");
@@ -163,7 +163,7 @@ public class ThreeGJBean extends RmiBean
 		double rZ = 0;		// 模型沿Z轴旋转弧度
 		ThreeModel model = new ThreeModel();
 		
-		radii = (short) (Short.valueOf(gx.getDiameter())/10);		// 模型的半径
+		radii = (short) (Short.valueOf(gx.getDiameter())/10/2);		// 模型的半径
 		// 中心管井和当前管井	的高度差
 		rotaZ = (Double.valueOf(cenGJ.getBase_Height()) - Double.valueOf(gj.getBase_Height()))*10;
 		// 管线水平长度
@@ -171,8 +171,11 @@ public class ThreeGJBean extends RmiBean
 		// 根据勾股定理，算出管线长度，即模型的高度
 		height = Math.sqrt(rotaZ*rotaZ + rotaX*rotaX);
 		// 管线模型与中心管井模型的高度差，中心管井一半高度-中心管井与管线的高度差。数值必定为负数
-		System.out.println("cenHeight/2["+cenHeight/2+"]radii["+radii+"]heightD*100["+heightD*100+"]");
-		pY =  - (cenHeight/2 - radii - heightD*100);
+		if(heightD < 0){
+			pY =  - (cenHeight/2 - radii + heightD*100);
+		}else{
+			pY =  - (cenHeight/2 - radii - heightD*100);
+		}
 		//pY = radii - cenHeight/2 - (heightD)*100;
 		// 中心管井与当前管井的纬度差
 		double pLat = (Double.valueOf(cenGJ.getLatitude()) - Double.valueOf(gj.getLatitude()))*10000000;
