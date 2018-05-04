@@ -20,9 +20,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.jspsmart.upload.SmartUpload;
-
-import net.sf.json.JSONArray;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -35,9 +32,14 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+import net.sf.json.JSONArray;
 import rmi.Rmi;
 import rmi.RmiBean;
-import util.*;
+import util.CommUtil;
+import util.CurrStatus;
+import util.MsgBean;
+
+import com.jspsmart.upload.SmartUpload;
 
 public class DevGXBean extends RmiBean
 {	
@@ -50,6 +52,12 @@ public class DevGXBean extends RmiBean
 	public DevGXBean()
 	{
 		super.className = "DevGXBean";
+	}
+	
+	public DevGXBean(CurrStatus currStatus)
+	{
+		super.className = "DevGXBean";
+		this.currStatus = currStatus;
 	}
 	
 	public void ExecCmd(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException

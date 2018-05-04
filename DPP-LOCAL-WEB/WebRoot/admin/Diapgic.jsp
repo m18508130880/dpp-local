@@ -84,7 +84,7 @@ $(function () {
  			 Iterator iter = MoreDev_GJ.iterator();
 			 while(iter.hasNext())
 			  {
-						DevGJBean jBean = (DevGJBean)iter.next();
+						DevQLBean jBean = (DevQLBean)iter.next();
 						
 						data1 += jBean.getTop_Height()+",";		
 						

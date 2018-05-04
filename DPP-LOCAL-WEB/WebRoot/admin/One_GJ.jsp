@@ -29,12 +29,12 @@
 	<table width="100%" border=1 cellPadding=0 cellSpacing=0 bordercolor="#3491D6" borderColorDark="#ffffff">					
 		<%
 								if(null != Dev_GJ)
-															{
-																Iterator deviter = Dev_GJ.iterator();
-																while(deviter.hasNext())
-																{
-																	DevGJBean dBean = (DevGJBean)deviter.next();
-																	pId = dBean.getId();
+																				{
+																					Iterator deviter = Dev_GJ.iterator();
+																					while(deviter.hasNext())
+																					{
+																						DevQLBean dBean = (DevQLBean)deviter.next();
+																						pId = dBean.getId();
 							%>   		    	
 					 <tr height='20'>
 							<td width="35px" align='center' >БрТы</td>

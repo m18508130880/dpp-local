@@ -125,7 +125,7 @@ if(<%=currStatus.getResult().length()%> > 0)
 			Iterator deviter = Map_GJ.iterator();
 			while(deviter.hasNext())
 			{
-				 DevGJJsonBean devBean  = (DevGJJsonBean)deviter.next();
+				 DevQLBean devBean  = (DevQLBean)deviter.next();
 				 Project_Id  = devBean.getProject_Id();
 				 Id          = devBean.getId();   + Equipment_Info_Edit.CName.value
   	         + "&GJ_Id=" + Equipment_Info_Edit.GJ_Select.value

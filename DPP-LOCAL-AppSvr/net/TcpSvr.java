@@ -6,11 +6,10 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.*;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Vector;
 
@@ -18,10 +17,11 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-import bean.BaseCmdBean;
+import util.CmdUtil;
+import util.Cmd_Sta;
+import util.CommUtil;
+import util.DBUtil;
 import container.ClientContainer;
-import container.ClientInfo;
-import util.*;
 
 public class TcpSvr extends Thread
 {
@@ -267,18 +267,21 @@ public class TcpSvr extends Thread
 	public void ClientStatusNotify(String strClientKey, int iStatus)
 	{
 		String sql = "";
+		String onoff = "";
 		switch(iStatus)
 		{
 			case STATUS_CLIENT_ONLINE:
 			{
 				//CPM网关恢复在线
 				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢复在线')";
+				onoff = "1";
 				break;
 			}
 			case STATUS_CLIENT_OFFLINE:
 			{
 				//CPM网关离线
-				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢离线')";
+				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关离线')";
+				onoff = "0";
 				break;
 			}
 		}
@@ -286,6 +289,9 @@ public class TcpSvr extends Thread
 		{
 			m_DbUtil.doUpdate(sql);
 		}
+		// 修改在线情况
+		sql = "update device_detail set onoff = '" + onoff + "' where id = '" + strClientKey + "'";
+		m_DbUtil.doUpdate(sql);
 	}
 	
 	//如果收到关闭指令，就关闭SOCKET和释放资源

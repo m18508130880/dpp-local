@@ -56,7 +56,9 @@ public class DevHandBean extends RmiBean
 				
 				break;
 			case 1:// 单个查询
-				
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+				request.getSession().setAttribute("User_DevHand_Info_" + Sid, (DevHandBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+				currStatus.setJsp("User_DevHand_Info.jsp?Sid=" + Sid);
 				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
@@ -83,30 +85,34 @@ public class DevHandBean extends RmiBean
 				Id = hlBean.getId();
 				Longitude = hlBean.getLongitude();
 				Latitude = hlBean.getLatitude();
+				Equip_Id = hlBean.getEquip_Id();
 				Value = hlBean.getValue();
+				CTime = hlBean.getCTime();
 				Des = hlBean.getDes();
-				Resp += Id + "|" + Longitude + "|" + Longitude + "|" + Value + ";";
+				Resp += Id + "|" + Longitude + "|" + Latitude + "|" + Equip_Id + "|" + Value + "|" + CTime + "|" + Des + ";";
 			}
+		}
+		//System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	public void updateData(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		CTime = CommUtil.getDateTime();
+		msgBean = pRmi.RmiExec(13, this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			msgBean = pRmi.RmiExec(11, this, 0, 25);
+			Resp = "0000";
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		outprint.write(Resp);
 	}
-//	public void updateHLData(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
-//	{
-//		getHtmlData(request);
-//		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
-//		currStatus.getHtmlData(request, pFromZone);
-//		PrintWriter outprint = response.getWriter();
-//		String Resp = "9999";
-//		
-//		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
-//		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
-//		{
-//			Resp = "0000";
-//		}
-//		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
-//		outprint.write(Resp);
-//	}
 
 	/**
 	 * 获取相应sql语句
@@ -118,16 +124,17 @@ public class DevHandBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0:// 查询全部
-				Sql = " select t.id,t.project_id, t.Longitude, t.Latitude, t.Equip_Id, t.Value, t.CTime, t.des" +
+				Sql = " select t.id,t.project_id, t.Longitude, t.Latitude, t.Equip_Id, t.Equip_Id, t.Value, t.CTime, t.des" +
 					  " from view_dev_hand t " + 
 					  " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
 					  " order by t.id  ";
 				break;
 			case 1:// 查询单个
-				Sql = " select t.id,t.project_id, t.Longitude, t.Latitude, t.Equip_Id, t.Value, t.CTime, t.des" +
+				Sql = " select t.id,t.project_id, t.Longitude, t.Latitude, t.Equip_Id, t.Equip_Id, t.Value, t.CTime, t.des" +
 					  " from view_dev_hand t " +
 					  " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
 					  " and t.id = '" + Id + "'" +
+					  " and t.equip_id = '" + Equip_Id + "'" +
 					  " order by t.id  ";
 				break;
 			case 10:// 添加
@@ -136,10 +143,9 @@ public class DevHandBean extends RmiBean
 				break;
 			case 11:// 编辑 alert_hand 表
 				Sql = " update alert_hand t set " +
-					  " t.status = '1', "+ 
-					  " t.ctime = '" + CTime + "', "+ 
+					  " t.status = '1' "+ 
 					  " where t.id = '" + Id + "' " + 
-					  " and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+					  " and t.project_id = '" + Project_Id + "'" +
 					  " and t.equip_id = '" + Equip_Id + "'";
 				break;
 			case 12:// 删除
@@ -168,9 +174,10 @@ public class DevHandBean extends RmiBean
 			setLongitude(pRs.getString(3));
 			setLatitude(pRs.getString(4));
 			setEquip_Id(pRs.getString(5));
-			setValue(pRs.getString(6));
-			setCTime(pRs.getString(7));
-			setDes(pRs.getString(8));
+			setEquip_Name(pRs.getString(6));
+			setValue(pRs.getString(7));
+			setCTime(pRs.getString(8));
+			setDes(pRs.getString(9));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -197,6 +204,7 @@ public class DevHandBean extends RmiBean
 			setLongitude(CommUtil.StrToGB2312(request.getParameter("Longitude")));
 			setLatitude(CommUtil.StrToGB2312(request.getParameter("Latitude")));
 			setEquip_Id(CommUtil.StrToGB2312(request.getParameter("Equip_Id")));
+			setEquip_Name(CommUtil.StrToGB2312(request.getParameter("Equip_Name")));
 			setValue(CommUtil.StrToGB2312(request.getParameter("Value")));
 			setCTime(CommUtil.StrToGB2312(request.getParameter("CTime")));
 			setDes(CommUtil.StrToGB2312(request.getParameter("Des")));
@@ -216,6 +224,7 @@ public class DevHandBean extends RmiBean
 	private String	Longitude;
 	private String	Latitude;
 	private String	Equip_Id;
+	private String	Equip_Name;
 	private String	Value;
 	private String	CTime;
 	private String	Des;
@@ -266,6 +275,14 @@ public class DevHandBean extends RmiBean
 
 	public void setEquip_Id(String equip_Id) {
 		Equip_Id = equip_Id;
+	}
+
+	public String getEquip_Name() {
+		return Equip_Name;
+	}
+
+	public void setEquip_Name(String equip_Name) {
+		Equip_Name = equip_Name;
 	}
 
 	public String getValue() {

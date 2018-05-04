@@ -18,13 +18,16 @@ import bean.AnalogBean;
 import bean.CorpInfoBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
+import bean.DataHandBean;
 import bean.DevBZBean;
 import bean.DevGJBean;
 import bean.DevGXBean;
+import bean.DevHandBean;
 import bean.DevMapBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
+import bean.ThreeGJBean;
 import bean.UserInfoBean;
 import bean.UserRoleBean;
 
@@ -322,8 +325,22 @@ public class MainServlet extends HttpServlet
         	new DevGXBean().InTotal(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("User_InTotal_GX.do"))			         		//管线统计_详细
         	new DevGXBean().InTotal_GX(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("bd09ToGcj02.do"))			         		//百度坐标系转腾讯
+        else if (strUrl.equalsIgnoreCase("bd09ToGcj02.do"))			         			//百度坐标系转腾讯
             	new DevGJBean().bd09ToGcj02(request, response, m_Rmi, false);
+        
+        /************************************user-统计*****************************************************/
+        else if (strUrl.equalsIgnoreCase("Admin_ToPo_YH.do"))			         		//运河点位获取
+        	new DevHandBean().getHand(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Dev_YH.do"))			         		//单个获取
+        	new DevHandBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Update_YH.do"))			         		//更新数据
+        	new DevHandBean().updateData(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("User_DevHand_Curve.do"))			         		//更新历史数据
+        	new DataHandBean().GraphData(request, response, m_Rmi, false);
+
+        /************************************user-三维图*****************************************************/
+        else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//更新历史数据
+        	new ThreeGJBean().getThreeOneGJ(request, response, m_Rmi, false);
     }
     
     private class Connect extends Thread

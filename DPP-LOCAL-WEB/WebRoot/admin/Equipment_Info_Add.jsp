@@ -105,9 +105,9 @@ function doCheck(Id)
 			Iterator deviter = Select_GJ.iterator();
 			while(deviter.hasNext())
 			{
-				DevGJ3Bean devBean  = (DevGJ3Bean)deviter.next();
+				DevQLBean devBean  = (DevQLBean)deviter.next();
 				String Project_Id  = devBean.getProject_Id();
-				String Id          = devBean.getId();dow.XMLHttpRequest)
+				String Id          = devBean.getId();LHttpRequest)
   {
 			req = new XMLHttpRequest();
   }

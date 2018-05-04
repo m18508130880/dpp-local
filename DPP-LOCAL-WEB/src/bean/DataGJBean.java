@@ -88,7 +88,7 @@ public class DataGJBean extends RmiBean
 					Month = "12";
 					Week = "5";
 				}
-				System.out.println("111111["+Integer.parseInt(CommUtil.getWeekDayString(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01")));
+				//System.out.println("111111["+Integer.parseInt(CommUtil.getWeekDayString(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01")));
 				switch (Integer.parseInt(CommUtil.getWeekDayString(Year + "-" + CommUtil.StrLeftFillZero(Month, 2) + "-01")))
 				{
 					case 5:// 星期天 星期五

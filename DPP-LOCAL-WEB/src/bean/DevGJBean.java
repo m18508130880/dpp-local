@@ -51,6 +51,12 @@ public class DevGJBean extends RmiBean
 	{
 		super.className = "DevGJBean";
 	}
+	
+	public DevGJBean(CurrStatus currStatus)
+	{
+		super.className = "DevGJBean";
+		this.currStatus = currStatus;
+	}
 
 	/**
 	 * @param request
@@ -1080,6 +1086,7 @@ public class DevGJBean extends RmiBean
 
 	}
 
+	
 	/**
 	 * 获取相应sql语句
 	 * 
@@ -1093,7 +1100,7 @@ public class DevGJBean extends RmiBean
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
 				break;
 			case 1:// 查询（全部）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " order by t.id  ";
+				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + Project_Id + "' "  + " order by t.id  ";
 				break;
 			case 2:// 查询（类型&项目）
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";

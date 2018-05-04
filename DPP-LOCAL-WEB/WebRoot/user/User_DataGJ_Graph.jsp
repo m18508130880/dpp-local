@@ -29,7 +29,7 @@
   
   if(One_GJ != null){
   	Iterator iterator = One_GJ.iterator();
-		DevGJBean devGJBean = (DevGJBean)iterator.next();
+		DevQLBean devGJBean = (DevQLBean)iterator.next();
 		GJ_Id = devGJBean.getId();
 	  WaterLev = devGJBean.getWaterLev();
 		Material = devGJBean.getMaterial();

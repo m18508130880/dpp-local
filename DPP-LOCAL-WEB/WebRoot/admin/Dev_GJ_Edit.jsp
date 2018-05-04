@@ -29,7 +29,7 @@
 		Iterator iterator = Dev_GJ.iterator();
 		while(iterator.hasNext())
 		{
-	DevGJBean devGJBean = (DevGJBean)iterator.next();
+	DevQLBean devGJBean = (DevQLBean)iterator.next();
 	if(devGJBean.getId().equals(Id))
 	{
 		 In_Id = devGJBean.getIn_Id();

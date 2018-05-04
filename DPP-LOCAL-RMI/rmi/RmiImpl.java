@@ -20,6 +20,7 @@ import bean.CorpInfoBean;
 import bean.DataBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
+import bean.DataHandBean;
 import bean.DataNowBean;
 import bean.DevBZBean;
 import bean.DevGJBean;
@@ -29,6 +30,8 @@ import bean.DevMapBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
+import bean.ThreeGJBean;
+import bean.ThreeGXBean;
 import bean.UserInfoBean;
 import bean.UserRoleBean;
 
@@ -242,6 +245,15 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_DEVHAND:
 						rmiBean = new DevHandBean();
+						break;
+					case RmiBean.RMI_DATAHAND:
+						rmiBean = new DataHandBean();
+						break;
+					case RmiBean.RMI_THREE_GJ:
+						rmiBean = new ThreeGJBean();
+						break;
+					case RmiBean.RMI_THREE_GX:
+						rmiBean = new ThreeGXBean();
 						break;
 						
 				}

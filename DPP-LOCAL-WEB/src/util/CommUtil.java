@@ -367,6 +367,11 @@ public class CommUtil
 		SimpleDateFormat SimFormat = new SimpleDateFormat("yyyyMMddHHmmss");  
 		return SimFormat.format(new Date());
 	}
+	public static String getDateTime()
+	{
+		SimpleDateFormat SimFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");  
+		return SimFormat.format(new Date());
+	}
 	
 	//zzk
 	public static Date getDate(String pTime)
