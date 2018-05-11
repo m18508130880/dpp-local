@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import rmi.Rmi;
 import rmi.RmiBean;
-import util.*;
+import util.CommUtil;
+import util.CurrStatus;
+import util.MsgBean;
 
 public class EquipInfoBean extends RmiBean 
 {
@@ -154,7 +156,7 @@ public class EquipInfoBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://查询                
-				Sql = " select  t.tid, t.pid, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
+				Sql = " select  t.tid, t.pid, t.onoff, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
 					  " from view_equip_info t order by t.ctime";
 				break;
 			case 1://查询device_deatail                
@@ -162,11 +164,11 @@ public class EquipInfoBean extends RmiBean
 					  " from device_detail t order by t.tid";
 				break;
 			case 3://User设备查询                
-				Sql = " select  t.tid, t.pid, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
+				Sql = " select  t.tid, t.pid, t.onoff, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
 					  " from view_equip_info t where t.project_Id='" + currStatus.getFunc_Project_Id() + "'  order by t.ctime";
 				break;	
 			case 2://设备ID检测
-				Sql = " select  t.tid, t.pid, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
+				Sql = " select  t.tid, t.pid, t.onoff, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
 					  " from view_equip_info t " +
 					  " where upper(TId) = upper('"+ TId +"') ";
 				break;
@@ -184,13 +186,14 @@ public class EquipInfoBean extends RmiBean
 		{
 			setTId(pRs.getString(1));
 			setPId(pRs.getString(2));
-			setCName(pRs.getString(3));
-			setTel(pRs.getString(4));
-			setProject_Id(pRs.getString(5));
-			setProject_Name(pRs.getString(6));
-			setG_Id(pRs.getString(7));
-			setCTime(pRs.getString(8));
-			setValue(pRs.getString(9));
+			setOnoff(pRs.getString(3));
+			setCName(pRs.getString(4));
+			setTel(pRs.getString(5));
+			setProject_Id(pRs.getString(6));
+			setProject_Name(pRs.getString(7));
+			setG_Id(pRs.getString(8));
+			setCTime(pRs.getString(9));
+			setValue(pRs.getString(10));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -206,6 +209,7 @@ public class EquipInfoBean extends RmiBean
 		{
 			setTId(CommUtil.StrToGB2312(request.getParameter("TId")));
 			setPId(CommUtil.StrToGB2312(request.getParameter("PId")));
+			setOnoff(CommUtil.StrToGB2312(request.getParameter("Onoff")));
 			setCName(CommUtil.StrToGB2312(request.getParameter("CName")));
 			setTel(CommUtil.StrToGB2312(request.getParameter("Tel")));
 			setProject_Id(CommUtil.StrToGB2312(request.getParameter("Project_Id")));
@@ -228,6 +232,7 @@ public class EquipInfoBean extends RmiBean
 	
 	private String TId;
 	private String PId;
+	private String Onoff;
 	private String CName;
 	private String Tel;
 	private String Project_Id;
@@ -250,6 +255,14 @@ public class EquipInfoBean extends RmiBean
 	public void setPId(String pId)
 	{
 		PId = pId;
+	}
+
+	public String getOnoff() {
+		return Onoff;
+	}
+
+	public void setOnoff(String onoff) {
+		Onoff = onoff;
 	}
 
 	public String getTel()

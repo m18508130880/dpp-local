@@ -147,6 +147,8 @@ public class ThreeGJBean extends RmiBean
 		model.setRotationX_W("0");
 		model.setRotationY_W(String.valueOf(Math.PI/2));
 		model.setRotationZ_W("0");
+		String des = "顶高/底高|" + cenGJ.getTop_Height() + "/" + cenGJ.getBase_Height() + ";尺寸|" + cenGJ.getSize() + ";道路|" + cenGJ.getRoad() + ";进口管线|" + cenGJ.getIn_Id() + ";出口管线|" + cenGJ.getOut_Id();
+		model.setDes(des);
 		return model;
 	}
 	
@@ -222,6 +224,9 @@ public class ThreeGJBean extends RmiBean
 		model.setRotationX_W(String.valueOf("0")); // 绕Z轴
 		model.setRotationY_W(String.valueOf(Math.PI/2 - rZ)); // 绕Y轴
 		model.setRotationZ_W(String.valueOf("0")); // 绕X轴
+		double pd = (Double.valueOf(gx.getEnd_Height()) - Double.valueOf(gx.getStart_Height())) / Double.valueOf(gx.getLength());
+		String des = "长度|" + gx.getLength() + ";直径|" + gx.getDiameter() + ";坡度|" + String.format("%.4f", pd) + ";道路|" + gx.getRoad() + ";起端管井|" + gx.getStart_Id() + ";终端管井|" + gx.getEnd_Id();
+		model.setDes(des);
 		return model;
 	}
 	/**

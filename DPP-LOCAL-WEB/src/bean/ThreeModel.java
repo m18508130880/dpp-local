@@ -4,6 +4,7 @@ public class ThreeModel {
 
 	private String	id;
 	private String	type;
+	private String	des;
 	private String	color;
 
 	private String	positionX;
@@ -52,6 +53,12 @@ public class ThreeModel {
 	}
 	public void setType(String type) {
 		this.type = type;
+	}
+	public String getDes() {
+		return des;
+	}
+	public void setDes(String des) {
+		this.des = des;
 	}
 	public String getColor() {
 		return color;

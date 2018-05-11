@@ -9163,7 +9163,7 @@ public class AnalogBean
 		int option = 0;
 		do
 		{
-			if (nextGJ.getFlag().equals("2"))
+			if (nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6"))
 			{
 				option = 1;
 			}
