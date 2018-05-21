@@ -17,7 +17,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import jxl.Sheet;
 import jxl.Workbook;
 import jxl.format.Alignment;
 import jxl.format.Border;
@@ -29,6 +28,13 @@ import jxl.write.WritableCellFormat;
 import jxl.write.WritableFont;
 import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
+
+import org.apache.poi.hssf.usermodel.HSSFCell;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+
 import rmi.Rmi;
 import rmi.RmiBean;
 import util.CommUtil;
@@ -458,7 +464,7 @@ public class DevGJBean extends RmiBean
 				Project_Id = devGJBean.getProject_Id();
 				Longitude = devGJBean.getLongitude();
 				Latitude = devGJBean.getLatitude();
-				coord = CoordConv.BD_09ToGCJ_02(Longitude, Latitude, CoordConv.bd09ll, CoordConv.gcj02);
+				coord = CoordConv.convLngAndLat(Longitude, Latitude, CoordConv.bd09ll, CoordConv.gcj02);
 				WX_Lng = coord[0];
 				WX_Lat = coord[1];
 				msgBean = pRmi.RmiExec(51, this, 0, 25);
@@ -470,7 +476,7 @@ public class DevGJBean extends RmiBean
 			}
 			Resp += "成功转换[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
 			ProjectInfoBean projectInfoBean = new ProjectInfoBean();
-			coord = CoordConv.BD_09ToGCJ_02(Lng, Lat, CoordConv.bd09ll, CoordConv.gcj02);
+			coord = CoordConv.convLngAndLat(Lng, Lat, CoordConv.bd09ll, CoordConv.gcj02);
 			projectInfoBean.setId(currStatus.getFunc_Project_Id());
 			projectInfoBean.setWX_Lng(coord[0]);
 			projectInfoBean.setWX_Lat(coord[1]);			
@@ -541,70 +547,84 @@ public class DevGJBean extends RmiBean
 						myFile.saveAs(FileSaveRoute + File_Name);
 						// 录入数据库
 						InputStream is = new FileInputStream(FileSaveRoute + File_Name);
-						Workbook rwb = Workbook.getWorkbook(is);
-						Sheet rs = rwb.getSheet(0);
-						int rsRows = rs.getRows(); // excel表格行的数量：依据是否有边框。
+						HSSFWorkbook wb = new HSSFWorkbook(is);
+						HSSFSheet sheet = wb.getSheetAt(0);
+						HSSFRow row;
 						int succCnt = 0;
-						int tmpCnt = 0;
-	
-						// 数据起始行
-						int rowStart = 1;
-						// 循环开始
-						for (int i = rowStart; i < rsRows; i++)
-						{
-							String id = rs.getCell(1, i).getContents().trim();
-							if (8 > id.length()) continue;
-	
-							tmpCnt++;
-							String top_Height = rs.getCell(4, i).getContents().trim();
-							String base_Height = rs.getCell(5, i).getContents().trim();
-							String size = rs.getCell(6, i).getContents().trim();
-							String in_Id = "";
-							for (int j = 7; j < 11; j++)
-							{
-								if (rs.getCell(j, i).getContents().trim().length() > 7) // 编码长度为8
+						int rowCount = 0;
+						for(int i = 1; rowCount < sheet.getPhysicalNumberOfRows() ; i++ ){
+							row = sheet.getRow(i);
+							if(row == null){
+								// 当读取行为空时
+								if(i >= sheet.getPhysicalNumberOfRows()){//判断是否是最后一行  
+									break;
+								}
+								continue;
+							}else{
+								String id = getString(row.getCell(1));
+								String wgs84_Lng = getString(row.getCell(2));
+								String wgs84_Lat = getString(row.getCell(3));
+
+								String top_Height = getString(row.getCell(4));
+								String base_Height = getString(row.getCell(5));
+								String size = getString(row.getCell(6));
+								String in_Id = "";
+								for (int j = 7; j < 11; j++)
 								{
-									in_Id += rs.getCell(j, i).getContents().trim() + ",";
+									if (row.getCell(j) != null && getString(row.getCell(j)).length() > 7) // 编码长度为8
+									{
+										in_Id += getString(row.getCell(j)) + ",";
+									}
+								}
+								String out_Id = getString(row.getCell(11));
+								String material = getString(row.getCell(12));
+								String flag = "1";
+								if (in_Id.substring(5).contains("000"))
+								{
+									flag = "0";
+								}
+								else if (out_Id.substring(5).contains("999"))
+								{
+									flag = "2";
+								}
+								else
+								{
+									flag = "1";
+								}
+								String data_Lev = getString(row.getCell(13));
+								String road = getString(row.getCell(14));
+
+								// wgs84坐标转百度坐标
+								String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
+								String longitude = lngAndLat[0];
+								String latitude = lngAndLat[1];
+
+								this.setId(id.toUpperCase());
+								this.setWgs84_Lng(wgs84_Lng);
+								this.setWgs84_Lat(wgs84_Lat);
+								this.setLongitude(longitude);
+								this.setLatitude(latitude);
+								this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
+								this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
+								this.setSize(size);
+								this.setIn_Id(in_Id.toUpperCase());
+								this.setOut_Id(out_Id.toUpperCase());
+								this.setMaterial(material);
+								this.setFlag(flag);
+								this.setData_Lev(data_Lev);
+								this.setProject_Id(Project_Id);
+								this.setRoad(road);
+
+								// 插入提交
+								msgBean = pRmi.RmiExec(10, this, 0, 25);
+								if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+								{
+									succCnt++;
 								}
 							}
-							String out_Id = rs.getCell(11, i).getContents().trim();
-							String material = rs.getCell(12, i).getContents().trim();
-							String flag = "1";
-							if (in_Id.substring(5).contains("000"))
-							{
-								flag = "0";
-							}
-							else if (out_Id.contains("999"))
-							{
-								flag = "2";
-							}
-							else
-							{
-								flag = "1";
-							}
-							String data_Lev = rs.getCell(13, i).getContents().trim();
-							String road = rs.getCell(14, i).getContents().trim();
-	
-							this.setId(id.toUpperCase());
-							this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
-							this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
-							this.setSize(!CommUtil.isNumeric(size) ? "0" : size);
-							this.setIn_Id(in_Id.toUpperCase());
-							this.setOut_Id(out_Id.toUpperCase());
-							this.setMaterial(material);
-							this.setFlag(flag);
-							this.setData_Lev(data_Lev);
-							this.setProject_Id(Project_Id);
-							this.setRoad(road);
-	
-							// 插入提交
-							msgBean = pRmi.RmiExec(10, this, 0, 25);
-							if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
-							{
-								succCnt++;
-							}
+							wb.close();
 						}
-						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
+						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(rowCount) + "]个\\n";
 					}
 					else
 					{
@@ -638,6 +658,138 @@ public class DevGJBean extends RmiBean
 	 * @param pConfig
 	 * 
 	 */
+//	public void UpdateExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig)
+//	{
+//		try
+//		{
+//			SmartUpload mySmartUpload = new SmartUpload();
+//			mySmartUpload.initialize(pConfig, request, response);
+//			mySmartUpload.setAllowedFilesList("xls,xlsx,XLS,XLSX,");
+//			mySmartUpload.upload();
+//
+//			Sid = mySmartUpload.getRequest().getParameter("Sid");
+//			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+//			currStatus.getHtmlData(request, pFromZone);
+//			Project_Id = mySmartUpload.getRequest().getParameter("Project_Id");
+//			String Timeout = mySmartUpload.getRequest().getParameter("Timeout");
+//
+//			if (mySmartUpload.getFiles().getCount() > 0 && mySmartUpload.getFiles().getCount() <=5)
+//			{
+//				String Resp = "";
+//				for(int n = 0; n < mySmartUpload.getFiles().getCount(); n ++)
+//				{
+//					String fileName = mySmartUpload.getFiles().getFile(n).getFilePathName().trim();
+//					if (mySmartUpload.getFiles().getFile(n).getSize() / 1024 <= 3072)// 最大3M
+//					{
+//						String FileSaveRoute = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/upfiles/";
+//						// 上传现有文档
+//						com.jspsmart.upload.File myFile = mySmartUpload.getFiles().getFile(n);
+//						String File_Name = new SimpleDateFormat("yyyyMMdd").format(new Date()) + CommUtil.Randon() + "." + myFile.getFileExt();
+//						myFile.saveAs(FileSaveRoute + File_Name);
+//						// 录入数据库
+//						InputStream is = new FileInputStream(FileSaveRoute + File_Name);
+//						Workbook rwb = Workbook.getWorkbook(is);
+//						Sheet rs = rwb.getSheet(0);
+//						int rsRows = rs.getRows(); // excel表格行的数量：依据是否有边框。
+//						int succCnt = 0;
+//						int tmpCnt = 0;
+//						// 数据起始行
+//						int rowStart = 1;
+//						// 循环开始
+//						for (int i = rowStart; i < rsRows; i++)
+//						{
+//							String id = rs.getCell(1, i).getContents().trim();
+//							if (8 > id.length()) continue;
+//	
+//							tmpCnt++;
+//							String wgs84_Lng = rs.getCell(2, i).getContents().trim();
+//							String wgs84_Lat = rs.getCell(3, i).getContents().trim();
+//							System.out.println("x["+wgs84_Lng+"]");
+//							System.out.println("y["+wgs84_Lat+"]");
+//							
+//							String top_Height = rs.getCell(4, i).getContents().trim();
+//							String base_Height = rs.getCell(5, i).getContents().trim();
+//							String size = rs.getCell(6, i).getContents().trim();
+//							String in_Id = "";
+//							for (int j = 7; j < 11; j++)
+//							{
+//								if (rs.getCell(j, i).getContents().trim().length() > 7) // 编码长度为8
+//								{
+//									in_Id += rs.getCell(j, i).getContents().trim() + ",";
+//								}
+//							}
+//							String out_Id = rs.getCell(11, i).getContents().trim();
+//							String material = rs.getCell(12, i).getContents().trim();
+//							String flag = "1";
+//							if (in_Id.substring(5).contains("000"))
+//							{
+//								flag = "0";
+//							}
+//							else if (out_Id.substring(5).contains("999"))
+//							{
+//								flag = "2";
+//							}
+//							else
+//							{
+//								flag = "1";
+//							}
+//							String data_Lev = rs.getCell(13, i).getContents().trim();
+//							String road = rs.getCell(14, i).getContents().trim();
+//	
+//							// wgs84坐标转百度坐标
+//							String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
+//							String longitude = lngAndLat[0];
+//							String latitude = lngAndLat[1];
+//	
+//							this.setId(id.toUpperCase());
+//							this.setWgs84_Lng(wgs84_Lng);
+//							this.setWgs84_Lat(wgs84_Lat);
+//							this.setLongitude(longitude);
+//							this.setLatitude(latitude);
+//							this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
+//							this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
+//							this.setSize(size);
+//							this.setIn_Id(in_Id.toUpperCase());
+//							this.setOut_Id(out_Id.toUpperCase());
+//							this.setMaterial(material);
+//							this.setFlag(flag);
+//							this.setData_Lev(data_Lev);
+//							this.setProject_Id(Project_Id);
+//							this.setRoad(road);
+//	
+//							// 插入提交
+//							msgBean = pRmi.RmiExec(13, this, 0, 25);
+//							if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+//							{
+//								succCnt++;
+//							}
+//						}
+//						rwb.close();
+//						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
+//					}
+//					else
+//					{
+//						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!\\n";
+//					}
+//				}
+//				currStatus.setResult(Resp);
+//				pRmi.Client(2001,"0000000001","");
+//			}
+//			else
+//			{
+//				currStatus.setResult("上传失败！每次上传最多5个文件!");
+//			}
+//
+//			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id + "&Timeout=" + Timeout);
+//			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+//			response.sendRedirect(currStatus.getJsp());
+//		}
+//		catch (Exception exp)
+//		{
+//			exp.printStackTrace();
+//		}
+//	}
+
 	public void UpdateExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig)
 	{
 		try
@@ -668,70 +820,85 @@ public class DevGJBean extends RmiBean
 						myFile.saveAs(FileSaveRoute + File_Name);
 						// 录入数据库
 						InputStream is = new FileInputStream(FileSaveRoute + File_Name);
-						Workbook rwb = Workbook.getWorkbook(is);
-						Sheet rs = rwb.getSheet(0);
-						int rsRows = rs.getRows(); // excel表格行的数量：依据是否有边框。
-						int succCnt = 0;
-						int tmpCnt = 0;
-	
-						// 数据起始行
-						int rowStart = 1;
-						// 循环开始
-						for (int i = rowStart; i < rsRows; i++)
-						{
-							String id = rs.getCell(1, i).getContents().trim();
-							if (8 > id.length()) continue;
-	
-							tmpCnt++;
-							String top_Height = rs.getCell(4, i).getContents().trim();
-							String base_Height = rs.getCell(5, i).getContents().trim();
-							String size = rs.getCell(6, i).getContents().trim();
-							String in_Id = "";
-							for (int j = 7; j < 11; j++)
-							{
-								if (rs.getCell(j, i).getContents().trim().length() > 7) // 编码长度为8
+						HSSFWorkbook wb = new HSSFWorkbook(is);
+						HSSFSheet sheet = wb.getSheetAt(0);
+			            HSSFRow row;
+			            int succCnt = 0;
+			            int rowCount = 0;
+			            for(int i = 1; rowCount < sheet.getPhysicalNumberOfRows() ; i++ ){
+			                row = sheet.getRow(i);
+			                if(row == null){
+			                    // 当读取行为空时
+			                    if(i >= sheet.getPhysicalNumberOfRows()){//判断是否是最后一行  
+			                    	break;
+			                    }
+			                    continue;
+			                }else{
+			                	String id = getString(row.getCell(1));
+			                	String wgs84_Lng = getString(row.getCell(2));
+								String wgs84_Lat = getString(row.getCell(3));
+								
+								String top_Height = getString(row.getCell(4));
+								String base_Height = getString(row.getCell(5));
+								String size = getString(row.getCell(6));
+								String in_Id = "";
+								for (int j = 7; j < 11; j++)
 								{
-									in_Id += rs.getCell(j, i).getContents().trim() + ",";
+									if (row.getCell(j) != null && getString(row.getCell(j)).length() > 7) // 编码长度为8
+									{
+										in_Id += getString(row.getCell(j)) + ",";
+									}
 								}
-							}
-							String out_Id = rs.getCell(11, i).getContents().trim();
-							String material = rs.getCell(12, i).getContents().trim();
-							String flag = "1";
-							if (in_Id.substring(5).contains("000"))
-							{
-								flag = "0";
-							}
-							else if (out_Id.substring(5).contains("999"))
-							{
-								flag = "2";
-							}
-							else
-							{
-								flag = "1";
-							}
-							String data_Lev = rs.getCell(13, i).getContents().trim();
-							String road = rs.getCell(14, i).getContents().trim();
-	
-							this.setId(id.toUpperCase());
-							this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
-							this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
-							this.setSize(size);
-							this.setIn_Id(in_Id.toUpperCase());
-							this.setOut_Id(out_Id.toUpperCase());
-							this.setMaterial(material);
-							this.setFlag(flag);
-							this.setData_Lev(data_Lev);
-							this.setProject_Id(Project_Id);
-							this.setRoad(road);
-	
-							// 插入提交
-							msgBean = pRmi.RmiExec(13, this, 0, 25);
-							if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
-							{
-								succCnt++;
-							}
-						}
-						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
+								String out_Id = getString(row.getCell(11));
+								String material = getString(row.getCell(12));
+								String flag = "1";
+								if (in_Id.substring(5).contains("000"))
+								{
+									flag = "0";
+								}
+								else if (out_Id.substring(5).contains("999"))
+								{
+									flag = "2";
+								}
+								else
+								{
+									flag = "1";
+								}
+								String data_Lev = getString(row.getCell(13));
+								String road = getString(row.getCell(14));
+
+								// wgs84坐标转百度坐标
+								String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
+								String longitude = lngAndLat[0];
+								String latitude = lngAndLat[1];
+
+								this.setId(id.toUpperCase());
+								this.setWgs84_Lng(wgs84_Lng);
+								this.setWgs84_Lat(wgs84_Lat);
+								this.setLongitude(longitude);
+								this.setLatitude(latitude);
+								this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
+								this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
+								this.setSize(size);
+								this.setIn_Id(in_Id.toUpperCase());
+								this.setOut_Id(out_Id.toUpperCase());
+								this.setMaterial(material);
+								this.setFlag(flag);
+								this.setData_Lev(data_Lev);
+								this.setProject_Id(Project_Id);
+								this.setRoad(road);
+		
+								// 插入提交
+								msgBean = pRmi.RmiExec(13, this, 0, 25);
+								if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+								{
+									succCnt++;
+								}
+			                    rowCount++;  
+			                }
+			            }
+						wb.close();
+						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(rowCount) + "]个\\n";
 					}
 					else
 					{
@@ -739,7 +906,7 @@ public class DevGJBean extends RmiBean
 					}
 				}
 				currStatus.setResult(Resp);
-				pRmi.Client(2001,"0000000001","");
+				//pRmi.Client(2001,"0000000001","");
 			}
 			else
 			{
@@ -755,7 +922,6 @@ public class DevGJBean extends RmiBean
 			exp.printStackTrace();
 		}
 	}
-
 	/**
 	 * 窨井图片上传
 	 * @param request
@@ -1086,7 +1252,28 @@ public class DevGJBean extends RmiBean
 
 	}
 
-	
+	public static String getString(HSSFCell cell){
+		String str = "";
+		if(cell != null){
+			switch(cell.getCellType()){  
+			case XSSFCell.CELL_TYPE_STRING:      
+				str = cell.getStringCellValue().trim();    
+				break;    
+			case XSSFCell.CELL_TYPE_NUMERIC:    
+				str = String.valueOf(cell.getNumericCellValue()).trim();  
+				break;    
+			case XSSFCell.CELL_TYPE_BOOLEAN:     
+				str = String.valueOf(cell.getBooleanCellValue()).trim();  
+				break;    
+			case XSSFCell.CELL_TYPE_BLANK:     
+				str = "";    
+				break;
+			default:
+				str = cell.toString().trim();    
+			}
+		}
+		return str;
+	}
 	/**
 	 * 获取相应sql语句
 	 * 
@@ -1120,7 +1307,7 @@ public class DevGJBean extends RmiBean
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
-				Sql = "insert into dev_gj(id, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road) " + "values('" + Id + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "')";
+				Sql = "insert into dev_gj(id, wgs85_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', '1')";
 				break;
 			case 11:// 编辑
 				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
@@ -1133,7 +1320,7 @@ public class DevGJBean extends RmiBean
 				break;
 
 			case 13:// 管井更新
-				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 
 			case 14:// 窨井内图更新
@@ -1225,6 +1412,8 @@ public class DevGJBean extends RmiBean
 		{
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 			setId(CommUtil.StrToGB2312(request.getParameter("Id")));
+			setWgs84_Lng(CommUtil.StrToGB2312(request.getParameter("Wgs84_Lng")));
+			setWgs84_Lat(CommUtil.StrToGB2312(request.getParameter("Wgs84_Lat")));
 			setLongitude(CommUtil.StrToGB2312(request.getParameter("Longitude")));
 			setLatitude(CommUtil.StrToGB2312(request.getParameter("Latitude")));
 			setTop_Height(CommUtil.StrToGB2312(request.getParameter("Top_Height")));
@@ -1257,6 +1446,10 @@ public class DevGJBean extends RmiBean
 	}
 
 	private String	Id;
+	
+	private String Wgs84_Lng;
+	private String Wgs84_Lat;
+	
 	private String	Longitude;
 	private String	Latitude;
 	private String	Top_Height;
@@ -1298,6 +1491,22 @@ public class DevGJBean extends RmiBean
 
 	public void setWX_Lat(String wX_Lat) {
 		WX_Lat = wX_Lat;
+	}
+
+	public String getWgs84_Lng() {
+		return Wgs84_Lng;
+	}
+
+	public void setWgs84_Lng(String wgs84_Lng) {
+		Wgs84_Lng = wgs84_Lng;
+	}
+
+	public String getWgs84_Lat() {
+		return Wgs84_Lat;
+	}
+
+	public void setWgs84_Lat(String wgs84_Lat) {
+		Wgs84_Lat = wgs84_Lat;
 	}
 
 	public String getpSimu()

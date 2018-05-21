@@ -9138,6 +9138,9 @@ public class AnalogBean
 					gjBean.setCurr_Data("0.00");
 				}
 			}
+			if(Double.valueOf(gjBean.getBase_Height()) <= 0 && Double.valueOf(gjBean.getCurr_Data()) <= 0){
+				gjBean.setCurr_Data(gjBean.getBase_Height());
+			}
 			/*******/
 			HashPut(objGJTable, gjId, gjBean);
 		}
@@ -9167,7 +9170,7 @@ public class AnalogBean
 			{
 				option = 1;
 			}
-			if (!nextGJ.getCurr_Data().equals("0.00"))
+			if (Double.valueOf(nextGJ.getCurr_Data()) > 0)
 			{
 				DevGJData devGJ = new DevGJData();
 				devGJ.sn = sn;
@@ -9185,7 +9188,7 @@ public class AnalogBean
 			{
 				String outGJId = nextGX.getEnd_Id();
 				String startGJId = nextGX.getStart_Id();
-				System.out.println("outGJId["+outGJId+"]startGJId["+startGJId+"]");
+				//System.out.println("outGJId["+outGJId+"]startGJId["+startGJId+"]");
 				if(outGJId.substring(2,5).equals(startGJId.substring(2,5)))
 				{
 					nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
@@ -9201,7 +9204,7 @@ public class AnalogBean
 		while (option == 0);
 
 		// 如果没有设备井，返回由选择管井到终点的管井列表
-		System.out.println("devList.size()["+devList.size()+"]");
+		//System.out.println("devList.size()["+devList.size()+"]");
 		if (0 == devList.size())
 		{
 			return gjList;
