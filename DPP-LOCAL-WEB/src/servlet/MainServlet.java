@@ -24,6 +24,7 @@ import bean.DevGJBean;
 import bean.DevGXBean;
 import bean.DevHandBean;
 import bean.DevMapBean;
+import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
@@ -202,6 +203,10 @@ public class MainServlet extends HttpServlet
         	new ProjectInfoBean().IdCheck(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Equip_Info.do"))	                 //设备信息管理
         	new EquipInfoBean().ExecCmd(request, response, m_Rmi, false); 
+        else if (strUrl.equalsIgnoreCase("Admin_Equip_GJInfo.do"))	                 //根据设备获取管井编号
+        	new EquipInfoBean().getAllId(request, response, m_Rmi, false); 
+        else if (strUrl.equalsIgnoreCase("Admin_Equip_Alert.do"))	                 //设备上下线信息
+        	new EquipAlertBean().ExecCmd(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("Equip_IdCheck.do"))						 //设备ID检测
         	new EquipInfoBean().IdCheck(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Equip_Restart.do"))						 //设备重启指令

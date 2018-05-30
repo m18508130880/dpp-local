@@ -33,6 +33,15 @@ public class ThreeModel {
 	//private String	heightSegments; //— 可选参数. 沿高度面的分割面数量. 默认值为1.
 	private String	depthSegments; //— 可选参数. 沿深度面的分割面数量. 默认值为1.
 	
+	// 圆环位移和偏移
+	private String	positionX_Y;
+	private String	positionY_Y;
+	private String	positionZ_Y;
+	
+	private String	rotationX_Y;
+	private String	rotationY_Y;
+	private String	rotationZ_Y;
+	
 	// 文字模型
 	private String	positionX_W;
 	private String	positionY_W;
@@ -209,6 +218,42 @@ public class ThreeModel {
 	}
 	public void setRotationZ_W(String rotationZ_W) {
 		this.rotationZ_W = rotationZ_W;
+	}
+	public String getPositionX_Y() {
+		return positionX_Y;
+	}
+	public void setPositionX_Y(String positionX_Y) {
+		this.positionX_Y = positionX_Y;
+	}
+	public String getPositionY_Y() {
+		return positionY_Y;
+	}
+	public void setPositionY_Y(String positionY_Y) {
+		this.positionY_Y = positionY_Y;
+	}
+	public String getPositionZ_Y() {
+		return positionZ_Y;
+	}
+	public void setPositionZ_Y(String positionZ_Y) {
+		this.positionZ_Y = positionZ_Y;
+	}
+	public String getRotationX_Y() {
+		return rotationX_Y;
+	}
+	public void setRotationX_Y(String rotationX_Y) {
+		this.rotationX_Y = rotationX_Y;
+	}
+	public String getRotationY_Y() {
+		return rotationY_Y;
+	}
+	public void setRotationY_Y(String rotationY_Y) {
+		this.rotationY_Y = rotationY_Y;
+	}
+	public String getRotationZ_Y() {
+		return rotationZ_Y;
+	}
+	public void setRotationZ_Y(String rotationZ_Y) {
+		this.rotationZ_Y = rotationZ_Y;
 	}
 	
 	

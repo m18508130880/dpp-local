@@ -73,6 +73,32 @@ public class DevHandBean extends RmiBean
 				request.getSession().setAttribute("One_YH_" + Sid, (DevHandBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
 				currStatus.setJsp("000004_jgh_Info.jsp?Sid=" + Sid);
 				break;
+			case 3:// 新天的YB001002
+				DevGJBean gjBean1 = new DevGJBean(currStatus);
+				gjBean1.setId("SZ001001");
+				msgBean = pRmi.RmiExec(3, gjBean1, 0, 25);
+				request.getSession().setAttribute("One_JGH_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+				
+				Id = "YH001001";
+				Equip_Id = "000004_YH001001";
+				msgBean = pRmi.RmiExec(1, this, 0, 25);
+				
+				request.getSession().setAttribute("One_YH_" + Sid, (DevHandBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+				currStatus.setJsp("000004_YB001002_Info.jsp?Sid=" + Sid);
+				break;
+			case 4:// 新天的YB001001
+				DevGJBean gjBean11 = new DevGJBean(currStatus);
+				gjBean11.setId("SZ001001");
+				msgBean = pRmi.RmiExec(3, gjBean11, 0, 25);
+				request.getSession().setAttribute("One_JGH_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+				
+				Id = "YH001001";
+				Equip_Id = "000004_YH001001";
+				msgBean = pRmi.RmiExec(1, this, 0, 25);
+				
+				request.getSession().setAttribute("One_YH_" + Sid, (DevHandBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+				currStatus.setJsp("000004_YB001001_Info.jsp?Sid=" + Sid);
+				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());

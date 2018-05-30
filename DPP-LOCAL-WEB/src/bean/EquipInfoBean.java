@@ -5,6 +5,8 @@ import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -44,10 +46,6 @@ public class EquipInfoBean extends RmiBean
 			case 0://≤È—Ø
 		    	request.getSession().setAttribute("Equip_Info_" + Sid, ((Object)msgBean.getMsg()));
 		    	
-		    	DevGJBean devGJBean = new DevGJBean();
-		    	msgBean = pRmi.RmiExec(1, devGJBean, 0, 25);
-		    	request.getSession().setAttribute("DevGJ_All_" + Sid, ((Object)msgBean.getMsg()));
-		    	
 		    	currStatus.setJsp("Equip_Info.jsp?Sid=" + Sid);		    
 		    	break;
 		}
@@ -58,6 +56,42 @@ public class EquipInfoBean extends RmiBean
     	
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void getAllId(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone)
+	{
+		try 
+		{
+			getHtmlData(request);
+			currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+			currStatus.getHtmlData(request, pFromZone);
+			
+			PrintWriter outprint = response.getWriter();
+			String Resp = "3006";
+			
+	    	DevGJBean devGJBean = new DevGJBean();
+	    	devGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+	    	msgBean = pRmi.RmiExec(1, devGJBean, 0, 25);
+	    	
+			if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+			{
+				Resp = "0000";
+				ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
+				Iterator<?> gj_iterator = gj_List.iterator();
+				while (gj_iterator.hasNext())
+				{
+					DevGJBean devGJ = (DevGJBean) gj_iterator.next();
+					Resp += devGJ.getId() + ",";
+				}
+			}
+			
+			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+			outprint.write(Resp);
+		}
+		catch (Exception Ex)
+		{
+			Ex.printStackTrace();
+		}
 	}
 	
 	public void IdCheck(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone)

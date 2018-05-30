@@ -48,6 +48,7 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_THREE_GJ				= 40;
 	public static final int	RMI_THREE_GX				= 41;
 
+	public static final int	RMI_EQUIP_ALERT				= 42;
 	public MsgBean    msgBean = null;
 	public String     className;
 	public CurrStatus currStatus = null;

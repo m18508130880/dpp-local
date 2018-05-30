@@ -9170,6 +9170,7 @@ public class AnalogBean
 			{
 				option = 1;
 			}
+			String outGXId = "";
 			if (Double.valueOf(nextGJ.getCurr_Data()) > 0)
 			{
 				DevGJData devGJ = new DevGJData();
@@ -9182,7 +9183,7 @@ public class AnalogBean
 					devList.add(devGJ);
 				}
 			}
-			String outGXId = nextGJ.getOut_Id();
+			outGXId = nextGJ.getOut_Id();
 			nextGX = (DevGXBean) HashGet(objGXTable, outGXId);
 			if(null != nextGX)
 			{

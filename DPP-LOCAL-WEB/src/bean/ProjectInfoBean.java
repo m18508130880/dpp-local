@@ -89,7 +89,7 @@ public class ProjectInfoBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.id, t.cname, t.Longitude, t.Latitude, t.wx_lng, t.wx_lat, t.MapLev , t.MapAngle , t.Demo "
+				Sql = " select  t.id, t.cname, t.Longitude, t.Latitude, t.wx_lng, t.wx_lat, t.MapLev, t.MapAngle, t.TianQi, t.Demo "
 						+ " from project_info t order by t.id";
 				break;
 			case 2://…Ë±∏IDºÏ≤‚
@@ -126,7 +126,8 @@ public class ProjectInfoBean extends RmiBean
 			setWX_Lat(pRs.getString(6));
 			setMapLev(pRs.getString(7));
 			setMapAngle(pRs.getString(8));
-			setDemo(pRs.getString(9));
+			setTianQi(pRs.getString(9));
+			setDemo(pRs.getString(10));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -148,6 +149,7 @@ public class ProjectInfoBean extends RmiBean
 			setWX_Lat(CommUtil.StrToGB2312(request.getParameter("WX_Lat")));
 			setMapLev(CommUtil.StrToGB2312(request.getParameter("MapLev")));
 			setMapAngle(CommUtil.StrToGB2312(request.getParameter("MapAngle")));
+			setTianQi(CommUtil.StrToGB2312(request.getParameter("TianQi")));
 			setDemo(CommUtil.StrToGB2312(request.getParameter("Demo")));
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
@@ -166,10 +168,19 @@ public class ProjectInfoBean extends RmiBean
 	private String WX_Lat;
 	private String MapLev;
 	private String MapAngle;
+	private String TianQi;
 	private String Demo;
 	private String Sid;
 	
 	
+	public String getTianQi() {
+		return TianQi;
+	}
+
+	public void setTianQi(String tianQi) {
+		TianQi = tianQi;
+	}
+
 	public String getWX_Lng() {
 		return WX_Lng;
 	}

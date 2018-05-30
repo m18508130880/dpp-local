@@ -108,7 +108,7 @@ public class ThreeGJBean extends RmiBean
 					ThreeGXBean inGx = gxMap.get(inIdList[i]);	// 取到进口管线
 					ThreeGJBean inGj = gjMap.get(inGx.getStart_Id());	// 取到进口管井
 					heightD = Double.valueOf(cenGJ.getBase_Height()) - Double.valueOf(inGx.getEnd_Height());
-					inModel = this.getGXModel(cenGJ, inGx, inGj, cenHeight, cenRadii, heightD);
+					inModel = this.getGXModel(cenGJ, inGx, inGj, cenHeight, cenRadii, heightD, 0);
 					modelList.add(inModel);
 				}
 			}
@@ -118,7 +118,7 @@ public class ThreeGJBean extends RmiBean
 				ThreeGXBean outGx = gxMap.get(outId);	// 取到出口管线
 				ThreeGJBean outGj = gjMap.get(outGx.getEnd_Id());	// 取到出口管井
 				heightD = Double.valueOf(cenGJ.getBase_Height()) - Double.valueOf(outGx.getStart_Height());
-				outModel = this.getGXModel(cenGJ, outGx, outGj, cenHeight, cenRadii, heightD);
+				outModel = this.getGXModel(cenGJ, outGx, outGj, cenHeight, cenRadii, heightD, 1);
 				modelList.add(outModel);
 			}
 		}
@@ -147,12 +147,19 @@ public class ThreeGJBean extends RmiBean
 		model.setRotationX_W("0");
 		model.setRotationY_W(String.valueOf(Math.PI/2));
 		model.setRotationZ_W("0");
+		
+		model.setPositionX_Y("0");
+		model.setPositionY_Y(String.valueOf(cenHeight/2));
+		model.setPositionZ_Y("0");
+		model.setRotationX_Y(String.valueOf(Math.PI/2));
+		model.setRotationY_Y("0");
+		model.setRotationZ_Y("0");
 		String des = "顶高/底高|" + cenGJ.getTop_Height() + "/" + cenGJ.getBase_Height() + ";尺寸|" + cenGJ.getSize() + ";道路|" + cenGJ.getRoad() + ";进口管线|" + cenGJ.getIn_Id() + ";出口管线|" + cenGJ.getOut_Id();
 		model.setDes(des);
 		return model;
 	}
 	
-	public ThreeModel getGXModel(ThreeGJBean cenGJ, ThreeGXBean gx, ThreeGJBean gj, Double cenHeight, Double cenRadii, Double heightD){
+	public ThreeModel getGXModel(ThreeGJBean cenGJ, ThreeGXBean gx, ThreeGJBean gj, Double cenHeight, Double cenRadii, Double heightD, int flag){
 		double rotaZ = 0;	// 中心管井与当前管线的高度差
 		double rotaX = 0;	// 管线的水平长度
 		short radii = 0;	// 模型半径
@@ -163,8 +170,15 @@ public class ThreeGJBean extends RmiBean
 		double rX = 0;		// 模型沿Y轴旋转弧度
 		double rY = 0;		// 模型沿X轴旋转弧度
 		double rZ = 0;		// 模型沿Z轴旋转弧度
-		ThreeModel model = new ThreeModel();
+
+		double pX_Y = 0;		// 模型前后偏移
+		double pY_Y = 0;		// 模型上下偏移
+		double pZ_Y = 0;		// 模型左右偏移
 		
+		ThreeModel model = new ThreeModel();
+		// 坡度
+		double pd = (Double.valueOf(gx.getStart_Height()) - Double.valueOf(gx.getEnd_Height())) / Double.valueOf(gx.getLength());
+
 		radii = (short) (Short.valueOf(gx.getDiameter())/10/2);		// 模型的半径
 		// 中心管井和当前管井	的高度差
 		rotaZ = (Double.valueOf(cenGJ.getBase_Height()) - Double.valueOf(gj.getBase_Height()))*10;
@@ -178,29 +192,41 @@ public class ThreeGJBean extends RmiBean
 		}else{
 			pY =  - (cenHeight/2 - radii - heightD*100);
 		}
-		//pY = radii - cenHeight/2 - (heightD)*100;
+		pY_Y = pY;
 		// 中心管井与当前管井的纬度差
 		double pLat = (Double.valueOf(cenGJ.getLatitude()) - Double.valueOf(gj.getLatitude()))*10000000;
 		// 中心管井与当前管井的经度差
 		double pLng = (Double.valueOf(cenGJ.getLongitude()) - Double.valueOf(gj.getLongitude()))*10000000;
 		rY = 0; // 旋转-绕X轴
-		rX = Math.PI/2 - Math.atan(rotaZ/rotaX); // 管线模型旋转角度-绕Y轴
+		if(pd >= 0){
+			rX = Math.PI/2 - Math.atan(rotaZ/rotaX); // 管线模型旋转角度-绕Y轴
+		}else{
+			rX = Math.PI/2 + Math.atan(rotaZ/rotaX); // 管线模型旋转角度-绕Y轴
+		}
 		if(pLat <= 0 && pLng <= 0){ // 第一象限
 			rZ = - Math.atan(Math.abs(pLat/pLng)); // 管线模型旋转角度-绕Z轴
-			pZ = - Math.cos(rZ)*(height/2 + cenRadii); // 管线模型与中心管井模型的左右差
-			pX = Math.sin(rZ)*(height/2 + cenRadii); // 管线模型与中心管井的前后差
+			pZ = - Math.cos(rZ)*(height/2 + cenRadii - 10); // 管线模型与中心管井模型的左右差
+			pX = Math.sin(rZ)*(height/2 + cenRadii - 10); // 管线模型与中心管井的前后差
+			pZ_Y = - Math.cos(rZ)*(height + cenRadii - 10); // 管线模型与中心管井模型的左右差
+			pX_Y = Math.sin(rZ)*(height + cenRadii - 10); // 管线模型与中心管井的前后差
 		}else if(pLat <= 0 && pLng > 0){ // 第二象限
 			rZ = Math.atan(Math.abs(pLat/pLng));
-			pZ = Math.cos(rZ)*(height/2 + cenRadii);
-			pX = - Math.sin(rZ)*(height/2 + cenRadii);
+			pZ = Math.cos(rZ)*(height/2 + cenRadii - 10);
+			pX = - Math.sin(rZ)*(height/2 + cenRadii - 10);
+			pZ_Y = Math.cos(rZ)*(height + cenRadii - 10);
+			pX_Y = - Math.sin(rZ)*(height + cenRadii - 10);
 		}else if(pLat > 0 && pLng > 0){ // 第三象限
 			rZ = - Math.atan(Math.abs(pLat/pLng));
-			pZ = Math.cos(rZ)*(height/2 + cenRadii);
-			pX = - Math.sin(rZ)*(height/2 + cenRadii);
+			pZ = Math.cos(rZ)*(height/2 + cenRadii - 10);
+			pX = - Math.sin(rZ)*(height/2 + cenRadii - 10);
+			pZ_Y = Math.cos(rZ)*(height + cenRadii - 10);
+			pX_Y = - Math.sin(rZ)*(height + cenRadii - 10);
 		}else if(pLat > 0 && pLng <= 0){ // 第四象限
 			rZ = Math.atan(Math.abs(pLat/pLng));
-			pZ = - Math.cos(rZ)*(height/2 + cenRadii);
-			pX = Math.sin(rZ)*(height/2 + cenRadii);
+			pZ = - Math.cos(rZ)*(height/2 + cenRadii - 10);
+			pX = Math.sin(rZ)*(height/2 + cenRadii - 10);
+			pZ_Y = - Math.cos(rZ)*(height + cenRadii - 10);
+			pX_Y = Math.sin(rZ)*(height + cenRadii - 10);
 		}
 		
 		model.setId(gx.getId());
@@ -224,7 +250,14 @@ public class ThreeGJBean extends RmiBean
 		model.setRotationX_W(String.valueOf("0")); // 绕Z轴
 		model.setRotationY_W(String.valueOf(Math.PI/2 - rZ)); // 绕Y轴
 		model.setRotationZ_W(String.valueOf("0")); // 绕X轴
-		double pd = (Double.valueOf(gx.getEnd_Height()) - Double.valueOf(gx.getStart_Height())) / Double.valueOf(gx.getLength());
+		
+		model.setPositionX_Y(String.valueOf(pX_Y));
+		model.setPositionY_Y(String.valueOf(pY_Y));
+		model.setPositionZ_Y(String.valueOf(pZ_Y));
+		model.setRotationX_Y("0");
+		model.setRotationY_Y(String.valueOf(- rZ));
+		model.setRotationZ_Y("0");
+		
 		String des = "长度|" + gx.getLength() + ";直径|" + gx.getDiameter() + ";坡度|" + String.format("%.4f", pd) + ";道路|" + gx.getRoad() + ";起端管井|" + gx.getStart_Id() + ";终端管井|" + gx.getEnd_Id();
 		model.setDes(des);
 		return model;

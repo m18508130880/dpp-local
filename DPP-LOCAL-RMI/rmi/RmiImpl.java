@@ -27,6 +27,7 @@ import bean.DevGJBean;
 import bean.DevGXBean;
 import bean.DevHandBean;
 import bean.DevMapBean;
+import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
@@ -254,6 +255,9 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_THREE_GX:
 						rmiBean = new ThreeGXBean();
+						break;
+					case RmiBean.RMI_EQUIP_ALERT:
+						rmiBean = new EquipAlertBean();
 						break;
 						
 				}
