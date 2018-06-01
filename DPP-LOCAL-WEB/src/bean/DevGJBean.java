@@ -552,7 +552,7 @@ public class DevGJBean extends RmiBean
 						HSSFRow row;
 						int succCnt = 0;
 						int rowCount = 0;
-						for(int i = 1; rowCount < sheet.getPhysicalNumberOfRows() ; i++ ){
+						for(int i = 1; i < sheet.getPhysicalNumberOfRows() ; i++ ){
 							row = sheet.getRow(i);
 							if(row == null){
 								// 当读取行为空时
@@ -562,22 +562,27 @@ public class DevGJBean extends RmiBean
 								continue;
 							}else{
 								String id = getString(row.getCell(1));
+								if(id.trim().length() <= 0){continue;}
+								
 								String wgs84_Lng = getString(row.getCell(2));
 								String wgs84_Lat = getString(row.getCell(3));
+								
+								String longitude = getString(row.getCell(4));
+								String latitude = getString(row.getCell(5));
 
-								String top_Height = getString(row.getCell(4));
-								String base_Height = getString(row.getCell(5));
-								String size = getString(row.getCell(6));
+								String top_Height = getString(row.getCell(6));
+								String base_Height = getString(row.getCell(7));
+								String size = getString(row.getCell(8));
 								String in_Id = "";
-								for (int j = 7; j < 11; j++)
+								for (int j = 9; j < 13; j++)
 								{
 									if (row.getCell(j) != null && getString(row.getCell(j)).length() > 7) // 编码长度为8
 									{
 										in_Id += getString(row.getCell(j)) + ",";
 									}
 								}
-								String out_Id = getString(row.getCell(11));
-								String material = getString(row.getCell(12));
+								String out_Id = getString(row.getCell(13));
+								String material = getString(row.getCell(14));
 								String flag = "1";
 								if (in_Id.substring(5).contains("000"))
 								{
@@ -591,14 +596,16 @@ public class DevGJBean extends RmiBean
 								{
 									flag = "1";
 								}
-								String data_Lev = getString(row.getCell(13));
-								String road = getString(row.getCell(14));
+								String data_Lev = getString(row.getCell(15));
+								String road = getString(row.getCell(16));
 
 								// wgs84坐标转百度坐标
-								String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
-								String longitude = lngAndLat[0];
-								String latitude = lngAndLat[1];
-
+								if(longitude.length() > 0 && latitude.length() > 0){
+									String [] lngAndLat = CoordConv.convLngAndLat(longitude, latitude, 1, 5);
+									longitude = lngAndLat[0];
+									latitude = lngAndLat[1];
+								}
+								
 								this.setId(id.toUpperCase());
 								this.setWgs84_Lng(wgs84_Lng);
 								this.setWgs84_Lat(wgs84_Lat);
@@ -621,6 +628,7 @@ public class DevGJBean extends RmiBean
 								{
 									succCnt++;
 								}
+								rowCount ++;
 							}
 							wb.close();
 						}
@@ -825,7 +833,8 @@ public class DevGJBean extends RmiBean
 			            HSSFRow row;
 			            int succCnt = 0;
 			            int rowCount = 0;
-			            for(int i = 1; rowCount < sheet.getPhysicalNumberOfRows() ; i++ ){
+			            String Ids = "";
+			            for(int i = 1; i < sheet.getPhysicalNumberOfRows() ; i++ ){
 			                row = sheet.getRow(i);
 			                if(row == null){
 			                    // 当读取行为空时
@@ -835,22 +844,27 @@ public class DevGJBean extends RmiBean
 			                    continue;
 			                }else{
 			                	String id = getString(row.getCell(1));
+								if(id.trim().length() <= 0){continue;}
+								
 			                	String wgs84_Lng = getString(row.getCell(2));
 								String wgs84_Lat = getString(row.getCell(3));
 								
-								String top_Height = getString(row.getCell(4));
-								String base_Height = getString(row.getCell(5));
-								String size = getString(row.getCell(6));
+			                	String longitude = getString(row.getCell(4));
+								String latitude = getString(row.getCell(5));
+								
+								String top_Height = getString(row.getCell(6));
+								String base_Height = getString(row.getCell(7));
+								String size = getString(row.getCell(8));
 								String in_Id = "";
-								for (int j = 7; j < 11; j++)
+								for (int j = 9; j < 13; j++)
 								{
 									if (row.getCell(j) != null && getString(row.getCell(j)).length() > 7) // 编码长度为8
 									{
 										in_Id += getString(row.getCell(j)) + ",";
 									}
 								}
-								String out_Id = getString(row.getCell(11));
-								String material = getString(row.getCell(12));
+								String out_Id = getString(row.getCell(13));
+								String material = getString(row.getCell(14));
 								String flag = "1";
 								if (in_Id.substring(5).contains("000"))
 								{
@@ -864,14 +878,16 @@ public class DevGJBean extends RmiBean
 								{
 									flag = "1";
 								}
-								String data_Lev = getString(row.getCell(13));
-								String road = getString(row.getCell(14));
+								String data_Lev = getString(row.getCell(15));
+								String road = getString(row.getCell(16));
 
 								// wgs84坐标转百度坐标
-								String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
-								String longitude = lngAndLat[0];
-								String latitude = lngAndLat[1];
-
+								if(longitude.length() > 0 && latitude.length() > 0){
+									String [] lngAndLat = CoordConv.convLngAndLat(longitude, latitude, 1, 5);
+									longitude = lngAndLat[0];
+									latitude = lngAndLat[1];
+								}
+								
 								this.setId(id.toUpperCase());
 								this.setWgs84_Lng(wgs84_Lng);
 								this.setWgs84_Lat(wgs84_Lat);
@@ -893,12 +909,12 @@ public class DevGJBean extends RmiBean
 								if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
 								{
 									succCnt++;
-								}
+								}else{Ids += id.toUpperCase() + ",";}
 			                    rowCount++;  
 			                }
 			            }
 						wb.close();
-						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(rowCount) + "]个\\n";
+						Resp += "文件[" + fileName + "]成功更新[" + String.valueOf(succCnt) + "/" + String.valueOf(rowCount) + "]个\\n失败["+Ids+"]";
 					}
 					else
 					{
@@ -1307,7 +1323,7 @@ public class DevGJBean extends RmiBean
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
-				Sql = "insert into dev_gj(id, wgs85_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', '1')";
+				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', '1')";
 				break;
 			case 11:// 编辑
 				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
