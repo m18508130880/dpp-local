@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -152,8 +153,8 @@ public class UserInfoBean extends RmiBean
 			    	msgBean = pRmi.RmiExec(1, roleBeanManage, 0, 25);
 			    	request.getSession().setAttribute("User_Manage_Role_" + Sid, ((Object)msgBean.getMsg()));
 			    	
-			    	Url = "index.jsp?Sid=" + Sid;
-			    //	Url = "Project_choose.jsp?Sid=" + Sid;
+			    //	Url = "index.jsp?Sid=" + Sid;
+			    	Url = "project_choose.jsp?Sid=" + Sid;
 				//	Url = "user/MapMain.jsp?Sid=" + Sid;
 					
 				}
@@ -318,6 +319,41 @@ public class UserInfoBean extends RmiBean
 				default://可用
 					Resp = "0000";
 					break;
+			}
+			
+			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+			outprint.write(Resp);
+		}
+		catch (Exception Ex)
+		{
+			Ex.printStackTrace();
+		}
+	}
+	
+	public void ajaxGetAll(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone)
+	{
+		try 
+		{
+			getHtmlData(request);
+			currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+			currStatus.getHtmlData(request, pFromZone);
+			
+			PrintWriter outprint = response.getWriter();
+			String Resp = "3006";
+			
+			msgBean = pRmi.RmiExec(1, this, 0, 25);//查找是否有该用户存在
+			if(msgBean.getStatus() == MsgBean.STA_SUCCESS){
+				Resp = "0000";
+				ArrayList<?> userList = (ArrayList<?>) msgBean.getMsg();
+				Iterator<?> useriterator = userList.iterator();
+				while (useriterator.hasNext())
+				{
+					UserInfoBean bean = (UserInfoBean) useriterator.next();
+					Id = bean.getId();
+					CName = bean.getCName();
+					Status = bean.getStatus();
+					Resp += Id + "|" + CName + "|" + Status + ";";
+				}
 			}
 			
 			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);

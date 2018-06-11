@@ -15,6 +15,9 @@ import util.CheckCode;
 import util.CommUtil;
 import bean.AlertInfoBean;
 import bean.AnalogBean;
+import bean.CheckTaskBean;
+import bean.CheckTaskGJBean;
+import bean.CheckTaskGXBean;
 import bean.CorpInfoBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
@@ -346,6 +349,18 @@ public class MainServlet extends HttpServlet
         /************************************user-三维图*****************************************************/
         else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//更新历史数据
         	new ThreeGJBean().getThreeOneGJ(request, response, m_Rmi, false);
+        
+        /************************************user-检测任务*****************************************************/
+        else if (strUrl.equalsIgnoreCase("getUser_Info.do"))			         		//获取用户列表
+        	new UserInfoBean().ajaxGetAll(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getCheck_Task.do"))			         		//ajax查询检查任务
+        	new CheckTaskBean().ajaxGetAll(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getCheck_GJ.do"))			         			//ajax查询管井
+        	new CheckTaskGJBean().getCheckGJ(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getCheck_GX.do"))			         			//ajax查询管线
+        	new CheckTaskGXBean().getCheckGX(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Check_Task.do"))			         			//ajax查询管线
+        	new CheckTaskBean().ExecCmd(request, response, m_Rmi, false);
     }
     
     private class Connect extends Thread
