@@ -4,9 +4,7 @@
 /.settings
 /Config.ini
 /DPPLOCALRMI
-/StartLNGLOCALRMI
 /bean
-/lib
 /net
 /rmi
 /util

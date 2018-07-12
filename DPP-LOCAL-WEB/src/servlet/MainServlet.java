@@ -268,6 +268,8 @@ public class MainServlet extends HttpServlet
         	new DevGXBean().ExecCmd(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("User_Equip_Info.do"))	                    //设备查询
         	new EquipInfoBean().ExecCmd(request, response, m_Rmi, false); 
+        else if (strUrl.equalsIgnoreCase("getDataNow.do"))				        	//获取实时数据
+        	new DataGJBean().getDataNow(request, response, m_Rmi, false);
  
         else if (strUrl.equalsIgnoreCase("User_DataGJ_His.do"))				        //管井表格数据
         	new DataGJBean().HistoryData(request, response, m_Rmi, false);

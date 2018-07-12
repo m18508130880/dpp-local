@@ -14,12 +14,13 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import net.sf.json.JSONObject;
 import rmi.Rmi;
 import rmi.RmiBean;
 import util.CommUtil;
 import util.CurrStatus;
 import util.MsgBean;
+
+import com.alibaba.fastjson.JSONObject;
 
 public class DataGJBean extends RmiBean 
 {	
@@ -300,12 +301,11 @@ public class DataGJBean extends RmiBean
 			}
 			Map <String, Object> jsonMap = new HashMap<String, Object>();
 			jsonMap.put("total", msgBean.getCount());
-			jsonMap.put("rows", CData);			
-			
-			JSONObject jsonObj = JSONObject.fromObject(jsonMap);
+			jsonMap.put("rows", CData);	
+			JSONObject jsonObj = (JSONObject) JSONObject.toJSON(jsonMap);
 	    	output = response.getWriter();
 	    	output.write(jsonObj.toString());
-	    	output.flush();	    	
+	    	output.flush();
 	    	System.out.println("GJNowData[" + jsonObj.toString() + "]");
 	    }
 	    catch (IOException e)
@@ -317,21 +317,78 @@ public class DataGJBean extends RmiBean
 	    	output.close();
 	    }
 	}	
-
+	public void getDataNow(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		PrintWriter outprint = response.getWriter();
+		try{
+			getHtmlData(request);
+			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+			currStatus.getHtmlData(request, pFromZone);
+			
+	
+			List<Object> CData = new ArrayList<Object>();
+			
+			msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+			if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+			{
+				if(null != msgBean.getMsg())
+				{
+					ArrayList<?> msgList = (ArrayList<?>)msgBean.getMsg();
+					if(msgList.size() > 0)
+					{
+						Iterator<?> iterator = msgList.iterator();
+						while(iterator.hasNext())
+						{
+							DataGJBean dataBean = (DataGJBean)iterator.next();
+							DataGJReal RealJson = new DataGJReal();
+							RealJson.setSn(dataBean.getSN());
+							RealJson.setGj_id(dataBean.getGJ_Id());
+							RealJson.setGj_name(dataBean.getGJ_Name());
+							RealJson.setRoad(dataBean.getRoad());
+							RealJson.setAttr_name(dataBean.getAttr_Name());
+							RealJson.setCtime(dataBean.getCTime());
+							RealJson.setTop_height(dataBean.getTop_Height()); 
+							RealJson.setBase_height(dataBean.getBase_Height());
+							RealJson.setEquip_height(dataBean.getEquip_Height());
+							RealJson.setValue(dataBean.getValue());
+							RealJson.setUnit(dataBean.getUnit());
+							CData.add(RealJson);
+						}
+					}
+				}
+				Map <String, Object> jsonMap = new HashMap<String, Object>();
+				jsonMap.put("total", CData.size());
+				jsonMap.put("rows", CData);	
+				JSONObject jsonObj = (JSONObject) JSONObject.toJSON(jsonMap);
+				outprint.write(jsonObj.toString());
+				outprint.flush();
+		    	System.out.println("dataNow[" + jsonObj.toString() + "]");
+			}
+			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		}
+	    catch (IOException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	    finally
+	    {
+	    	outprint.close();
+	    }
+	}
 	public String getSql(int pCmd)
 	{
 		String Sql = "";
 		switch (pCmd)
 		{
 			case 0://实时数据 (GIS表格)
-				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, t.value, t.unit, t.lev, t.des, t.top_height, t.base_height, t.material" +
+				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, t.value, t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 					  " FROM view_data_now_gj t " +
 					  " where t.project_id = "+ currStatus.getFunc_Project_Id() + 
 					  " and t.gj_id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " +
 					  " ORDER BY t.project_id, t.gj_id";
 				break;
 			case 1:
-				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 						  " FROM view_data_gj t  " +
 						  " where t.gj_id = '"+ GJ_Id +"'" + 
 						  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -344,7 +401,7 @@ public class DataGJBean extends RmiBean
 				switch (Level)
 				{
 					case 1:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 							" FROM view_data_gj t  " +
 							" where t.gj_id = '"+ GJ_Id +"'" + 
 							"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -354,7 +411,7 @@ public class DataGJBean extends RmiBean
 							" ORDER BY t.ctime " ;
 						break;
 					case 2:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -364,7 +421,7 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 					case 3:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -379,7 +436,7 @@ public class DataGJBean extends RmiBean
 				switch (Level)
 				{
 					case 1:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -389,7 +446,7 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 					case 2:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -399,7 +456,7 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 					case 3:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -414,7 +471,7 @@ public class DataGJBean extends RmiBean
 				switch (Level)
 				{
 					case 1:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(max(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -424,7 +481,7 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 					case 2:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -434,7 +491,7 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 					case 3:
-						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
+						Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 								" FROM view_data_gj t  " +
 								" where t.gj_id = '"+ GJ_Id +"'" + 
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
@@ -444,6 +501,13 @@ public class DataGJBean extends RmiBean
 								" ORDER BY t.ctime " ;
 						break;
 				}
+				break;
+			case 5: // 实时一小时内的数据
+				Sql = " select t.sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, t.value, t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
+					  " FROM view_data_gj t " +
+					  " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+					  " and ctime > DATE_SUB(NOW(),INTERVAL 1 HOUR) " +
+					  " ORDER BY t.ctime" ;
 				break;
 				
 //			case 4://历史   最近二十四小时均值折线图
@@ -502,6 +566,8 @@ public class DataGJBean extends RmiBean
 			setTop_Height(pRs.getString(12));
 			setBase_Height(pRs.getString(13));
 			setMaterial(pRs.getString(14));
+			setEquip_Height(pRs.getString(15));
+			setRoad(pRs.getString(16));
 		} 
 		catch (SQLException sqlExp) 
 		{
@@ -548,9 +614,27 @@ public class DataGJBean extends RmiBean
 	private String Top_Height;
 	private String Base_Height;
 	private String Material;
+	private String Equip_Height;
+	private String Road;
 	
 	private String SqlBTime;
 	private String SqlETime;
+
+	public String getRoad() {
+		return Road;
+	}
+
+	public void setRoad(String road) {
+		Road = road;
+	}
+
+	public String getEquip_Height() {
+		return Equip_Height;
+	}
+
+	public void setEquip_Height(String equip_Height) {
+		Equip_Height = equip_Height;
+	}
 
 	public String getSqlBTime() {
 		return SqlBTime;

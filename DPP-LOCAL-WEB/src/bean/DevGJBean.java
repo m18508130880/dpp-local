@@ -597,20 +597,25 @@ public class DevGJBean extends RmiBean
 									flag = "1";
 								}
 								String data_Lev = getString(row.getCell(15));
+								if (data_Lev.length() <= 0)
+								{
+									data_Lev = "2,2,2";
+								}
 								String road = getString(row.getCell(16));
-
+								String sign = "0";
 								// wgs84坐标转百度坐标
 								if(longitude.length() > 0 && latitude.length() > 0){
 									String [] lngAndLat = CoordConv.convLngAndLat(longitude, latitude, 1, 5);
 									longitude = lngAndLat[0];
 									latitude = lngAndLat[1];
+									sign = "1";
 								}
 								
 								this.setId(id.toUpperCase());
-								this.setWgs84_Lng(wgs84_Lng);
-								this.setWgs84_Lat(wgs84_Lat);
-								this.setLongitude(longitude);
-								this.setLatitude(latitude);
+								this.setWgs84_Lng(!CommUtil.isNumeric(wgs84_Lng) ? "0" : wgs84_Lng);
+								this.setWgs84_Lat(!CommUtil.isNumeric(wgs84_Lat) ? "0" : wgs84_Lat);
+								this.setLongitude(!CommUtil.isNumeric(longitude) ? "0" : longitude);
+								this.setLatitude(!CommUtil.isNumeric(latitude) ? "0" : latitude);
 								this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
 								this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
 								this.setSize(size);
@@ -621,6 +626,7 @@ public class DevGJBean extends RmiBean
 								this.setData_Lev(data_Lev);
 								this.setProject_Id(Project_Id);
 								this.setRoad(road);
+								this.setSign(sign);
 
 								// 插入提交
 								msgBean = pRmi.RmiExec(10, this, 0, 25);
@@ -879,20 +885,25 @@ public class DevGJBean extends RmiBean
 									flag = "1";
 								}
 								String data_Lev = getString(row.getCell(15));
+								if (data_Lev.length() <= 0)
+								{
+									data_Lev = "2,2,2";
+								}
 								String road = getString(row.getCell(16));
-
+								String sign = "0";
 								// wgs84坐标转百度坐标
 								if(longitude.length() > 0 && latitude.length() > 0){
 									String [] lngAndLat = CoordConv.convLngAndLat(longitude, latitude, 1, 5);
 									longitude = lngAndLat[0];
 									latitude = lngAndLat[1];
+									sign = "1";
 								}
 								
 								this.setId(id.toUpperCase());
-								this.setWgs84_Lng(wgs84_Lng);
-								this.setWgs84_Lat(wgs84_Lat);
-								this.setLongitude(longitude);
-								this.setLatitude(latitude);
+								this.setWgs84_Lng(!CommUtil.isNumeric(wgs84_Lng) ? "0" : wgs84_Lng);
+								this.setWgs84_Lat(!CommUtil.isNumeric(wgs84_Lat) ? "0" : wgs84_Lat);
+								this.setLongitude(!CommUtil.isNumeric(longitude) ? "0" : longitude);
+								this.setLatitude(!CommUtil.isNumeric(latitude) ? "0" : latitude);
 								this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
 								this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
 								this.setSize(size);
@@ -903,6 +914,7 @@ public class DevGJBean extends RmiBean
 								this.setData_Lev(data_Lev);
 								this.setProject_Id(Project_Id);
 								this.setRoad(road);
+								this.setSign(sign);
 		
 								// 插入提交
 								msgBean = pRmi.RmiExec(13, this, 0, 25);
@@ -1323,7 +1335,7 @@ public class DevGJBean extends RmiBean
 				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
-				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', '1')";
+				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', " + Sign + ")";
 				break;
 			case 11:// 编辑
 				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
@@ -1336,7 +1348,7 @@ public class DevGJBean extends RmiBean
 				break;
 
 			case 13:// 管井更新
-				Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "',t.sign = '" + Sign + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 
 			case 14:// 窨井内图更新
