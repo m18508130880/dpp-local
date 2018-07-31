@@ -85,6 +85,18 @@ public class DevGJBean extends RmiBean
 				pRmi.Client(2001,"0000000001","");
 				break;
 			case 12:// 删除
+				String[] Ids = currStatus.getFunc_Sub_Type_Id().split(",");
+				for(int i = 0; i < Ids.length; i ++){
+					Id = Ids[i];
+					msgBean = pRmi.RmiExec(currStatus.getCmd(), this, currStatus.getCurrPage(), 25);
+				}
+				pRmi.Client(2001,"0000000001","");
+				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
+				msgBean = pRmi.RmiExec(0, this, currStatus.getCurrPage(), 25);
+				currStatus.setTotalRecord(msgBean.getCount());
+				request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (Object) msgBean.getMsg());
+				currStatus.setJsp("Dev_GJ.jsp?Sid=" + Sid);
+				break;
 			case 11:// 编辑
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25); // 得到一个封装了结果集的MsgBean对象
@@ -109,7 +121,8 @@ public class DevGJBean extends RmiBean
 			case 4:// User单个查询
 				msgBean = pRmi.RmiExec(3, this, 0, 25);
 				request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
-				currStatus.setJsp("One_GJ.jsp?Sid=" + Sid + "&Id=" + Id);
+				String Join = request.getParameter("Join");
+				currStatus.setJsp("One_GJ.jsp?Sid=" + Sid + "&Id=" + Id + "&Join=" + Join);
 				break;
 			case 5:// User单个查询
 				msgBean = pRmi.RmiExec(3, this, 0, 25);
@@ -486,6 +499,25 @@ public class DevGJBean extends RmiBean
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		outprint.write(Resp);
 	}
+	
+	public void getSysId(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(24, this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = (String) msgBean.getMsg();
+		}
+		System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
 
 	/**
 	 * 管线命名
@@ -629,7 +661,12 @@ public class DevGJBean extends RmiBean
 								this.setSign(sign);
 
 								// 插入提交
-								msgBean = pRmi.RmiExec(10, this, 0, 25);
+								if(sign.equals("1")){
+									msgBean = pRmi.RmiExec(10, this, 0, 25);
+								}
+								else{
+									msgBean = pRmi.RmiExec(53, this, 0, 25);
+								}
 								if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
 								{
 									succCnt++;
@@ -661,148 +698,6 @@ public class DevGJBean extends RmiBean
 			exp.printStackTrace();
 		}
 	}
-
-	/**
-	 * 更新管井数据列表
-	 * 
-	 * @param request
-	 * @param response
-	 * @param pRmi
-	 * @param pFromZone
-	 * @param pConfig
-	 * 
-	 */
-//	public void UpdateExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig)
-//	{
-//		try
-//		{
-//			SmartUpload mySmartUpload = new SmartUpload();
-//			mySmartUpload.initialize(pConfig, request, response);
-//			mySmartUpload.setAllowedFilesList("xls,xlsx,XLS,XLSX,");
-//			mySmartUpload.upload();
-//
-//			Sid = mySmartUpload.getRequest().getParameter("Sid");
-//			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
-//			currStatus.getHtmlData(request, pFromZone);
-//			Project_Id = mySmartUpload.getRequest().getParameter("Project_Id");
-//			String Timeout = mySmartUpload.getRequest().getParameter("Timeout");
-//
-//			if (mySmartUpload.getFiles().getCount() > 0 && mySmartUpload.getFiles().getCount() <=5)
-//			{
-//				String Resp = "";
-//				for(int n = 0; n < mySmartUpload.getFiles().getCount(); n ++)
-//				{
-//					String fileName = mySmartUpload.getFiles().getFile(n).getFilePathName().trim();
-//					if (mySmartUpload.getFiles().getFile(n).getSize() / 1024 <= 3072)// 最大3M
-//					{
-//						String FileSaveRoute = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/upfiles/";
-//						// 上传现有文档
-//						com.jspsmart.upload.File myFile = mySmartUpload.getFiles().getFile(n);
-//						String File_Name = new SimpleDateFormat("yyyyMMdd").format(new Date()) + CommUtil.Randon() + "." + myFile.getFileExt();
-//						myFile.saveAs(FileSaveRoute + File_Name);
-//						// 录入数据库
-//						InputStream is = new FileInputStream(FileSaveRoute + File_Name);
-//						Workbook rwb = Workbook.getWorkbook(is);
-//						Sheet rs = rwb.getSheet(0);
-//						int rsRows = rs.getRows(); // excel表格行的数量：依据是否有边框。
-//						int succCnt = 0;
-//						int tmpCnt = 0;
-//						// 数据起始行
-//						int rowStart = 1;
-//						// 循环开始
-//						for (int i = rowStart; i < rsRows; i++)
-//						{
-//							String id = rs.getCell(1, i).getContents().trim();
-//							if (8 > id.length()) continue;
-//	
-//							tmpCnt++;
-//							String wgs84_Lng = rs.getCell(2, i).getContents().trim();
-//							String wgs84_Lat = rs.getCell(3, i).getContents().trim();
-//							System.out.println("x["+wgs84_Lng+"]");
-//							System.out.println("y["+wgs84_Lat+"]");
-//							
-//							String top_Height = rs.getCell(4, i).getContents().trim();
-//							String base_Height = rs.getCell(5, i).getContents().trim();
-//							String size = rs.getCell(6, i).getContents().trim();
-//							String in_Id = "";
-//							for (int j = 7; j < 11; j++)
-//							{
-//								if (rs.getCell(j, i).getContents().trim().length() > 7) // 编码长度为8
-//								{
-//									in_Id += rs.getCell(j, i).getContents().trim() + ",";
-//								}
-//							}
-//							String out_Id = rs.getCell(11, i).getContents().trim();
-//							String material = rs.getCell(12, i).getContents().trim();
-//							String flag = "1";
-//							if (in_Id.substring(5).contains("000"))
-//							{
-//								flag = "0";
-//							}
-//							else if (out_Id.substring(5).contains("999"))
-//							{
-//								flag = "2";
-//							}
-//							else
-//							{
-//								flag = "1";
-//							}
-//							String data_Lev = rs.getCell(13, i).getContents().trim();
-//							String road = rs.getCell(14, i).getContents().trim();
-//	
-//							// wgs84坐标转百度坐标
-//							String [] lngAndLat = CoordConv.convLngAndLat(wgs84_Lng, wgs84_Lat, 1, 5);
-//							String longitude = lngAndLat[0];
-//							String latitude = lngAndLat[1];
-//	
-//							this.setId(id.toUpperCase());
-//							this.setWgs84_Lng(wgs84_Lng);
-//							this.setWgs84_Lat(wgs84_Lat);
-//							this.setLongitude(longitude);
-//							this.setLatitude(latitude);
-//							this.setTop_Height(!CommUtil.isNumeric(top_Height) ? "0" : top_Height);
-//							this.setBase_Height(!CommUtil.isNumeric(base_Height) ? "0" : base_Height);
-//							this.setSize(size);
-//							this.setIn_Id(in_Id.toUpperCase());
-//							this.setOut_Id(out_Id.toUpperCase());
-//							this.setMaterial(material);
-//							this.setFlag(flag);
-//							this.setData_Lev(data_Lev);
-//							this.setProject_Id(Project_Id);
-//							this.setRoad(road);
-//	
-//							// 插入提交
-//							msgBean = pRmi.RmiExec(13, this, 0, 25);
-//							if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
-//							{
-//								succCnt++;
-//							}
-//						}
-//						rwb.close();
-//						Resp += "文件[" + fileName + "]成功导入[" + String.valueOf(succCnt) + "/" + String.valueOf(tmpCnt) + "]个\\n";
-//					}
-//					else
-//					{
-//						Resp += "文件[" + fileName + "]上传失败！文档过大，必须小于3M!\\n";
-//					}
-//				}
-//				currStatus.setResult(Resp);
-//				pRmi.Client(2001,"0000000001","");
-//			}
-//			else
-//			{
-//				currStatus.setResult("上传失败！每次上传最多5个文件!");
-//			}
-//
-//			currStatus.setJsp("Import_Excel.jsp?Sid=" + Sid + "&Project_Id=" + Project_Id + "&Timeout=" + Timeout);
-//			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
-//			response.sendRedirect(currStatus.getJsp());
-//		}
-//		catch (Exception exp)
-//		{
-//			exp.printStackTrace();
-//		}
-//	}
 
 	public void UpdateExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig)
 	{
@@ -917,7 +812,12 @@ public class DevGJBean extends RmiBean
 								this.setSign(sign);
 		
 								// 插入提交
-								msgBean = pRmi.RmiExec(13, this, 0, 25);
+								if(sign.equals("1")){
+									msgBean = pRmi.RmiExec(13, this, 0, 25);
+								}
+								else{
+									msgBean = pRmi.RmiExec(52, this, 0, 25);
+								}
 								if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
 								{
 									succCnt++;
@@ -1312,30 +1212,33 @@ public class DevGJBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0:// 查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
 				break;
 			case 1:// 查询（全部）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + Project_Id + "' "  + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + Project_Id + "' "  + " order by t.id  ";
 				break;
 			case 2:// 查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
 				break;
 
 			case 3:// 查询（单个）
 			case 6:
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 4:// 查询（多个）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
 				break;
 			case 5:// 查询（项目&子系统）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.project_id = '" + Project_Id + "'" + " and substr(t.id, 3, 3) = '" + Subsys_Id + "'" + " order by t.id";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.project_id = '" + Project_Id + "'" + " and substr(t.id, 3, 3) = '" + Subsys_Id + "'" + " order by t.id";
 				break;
 			case 7:// 查询（下载地图）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
 				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', " + Sign + ")";
+				break;
+			case 53:// 添加-没有经纬度
+				Sql = "insert into dev_gj(id, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road) " + "values('" + Id + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + ")";
 				break;
 			case 11:// 编辑
 				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
@@ -1349,6 +1252,9 @@ public class DevGJBean extends RmiBean
 
 			case 13:// 管井更新
 				Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "',t.sign = '" + Sign + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+				break;
+			case 52:// 管井更新-不更新经纬度
+				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 
 			case 14:// 窨井内图更新
@@ -1375,13 +1281,15 @@ public class DevGJBean extends RmiBean
 			case 23:// 获取未标注管井
 				Sql = "{? = call Func_UnMark_GJ_Get('" + Project_Id + "')}";
 				break;
+			case 24: // 查询本项目的所有子系统
+				Sql = "{? = call Func_SysId_Get('" + Project_Id + "')}";
+				break;
 			case 50:// 地图拖拽更新旋转角度
 				Sql = " update dev_gj t set t.rotation = '" + Rotation + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
 			case 51:// 百度坐标系转腾讯坐标系
 				Sql = " update dev_gj t set t.wx_lng = '" + WX_Lng + "',t.wx_lat = '" + WX_Lat + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
 				break;
-
 		}
 		return Sql;
 	}
@@ -1396,29 +1304,34 @@ public class DevGJBean extends RmiBean
 		try
 		{
 			setId(pRs.getString(1));
-			setLongitude(pRs.getString(2));
-			setLatitude(pRs.getString(3));
-			setTop_Height(pRs.getString(4));
-			setBase_Height(pRs.getString(5));
-			setSize(pRs.getString(6));
-			setIn_Id(pRs.getString(7));
-			setOut_Id(pRs.getString(8));
-			setMaterial(pRs.getString(9));
-			setFlag(pRs.getString(10));
-			setData_Lev(pRs.getString(11));
-			setCurr_Data(pRs.getString(12));
-			setSign(pRs.getString(13));
-			setProject_Id(pRs.getString(14));
-			setProject_Name(pRs.getString(15));
-			setEquip_Id(pRs.getString(16));
-			setEquip_Name(pRs.getString(17));
-			setEquip_Height(pRs.getString(18));
-			setEquip_Tel(pRs.getString(19));
-			setIn_Img(pRs.getString(20));
-			setOut_Img(pRs.getString(21));
-			setEquip_Time(pRs.getString(22));
-			setRoad(pRs.getString(23));
-			setRotation(pRs.getString(24));
+			setWgs84_Lng(pRs.getString(2));
+			setWgs84_Lat(pRs.getString(3));
+			setLongitude(pRs.getString(4));
+			setLatitude(pRs.getString(5));
+			setTop_Height(pRs.getString(6));
+			setBase_Height(pRs.getString(7));
+			setSize(pRs.getString(8));
+			setIn_Id(pRs.getString(9));
+			setOut_Id(pRs.getString(10));
+			setMaterial(pRs.getString(11));
+			setFlag(pRs.getString(12));
+			setData_Lev(pRs.getString(13));
+			setCurr_Data(pRs.getString(14));
+			setSign(pRs.getString(15));
+			setProject_Id(pRs.getString(16));
+			setProject_Name(pRs.getString(17));
+			setEquip_Id(pRs.getString(18));
+			setEquip_Name(pRs.getString(19));
+			setEquip_Height(pRs.getString(20));
+			setEquip_Tel(pRs.getString(21));
+			setIn_Img(pRs.getString(22));
+			setOut_Img(pRs.getString(23));
+			setEquip_Time(pRs.getString(24));
+			setRoad(pRs.getString(25));
+			setRotation(pRs.getString(26));
+			setUser_Id(pRs.getString(27));
+			setDes(pRs.getString(28));
+			setStatus(pRs.getString(29));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -1464,6 +1377,9 @@ public class DevGJBean extends RmiBean
 			setEquip_Time(CommUtil.StrToGB2312(request.getParameter("Equip_Time")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
 			setRotation(CommUtil.StrToGB2312(request.getParameter("Rotation")));
+			setUser_Id(CommUtil.StrToGB2312(request.getParameter("User_Id")));
+			setDes(CommUtil.StrToGB2312(request.getParameter("Des")));
+			setStatus(CommUtil.StrToGB2312(request.getParameter("Status")));
 			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 		}
 		catch (Exception Exp)
@@ -1499,11 +1415,39 @@ public class DevGJBean extends RmiBean
 	private String	Equip_Time;
 	private String	Road;
 	private String	Rotation;
+
+	private String	User_Id;
+	private String	Des;
+	private String	Status;
 	
 	private String	WX_Lng;
 	private String	WX_Lat;
 	
 	private String	pSimu; //降雨强度
+
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
+	}
+
+	public String getUser_Id() {
+		return User_Id;
+	}
+
+	public void setUser_Id(String user_Id) {
+		User_Id = user_Id;
+	}
+
+	public String getDes() {
+		return Des;
+	}
+
+	public void setDes(String des) {
+		Des = des;
+	}
 
 	public String getWX_Lng() {
 		return WX_Lng;

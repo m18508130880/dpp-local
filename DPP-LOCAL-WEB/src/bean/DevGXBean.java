@@ -69,6 +69,18 @@ public class DevGXBean extends RmiBean
 		switch(currStatus.getCmd())
 		{
 			case 12://删除
+				String[] Ids = currStatus.getFunc_Sub_Type_Id().split(",");
+				for(int i = 0; i < Ids.length; i ++){
+					Id = Ids[i];
+					msgBean = pRmi.RmiExec(currStatus.getCmd(), this, currStatus.getCurrPage(), 25);
+				}
+				pRmi.Client(2001,"0000000001","");
+				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
+				msgBean = pRmi.RmiExec(1, this,  currStatus.getCurrPage(), 25);
+				currStatus.setTotalRecord(msgBean.getCount());
+				request.getSession().setAttribute("User_DevGX_Info_" + Sid, (Object)msgBean.getMsg());
+				currStatus.setJsp("Dev_GX.jsp?Sid=" + Sid);
+				break;
 			case 11://编辑	
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
@@ -117,9 +129,351 @@ public class DevGXBean extends RmiBean
 				currStatus.setJsp("User_Graph_Cut.jsp?Sid=" + Sid + "&Id=" + Id);
 				break;
 		}
-		float a = Float.valueOf("2");
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	// 画剖面图之前计算排出口数量
+	public void getSumOutGJ(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = ((String)msgBean.getMsg());
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
+	// 画剖面图之前多个排出口，取得管井编号list
+	public void getOutGJId(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(4, this, 0, 25);
+		//request.getSession().setAttribute("User_Graph_Cut_GX_" + Sid, (Object)msgBean.getMsg());				
+		@SuppressWarnings("rawtypes")
+		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		DevGJBean tmpGJBean = new DevGJBean();
+		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+		tmpGJBean.setSubsys_Id(Id.substring(2, 5));
+		
+		msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
+		@SuppressWarnings("rawtypes")
+		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		Resp = "0000" + this.getSIdAndEId(gjObj, gxObj, Id, currStatus.getFunc_Sort_Id());
+
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
+	/**
+	 * 取到一段管段开始管井和结束管井
+	 * @param gjObj
+	 * @param gxObj
+	 * @param StartGJ 起点井
+	 * @param joinGJ 交汇井
+	 * @return
+	 */
+	public String getSIdAndEId(ArrayList<?> gjObj, ArrayList<?> gxObj, String StartGJ, String joinGJ)
+	{
+		//gjObj ArrayList转Hash
+		AnalogBean analogBean = new AnalogBean();
+		Hashtable<String, DevGJBean> objGJTable = null;
+		objGJTable = new Hashtable<String, DevGJBean>(); 
+		Iterator<?> iterGJ = gjObj.iterator();
+		while(iterGJ.hasNext())
+		{
+			DevGJBean gjBean = (DevGJBean)iterGJ.next();
+			String gjId = gjBean.getId();
+			analogBean.HashPut(objGJTable, gjId, gjBean);
+		}
+		//gxObj ArrayList转Hash
+		Hashtable<String, DevGXBean> objGXTable = null;
+		objGXTable = new Hashtable<String, DevGXBean>(); 
+		Iterator<?> iterGX = gxObj.iterator();
+		while(iterGX.hasNext())
+		{
+			DevGXBean gxBean = (DevGXBean)iterGX.next();
+			String gxId = gxBean.getId();
+			analogBean.HashPut(objGXTable, gxId, gxBean);
+		}
+		
+		DevGJBean nextGJ = (DevGJBean)analogBean.HashGet(objGJTable, StartGJ);
+		DevGJBean preGJ = new DevGJBean();
+		DevGXBean nextGX = new DevGXBean();
+		boolean option = true;
+		String IdList = "";
+		do
+		{
+			preGJ = nextGJ;
+			nextGX = (DevGXBean)analogBean.HashGet(objGXTable, nextGJ.getOut_Id());
+			nextGJ = (DevGJBean)analogBean.HashGet(objGJTable, nextGX.getEnd_Id());
+			if(nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6")){
+				IdList = "0," + nextGJ.getId();
+				option = false;
+			}else{
+				System.out.println(joinGJ);
+				if(nextGJ.getId().equals(joinGJ)){ // 相反的流向
+					joinGJ = nextGJ.getId(); // 把当前的管井记录为上一个井
+					String In_Id = preGJ.getIn_Id();
+					if(In_Id.length() > 10) { // 进口管线大于1个,交汇井
+						String [] In_IdList = In_Id.split(","); // 交汇井的进口
+						for(int i = 0; i < In_IdList.length; i ++){
+							DevGXBean inGX = (DevGXBean)analogBean.HashGet(objGXTable, In_IdList[i]); // 取到进口
+							if(inGX.getFlow().equals("2")){ // 进口管线是双流向
+								DevGJBean inGJ = (DevGJBean)analogBean.HashGet(objGJTable, inGX.getStart_Id()); // 取到双流向的起始井
+								if(inGJ.getId() != nextGJ.getId() && !IdList.contains(inGJ.getId())){
+									IdList += inGJ.getId() + "," + this.getQua(nextGJ, inGJ) + ";";
+									option = false;
+								}
+							}
+							if(!option){
+								DevGXBean outGX = (DevGXBean)analogBean.HashGet(objGXTable, nextGJ.getOut_Id()); // 交汇井的出口
+								DevGJBean outGJ = (DevGJBean)analogBean.HashGet(objGJTable, outGX.getEnd_Id());  // 交汇井的出口井
+								if(!outGJ.getId().contains(nextGJ.getId())){
+									IdList += outGJ.getId() + "," + this.getQua(nextGJ, outGJ) + ";";
+								}
+								IdList = nextGJ.getId() + "," + nextGJ.getLongitude() + "," + nextGJ.getLatitude() + ";" + IdList;
+							}
+						}
+					}
+				}else{
+					joinGJ = nextGJ.getId(); // 把当前的管井记录为上一个井
+					String In_Id = nextGJ.getIn_Id();
+					if(In_Id.length() > 10) { // 进口管线大于1个,交汇井
+						String [] In_IdList = In_Id.split(","); // 交汇井的进口
+						for(int i = 0; i < In_IdList.length; i ++){
+							DevGXBean inGX = (DevGXBean)analogBean.HashGet(objGXTable, In_IdList[i]); // 取到进口
+							if(inGX.getFlow().equals("2")){ // 进口管线是双流向
+								DevGJBean inGJ = (DevGJBean)analogBean.HashGet(objGJTable, inGX.getStart_Id()); // 取到双流向的起始井
+								if(inGJ.getId() != nextGJ.getId() && !IdList.contains(inGJ.getId())){
+									IdList += inGJ.getId() + "," + this.getQua(nextGJ, inGJ) + ";";
+									option = false;
+								}
+							}
+						}
+						if(!option){
+							DevGXBean outGX = (DevGXBean)analogBean.HashGet(objGXTable, nextGJ.getOut_Id()); // 交汇井的出口
+							DevGJBean outGJ = (DevGJBean)analogBean.HashGet(objGJTable, outGX.getEnd_Id());  // 交汇井的出口井
+							if(!outGJ.getId().contains(nextGJ.getId())){
+								IdList += outGJ.getId() + "," + this.getQua(nextGJ, outGJ) + ";";
+							}
+							IdList = nextGJ.getId() + "," + nextGJ.getLongitude() + "," + nextGJ.getLatitude() + ";" + IdList;
+						}
+					}
+				}
+			}
+		}
+		while(option);
+		return IdList;
+	}
+	
+	public void getGJListAndGXList(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+
+		msgBean = pRmi.RmiExec(4, this, 0, 25);			
+		@SuppressWarnings("rawtypes")
+		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		DevGJBean tmpGJBean = new DevGJBean();
+		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+		tmpGJBean.setSubsys_Id(Id.substring(2, 5));
+		
+		msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
+		@SuppressWarnings("rawtypes")
+		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
+		String IdList = request.getParameter("IdList");
+		currStatus.setJsp("User_Graph_Cut.jsp?Sid=" + Sid + "&Id=" + Id);
+		
+		//gjObj ArrayList转Hash
+		AnalogBean analogBean = new AnalogBean();
+		Hashtable<String, DevGJBean> objGJTable = null;
+		objGJTable = new Hashtable<String, DevGJBean>(); 
+		Iterator<?> iterGJ = gjObj.iterator();
+		while(iterGJ.hasNext())
+		{
+			DevGJBean gjBean = (DevGJBean)iterGJ.next();
+			String gjId = gjBean.getId();
+			analogBean.HashPut(objGJTable, gjId, gjBean);
+		}
+		//gxObj ArrayList转Hash
+		Hashtable<String, DevGXBean> objGXTable = null;
+		objGXTable = new Hashtable<String, DevGXBean>(); 
+		Iterator<?> iterGX = gxObj.iterator();
+		while(iterGX.hasNext())
+		{
+			DevGXBean gxBean = (DevGXBean)iterGX.next();
+			String gxId = gxBean.getId();
+			analogBean.HashPut(objGXTable, gxId, gxBean);
+		}
+		ArrayList<DevGJBean> gjList = new ArrayList<DevGJBean>();
+		ArrayList<DevGXBean> gxList = new ArrayList<DevGXBean>();
+		DevGJBean gjBean = new DevGJBean();
+		DevGXBean gxBean = new DevGXBean();
+		String [] IdArray = IdList.split(";");
+		gjBean = (DevGJBean) analogBean.HashGet(objGJTable, IdArray[0].split(",")[0]);
+		gjBean.setCurr_Data(gjBean.getBase_Height());
+		gjList.add(gjBean);
+		// 取到第一段
+		while(true) {
+			gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getOut_Id());
+			if(null != gxBean)
+			{
+				gxList.add(gxBean);
+				gjBean = (DevGJBean) analogBean.HashGet(objGJTable, gxBean.getEnd_Id());
+				gjBean.setCurr_Data(gjBean.getBase_Height());
+				gjList.add(gjBean);
+				if(gjBean.getId().equals(IdArray[0].split(",")[1])){
+					break;
+				}
+			}
+		}
+		for(int i = 1; i < IdArray.length; i ++){
+			String [] IdYD = IdArray[i].split(",");
+			gjBean = (DevGJBean) analogBean.HashGet(objGJTable, IdYD[1]);
+			gjBean.setCurr_Data(gjBean.getBase_Height());
+			gjList.add(gjBean);
+			String preGj = IdYD[0];
+			gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getOut_Id());
+			System.out.println(gxBean.getEnd_Id() + ":" + preGj);
+			System.out.println(gxBean.getEnd_Id().equals(preGj));
+			if(gxBean.getEnd_Id().equals(preGj)){
+				gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getOut_Id());
+				String change = gxBean.getEnd_Id();
+				gxBean.setEnd_Id(gxBean.getStart_Id());
+				gxBean.setStart_Id(change);
+				change = gxBean.getEnd_Height();
+				gxBean.setEnd_Height(gxBean.getStart_Height());
+				gxBean.setStart_Height(change);
+				gxList.add(gxBean);
+			}else{
+				gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getIn_Id().substring(0,8));
+				if(gxBean.getId().equals("YG011076")){
+					String change = gxBean.getEnd_Id();
+					gxBean.setEnd_Id(gxBean.getStart_Id());
+					gxBean.setStart_Id(change);
+					change = gxBean.getEnd_Height();
+					gxBean.setEnd_Height(gxBean.getStart_Height());
+					gxBean.setStart_Height(change);
+				}
+				gxList.add(gxBean);
+				
+			}
+			while(true) {
+				gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getOut_Id());
+				if(gxBean.getEnd_Id().equals(preGj)){
+					preGj = gjBean.getId();
+					gxBean = (DevGXBean) analogBean.HashGet(objGXTable,gjBean.getIn_Id().substring(0,8));
+					String change = gxBean.getEnd_Id();
+					gxBean.setEnd_Id(gxBean.getStart_Id());
+					gxBean.setStart_Id(change);
+					change = gxBean.getEnd_Height();
+					gxBean.setEnd_Height(gxBean.getStart_Height());
+					gxBean.setStart_Height(change);
+					gxList.add(gxBean);
+					gjBean = (DevGJBean) analogBean.HashGet(objGJTable, gxBean.getStart_Id());
+				}else{
+					preGj = gjBean.getId();
+					gxList.add(gxBean);
+					gjBean = (DevGJBean) analogBean.HashGet(objGJTable, gxBean.getEnd_Id());
+				}
+				gjBean.setCurr_Data(gjBean.getBase_Height());
+				gjList.add(gjBean);
+				if(gjBean.getId().equals(IdYD[2])){
+					break;
+				}
+			}
+		}
+		request.getSession().setAttribute("User_Graph_Cut_GX_" + Sid, gxList);
+		request.getSession().setAttribute("User_Graph_Cut_GJ_" + Sid, gjList);
+		for(int i = 0; i < gjList.size(); i ++){
+			System.out.println((gjList.get(i)).getId());
+		}
+		for(int i = 0; i < gxList.size(); i ++){
+			System.out.println((gxList.get(i)).getId());
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public String getQua(DevGJBean cenBean, DevGJBean orBean){
+		double pi = Math.PI;
+		double p_1 = Math.PI/8;
+		double p_2 = 3*Math.PI/8;
+		double p_3 = 5*Math.PI/8;
+		double p_4 = 7*Math.PI/8;
+		double p_5 = -7*Math.PI/8;
+		double p_6 = -5*Math.PI/8;
+		double p_7 = -3*Math.PI/8;
+		double p_8 = -Math.PI/8;
+		double pX = Double.valueOf(orBean.getLongitude()) - Double.valueOf(cenBean.getLongitude());
+		double pY = Double.valueOf(orBean.getLatitude()) - Double.valueOf(cenBean.getLatitude());
+		String qua = "";
+		double an = 0;
+		if(pX != 0){
+			an = Math.atan(Math.abs(pY/pX));
+		}
+		if(pY >= 0 && pX > 0){
+			if(an >= 0 && an < p_1){
+				qua = "1";
+			}else if(an >= p_1 && an < p_2){
+				qua = "2";
+			}else if(an >= p_2 && an < pi/2){
+				qua = "3";
+			}
+		}else if(pY > 0 && pX <= 0){
+			an = pi - an;
+			if(an >= pi/2 && an < p_3){
+				qua = "3";
+			}else if(an >= p_3 && an < p_4){
+				qua = "4";
+			}else if(an >= p_4 && an < pi){
+				qua = "5";
+			}
+			if(pX == 0){qua = "5";}
+		}else if(pY <= 0 && pX < 0){
+			an = an - pi;
+			if(an >= -pi && an < p_5){
+				qua = "5";
+			}else if(an >= p_5 && an < p_6){
+				qua = "6";
+			}else if(an >= p_6 && an < -pi/2){
+				qua = "7";
+			}
+		}else if(pY < 0 && pX >= 0){
+			an = -an;
+			if(an >= -pi/2 && an < p_7){
+				qua = "7";
+			}else if(an >= p_7 && an < p_8){
+				qua = "8";
+			}else if(an >= p_8 && an < 0){
+				qua = "1";
+			}
+			if(pX == 0){
+				qua = "1";
+			}
+		}
+		return qua;
 	}
 	
 	//管井管线统计
@@ -593,7 +947,192 @@ public class DevGXBean extends RmiBean
 		return gjList;
 	}
 	
-	
+	/**
+	 * 获得当前系统的分析数据
+	 * @param request
+	 * @param response
+	 * @param pRmi
+	 * @param pFromZone
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	public void getSysIdNow(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "0000";
+		
+		msgBean = pRmi.RmiExec(4, this, 0, 25);				
+		@SuppressWarnings("rawtypes")
+		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
+
+		DevGJBean tmpGJBean = new DevGJBean();
+		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+		tmpGJBean.setSubsys_Id(Id.substring(2, 5));
+
+		msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
+		@SuppressWarnings("rawtypes")
+		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
+
+		Resp = this.sysIdNowGJ(gjObj, gxObj, Id);
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	/**
+	 * 当前管井分析
+	 * @param gjObj
+	 * @param gxObj
+	 * @param Id
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public String sysIdNowGJ(ArrayList gjObj, ArrayList gxObj, String Id)
+	{
+		AnalogBean analogBean = new AnalogBean();
+		// gjObj ArrayList转Hash
+		Hashtable<String, DevGJBean> objGJTable = null;
+		objGJTable = new Hashtable<String, DevGJBean>();
+		Iterator iterGJ = gjObj.iterator();
+		while (iterGJ.hasNext())
+		{
+			DevGJBean gjBean = (DevGJBean) iterGJ.next();
+			String gjId = gjBean.getId();
+			analogBean.HashPut(objGJTable, gjId, gjBean);
+		}
+		// gxObj ArrayList转Hash
+		Hashtable<String, DevGXBean> objGXTable = null;
+		objGXTable = new Hashtable<String, DevGXBean>();
+		Iterator iterGX = gxObj.iterator();
+		while (iterGX.hasNext())
+		{
+			DevGXBean gxBean = (DevGXBean) iterGX.next();
+			String gxId = gxBean.getId();
+			analogBean.HashPut(objGXTable, gxId, gxBean);
+		}
+		
+		// 遍历，梳理先后关系,转成ArrayList
+		DevGJBean nextGJ = (DevGJBean) analogBean.HashGet(objGJTable, Id);
+		ArrayList<Object> gjList = new ArrayList<Object>(); // 管井ArrayList
+		gjList.add(nextGJ); // 加入第一个管井
+		DevGXBean nextGX = new DevGXBean();
+		
+		int option = 0;
+		do
+		{
+			if (nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6"))
+			{
+				option = 1;
+			}
+			String outGXId = "";
+			outGXId = nextGJ.getOut_Id();
+			nextGX = (DevGXBean) analogBean.HashGet(objGXTable, outGXId);
+			if(null != nextGX)
+			{
+				String outGJId = nextGX.getEnd_Id();
+				String startGJId = nextGX.getStart_Id();
+				if(outGJId.substring(2,5).equals(startGJId.substring(2,5)))
+				{
+					nextGJ = (DevGJBean) analogBean.HashGet(objGJTable, outGJId);
+					gjList.add(nextGJ);
+				}
+				else
+				{
+					option = 1;
+				}
+			}
+		}while (option == 0);
+		
+		// 倒序分析
+		double minHeight = 100;
+		double maxHeight = -100;
+		String minGJ = "";
+		String maxGJ = "";
+		int minGJI = 0;
+		int maxGJI = gjList.size() - 1;
+		String pondingGJ = "";
+		String dpGX = "";
+		DevGJBean outGJ = (DevGJBean) gjList.get(gjList.size() - 1);
+		double outGJBase = Double.valueOf(outGJ.getBase_Height());
+		for(int i = gjList.size() - 1; i >= 0; i --){
+			DevGJBean bean = (DevGJBean) gjList.get(i);
+			double GJBase = Double.valueOf(bean.getBase_Height());
+			if(outGJBase > GJBase) {
+				pondingGJ += bean.getId() + "," + bean.getLongitude() + "," + bean.getLatitude() + "#";
+			}
+			if(Double.valueOf(bean.getBase_Height()) < minHeight) {
+				minHeight = Double.valueOf(bean.getBase_Height());
+				minGJ = bean.getId() + "[" + minHeight + "]," + bean.getLongitude() + "," + bean.getLatitude();
+				minGJI = i;
+			}
+			if(Double.valueOf(bean.getBase_Height()) > maxHeight) {
+				maxHeight = Double.valueOf(bean.getBase_Height());
+				maxGJ = bean.getId() + "[" + maxHeight + "]," + bean.getLongitude() + "," + bean.getLatitude();
+				maxGJI = i;
+			}
+			String outGXId = bean.getOut_Id();
+			DevGXBean gxBean = (DevGXBean) analogBean.HashGet(objGXTable, outGXId);
+			if(gxBean == null){continue;}
+			double dp = Double.valueOf(gxBean.getStart_Height()) - Double.valueOf(gxBean.getEnd_Height());
+			if(dp < 0) {
+				DevGJBean startGJ = (DevGJBean) analogBean.HashGet(objGJTable, gxBean.getStart_Id());
+				DevGJBean endGJ = (DevGJBean) analogBean.HashGet(objGJTable, gxBean.getEnd_Id());
+				dpGX += gxBean.getId() + "," + startGJ.getLongitude() + "," + startGJ.getLatitude()
+						 + "," + endGJ.getLongitude() + "," + endGJ.getLatitude() + "#";
+			}
+			
+		}
+		String analyze = "";
+		if (minGJI == gjList.size() - 1 && maxGJI == 0) {
+			analyze = "经系统分析，"+Id+"至排出口，排水正常";
+		} else if (maxGJI > 0 && maxGJI < gjList.size() - 1 && minGJI == gjList.size() - 1) {
+			analyze = "经系统分析，"+Id+"至排出口，存在积水";
+		} else if (maxGJI > 0 && maxGJI < gjList.size() - 1 && minGJI < gjList.size() - 1 && minGJI > 0) {
+			analyze = "经系统分析，"+Id+"至排出口，存在多处积水";
+		} else if (maxGJI == 0 && minGJI < gjList.size() - 1 && minGJI > 0) {
+			analyze = "经系统分析，"+Id+"至排出口，存在积水";
+		}
+		String Resp = Id+"|" + minGJ + "|" + maxGJ + "|"+analyze+"|"+pondingGJ+"|"+dpGX;
+		return Resp;
+	}
+	/**
+	 * 当前管线分析
+	 * @param gjObj
+	 * @param gxObj
+	 * @param Id
+	 * @return
+	 */
+	@SuppressWarnings("rawtypes")
+	public String sysIdNowGX(ArrayList gxObj)
+	{
+		Iterator<?> gx_iterator = gxObj.iterator();
+		String Resp = "";
+		String PD = "";
+		DecimalFormat df = new DecimalFormat("#.####");
+		while (gx_iterator.hasNext()) {
+			DevGXBean devGXBean = (DevGXBean) gx_iterator.next();
+			Id = devGXBean.getId();
+			Diameter = devGXBean.getDiameter();
+			Length = devGXBean.getLength();
+			Start_Id = devGXBean.getStart_Id();
+			End_Id = devGXBean.getEnd_Id();
+			Start_Height = devGXBean.getStart_Height();
+			End_Height = devGXBean.getEnd_Height();
+			Material = devGXBean.getMaterial();
+			Buried_Year = devGXBean.getBuried_Year();
+			Flag = "";
+			PD = df.format((Double.valueOf(Start_Height) - Double.valueOf(End_Height))/Double.valueOf(Length));
+			if(Double.valueOf(Start_Height) < Double.valueOf(End_Height))
+			{
+				Resp += Id + ",";
+			}
+		}
+		return Resp;
+	}
+
 	
 	/** 导入Excel文档  解析文档中的管线详细数据  
 	 * @param request
@@ -660,6 +1199,7 @@ public class DevGXBean extends RmiBean
 				    		String data_Lev = rs.getCell(10, i).getContents().trim(); 
 				    		String road = rs.getCell(11, i).getContents().trim(); 
 				    		String flag = rs.getCell(12, i).getContents().trim(); 
+				    		String flow = rs.getCell(13, i).getContents().trim(); 
 	
 				    		this.setId(id.toUpperCase());			    		
 				    		this.setDiameter(!CommUtil.isNumeric(diameter)?"0":diameter);
@@ -675,6 +1215,7 @@ public class DevGXBean extends RmiBean
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
 				    		this.setFlag(flag);
+				    		this.setFlow(flow);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(10, this, 0, 25);
@@ -771,6 +1312,7 @@ public class DevGXBean extends RmiBean
 				    		String data_Lev = rs.getCell(10, i).getContents().trim();
 				    		String road = rs.getCell(11, i).getContents().trim();
 				    		String flag = rs.getCell(12, i).getContents().trim();
+				    		String flow = rs.getCell(13, i).getContents().trim();
 	
 				    		this.setId(id.toUpperCase());			    		
 				    		this.setDiameter(!CommUtil.isNumeric(diameter)?"0":diameter);
@@ -786,6 +1328,7 @@ public class DevGXBean extends RmiBean
 				    		this.setProject_Id(Project_Id);
 				    		this.setRoad(road);
 				    		this.setFlag(flag);
+				    		this.setFlow(flow);
 				    			    		
 				    		//插入提交
 				    		msgBean = pRmi.RmiExec(13, this, 0, 25);
@@ -1039,7 +1582,7 @@ public class DevGXBean extends RmiBean
 		switch (pCmd)
 		{  
 			case 0://查询（类型&项目）
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 		    	 	   	  " from view_dev_gx t " +		
 		    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 		    	 	   	  " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " +
@@ -1049,21 +1592,21 @@ public class DevGXBean extends RmiBean
 		    	switch(Integer.parseInt(currStatus.getFunc_Sort_Id()))
 				{
 					case 1://按照ID排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 				    	 	   	  " from view_dev_gx t " +		
 				    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 				    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
 			 	 		          " order by t.id ";
 						break;
 					case 2://按照直径排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 			    	 	   	  " from view_dev_gx t " +		
 			    	 	   	  " where t.id like  '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +  
 			    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
 		 	 		          " order by t.diameter ";
 				       break;
 				    case 3://按照材料排序
-						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+						Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 			    	 	   	  " from view_dev_gx t " +		
 			    	 	   	  " where t.id like '%"+ currStatus.getFunc_Sub_Type_Id() +"%'" +
 			    	 	   	  " and t.project_id like '" + currStatus.getFunc_Project_Id() + "%' " +
@@ -1074,45 +1617,45 @@ public class DevGXBean extends RmiBean
   
 		    case 3://查询(单个)
 		    case 5:
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 	    	 	   	  " from view_dev_gx t " +		
 	    	 	   	  " where t.id = '"+ Id +"' and t.project_id='" + currStatus.getFunc_Project_Id() + "'";	 		         
 			   break;
 		    case 4://查询（项目&子系统）
-				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 				      " from view_dev_gx t " +	
 				      " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
 				      " and substr(t.id, 3, 3) = '"+ Id.substring(2,5) +"'" +
 				      " order by t.id ";
 			   break;
 		    case 6://查询（项目&子系统）
-		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 		    			" from view_dev_gx t " +	
 		    			" where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + 
 		    			" and t.id like '"+ Id +"%'" +
 		    			" order by t.id ";
 		    	break;
 		    case 7://查询（下载地图）
-		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag" +
+		    	Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
 		    			" from view_dev_gx t " +	
 		    			" where t.project_id = '" + Project_Id + "'" + 
 		    			" and substr(t.id, 3, 3) = '"+ Id.substring(2,5) +"'" +
 		    			" order by t.id ";
 		    	break;
 		    case 10://添加
-		    	Sql = " insert into dev_gx(id, diameter, length, start_id, end_id, start_height, end_height, material, buried_year, data_lev, project_id, road, flag)" +
-		    			"values('"+ Id +"', '"+ Diameter +"', '"+ Length +"', '"+ Start_Id +"', '"+ End_Id +"',  '"+ Start_Height +"', '"+ End_Height +"',  '"+Material +"', '"+Buried_Year +"', '"+Data_Lev +"', '"+ Project_Id +"', '"+ Road +"', '"+ Flag +"')";
+		    	Sql = " insert into dev_gx(id, diameter, length, start_id, end_id, start_height, end_height, material, buried_year, data_lev, project_id, road, flag, flow)" +
+		    			"values('"+ Id +"', '"+ Diameter +"', '"+ Length +"', '"+ Start_Id +"', '"+ End_Id +"',  '"+ Start_Height +"', '"+ End_Height +"',  '"+Material +"', '"+Buried_Year +"', '"+Data_Lev +"', '"+ Project_Id +"', '"+ Road +"', '"+ Flag +"', '" + Flow + "')";
 		    	break;	
 		    case 13://管线更新
-				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "' " +
+				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "',t.flow = '" + Flow + "' " +
 					  " where t.id = '"+ Id +"' and t.project_id = '" + Project_Id + "'";
 				break;
 		    case 11://编辑
-				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material  +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "' " +
+				Sql = " update dev_gx t set t.start_id= '"+ Start_Id + "', t.end_id = '"+ End_Id  + "', t.start_height = '"+ Start_Height + "', t.end_height = '"+ End_Height +"' ,t.diameter= '"+ Diameter + "', t.length = '"+ Length + "', t.buried_year = '"+ Buried_Year + "', t.data_lev = '"+ Data_Lev +"',t.material = '"+ Material  +"',t.road = '"+ Road +"',t.flag = '"+ Flag + "',t.flow = '" + Flow + "',t.port = '" + Port + "',t.status = '" + Status + "',t.des = '" + Des + "' " +
 					  " where t.id = '"+ Id +"' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
 				break;
 		    case 12://删除
-		    	Sql = " delete from dev_gx where id = '"+ Id +"' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
+		    	Sql = " delete from dev_gx where id = '"+ Id +"' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
 		    	break;
 	    /*case 14://终点拖拽
 				Sql = " update dev_gx t set t.end_longi = '"+ End_Longi +"', t.end_lati = '"+ End_Lati +"' " +
@@ -1149,6 +1692,9 @@ public class DevGXBean extends RmiBean
 			case 23://获取未标注企业
 				Sql = "{? = call Func_UnMark_GX_Get('')}";
 				break;
+			case 24://获取子系统的排出口个数
+				Sql = "{? = call Func_Sum_OutGJ('"+Id+"', '"+currStatus.getFunc_Project_Id()+"')}";
+				break;
 			case 40://编辑设备EquipInfo
 				Sql = "{call pro_update_dev_gx('" + Equip_Id + "', '" + Equip_Name + "', '" + Id + "' , '" + Project_Id + "', '" + After_Project_Id + "')}";
 				break;
@@ -1178,6 +1724,10 @@ public class DevGXBean extends RmiBean
 			setCurr_Data(pRs.getString(15));
 			setRoad(pRs.getString(16));
 			setFlag(pRs.getString(17));
+			setFlow(pRs.getString(18));
+			setPort(pRs.getString(19));
+			setStatus(pRs.getString(20));
+			setDes(pRs.getString(21));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -1210,6 +1760,10 @@ public class DevGXBean extends RmiBean
 			setAfter_Project_Id(CommUtil.StrToGB2312(request.getParameter("After_Project_Id")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
 			setFlag(CommUtil.StrToGB2312(request.getParameter("Flag")));
+			setFlow(CommUtil.StrToGB2312(request.getParameter("Flow")));
+			setPort(CommUtil.StrToGB2312(request.getParameter("Port")));
+			setStatus(CommUtil.StrToGB2312(request.getParameter("Status")));
+			setDes(CommUtil.StrToGB2312(request.getParameter("Des")));
 			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 			
 		}
@@ -1232,6 +1786,10 @@ public class DevGXBean extends RmiBean
 	private String Data_Lev;
 	private String Road;
 	private String Flag;
+	private String Flow;
+	private String Port;
+	private String Status;
+	private String Des;
 	
 	private String Project_Id;	
 	private String Project_Name;	
@@ -1244,6 +1802,30 @@ public class DevGXBean extends RmiBean
 	private String After_Project_Id;
 	private String pSimu;
 	
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
+	}
+
+	public String getDes() {
+		return Des;
+	}
+
+	public void setDes(String des) {
+		Des = des;
+	}
+
+	public String getPort() {
+		return Port;
+	}
+
+	public void setPort(String port) {
+		Port = port;
+	}
+
 	public String getFlag()
 	{
 		return Flag;
@@ -1293,6 +1875,14 @@ public class DevGXBean extends RmiBean
 
 	
 	
+	public String getFlow() {
+		return Flow;
+	}
+
+	public void setFlow(String flow) {
+		Flow = flow;
+	}
+
 	public String getSubsys_Id() {
 		return Subsys_Id;
 	}

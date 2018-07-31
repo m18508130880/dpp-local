@@ -67,7 +67,7 @@ public class UserInfoBean extends RmiBean
 				{
 					
 				}
-				else if(StrMd5.substring(0,20).trim().equalsIgnoreCase("admin"))
+				else if(StrMd5.substring(0,20).trim().equalsIgnoreCase("admin001"))
 				{
 					//µ«»Î–≈œ¢
 					msgBean = pRmi.RmiExec(0, this, 0, 25);

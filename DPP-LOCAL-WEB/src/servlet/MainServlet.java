@@ -34,6 +34,7 @@ import bean.ProjectInfoBean;
 import bean.ThreeGJBean;
 import bean.UserInfoBean;
 import bean.UserRoleBean;
+import bean.WeatherBean;
 
 ////0全部查询 2插入 3修改 4删除 10～19单个查询
 public class MainServlet extends HttpServlet
@@ -280,6 +281,12 @@ public class MainServlet extends HttpServlet
         	new CorpInfoBean().ExecCmd(request, response, m_Rmi, false);    
         
         /***********************************user-图表分析*****************************************************/
+        else if (strUrl.equalsIgnoreCase("getSumOutGJ.do"))				        	//画剖面图前取得排出口数量
+        	new DevGXBean().getSumOutGJ(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getOutGJId.do"))				        	//画剖面图之前多个排出口，取得管井编号list
+        	new DevGXBean().getOutGJId(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getGJListAndGXList.do"))				        	//取到gjLIst和gxList
+        	new DevGXBean().getGJListAndGXList(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("User_Graph_Cut.do"))				        //管段剖面图
         	new DevGXBean().ExecCmd(request, response, m_Rmi, false);  
         else if (strUrl.equalsIgnoreCase("User_Graph_Curve.do"))				    //管井折线图
@@ -345,12 +352,14 @@ public class MainServlet extends HttpServlet
         	new DevHandBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Update_YH.do"))			         		//更新数据
         	new DevHandBean().updateData(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("User_DevHand_Curve.do"))			         		//更新历史数据
+        else if (strUrl.equalsIgnoreCase("User_DevHand_Curve.do"))			         	//更新历史数据
         	new DataHandBean().GraphData(request, response, m_Rmi, false);
 
         /************************************user-三维图*****************************************************/
-        else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//更新历史数据
+        else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//获取三维图数据
         	new ThreeGJBean().getThreeOneGJ(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getCanvasOneGJ.do"))			         		//交汇井简单图
+        	new ThreeGJBean().getCanvasOneGJ(request, response, m_Rmi, false);
         
         /************************************user-检测任务*****************************************************/
         else if (strUrl.equalsIgnoreCase("getUser_Info.do"))			         		//获取用户列表
@@ -363,6 +372,18 @@ public class MainServlet extends HttpServlet
         	new CheckTaskGXBean().getCheckGX(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Check_Task.do"))			         			//ajax查询管线
         	new CheckTaskBean().ExecCmd(request, response, m_Rmi, false);
+
+        /************************************user-数据分析*****************************************************/
+        else if (strUrl.equalsIgnoreCase("getSysId.do"))			         			//获取全部系统
+        	new DevGJBean().getSysId(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getSysIdNow.do"))			         			//分析当前系统的数据
+        	new DevGXBean().getSysIdNow(request, response, m_Rmi, false);
+        
+        /************************************user-天气接口*****************************************************/
+        else if (strUrl.equalsIgnoreCase("getWeatherAll.do"))			         		//获取全部天气
+        	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
+        	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
     }
     
     private class Connect extends Thread

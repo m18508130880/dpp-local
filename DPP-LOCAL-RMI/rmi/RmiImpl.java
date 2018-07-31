@@ -38,6 +38,7 @@ import bean.ThreeGJBean;
 import bean.ThreeGXBean;
 import bean.UserInfoBean;
 import bean.UserRoleBean;
+import bean.WeatherBean;
 
 /** RmiImpl implements Rmi 
  * @author Cui
@@ -270,6 +271,10 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_CHECK_GX:
 						rmiBean = new CheckTaskGXBean();
+						break;
+						
+					case RmiBean.RMI_WEATHER:
+						rmiBean = new WeatherBean();
 						break;
 				}
 				rmiBean.getData(rs);

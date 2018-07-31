@@ -123,6 +123,53 @@ public class DBUtil
 		return rslt;
 	}
 	
+
+	public String doFunc(String pSql)
+	{
+		String rslt = null;
+		Connection conn = null;
+		CallableStatement cstat = null;
+		try
+		{
+			conn = objConnPool.getConnection();
+			if(null != conn)
+			{
+				conn.setAutoCommit(false);
+				cstat = conn.prepareCall(pSql);
+				cstat.registerOutParameter(1, java.sql.Types.VARCHAR);
+				cstat.execute();
+				rslt = cstat.getString(1);
+				conn.commit();
+			}
+		}
+		catch(SQLException ex)
+		{
+			ex.printStackTrace();
+			return  CommUtil.IntToStringLeftFillSpace(Cmd_Sta.STA_UNKHOWN_ERROR, 4);
+		}
+		finally
+		{
+			try
+			{
+				if(null != cstat)
+				{
+					cstat.close();
+					cstat = null;					
+				}
+				if(null != conn)
+				{
+					conn.close();
+					conn = null;	
+				}
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		CommUtil.PRINT("DB_IN["+pSql+"] DB_OUT[" + rslt + "]");	
+		return rslt;
+	}
 	/** 数据库查询操作
 	 * @param pSql
 	 * @param pClass

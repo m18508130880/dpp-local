@@ -9166,40 +9166,45 @@ public class AnalogBean
 		int option = 0;
 		do
 		{
-			if (nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6"))
-			{
-				option = 1;
-			}
-			String outGXId = "";
-			if (Double.valueOf(nextGJ.getCurr_Data()) > 0)
-			{
-				DevGJData devGJ = new DevGJData();
-				devGJ.sn = sn;
-				devGJ.Base_Height = nextGJ.getBase_Height();
-				devGJ.Top_Height = nextGJ.getTop_Height();
-				devGJ.Equip_Height = nextGJ.getEquip_Height();
-				devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height()) - CommUtil.StrToFloat(nextGJ.getEquip_Height()) + CommUtil.StrToFloat(nextGJ.getCurr_Data());
-				if(devGJ.water - CommUtil.StrToFloat(devGJ.Base_Height) >= 0.06) {
-					devList.add(devGJ);
-				}
-			}
-			outGXId = nextGJ.getOut_Id();
-			nextGX = (DevGXBean) HashGet(objGXTable, outGXId);
-			if(null != nextGX)
-			{
-				String outGJId = nextGX.getEnd_Id();
-				String startGJId = nextGX.getStart_Id();
-				//System.out.println("outGJId["+outGJId+"]startGJId["+startGJId+"]");
-				if(outGJId.substring(2,5).equals(startGJId.substring(2,5)))
-				{
-					nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
-					sn++;
-					gjList.add(nextGJ);
-				}
-				else
+			try{
+				if (nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6") || sn > 1000)
 				{
 					option = 1;
 				}
+				String outGXId = "";
+				if (Double.valueOf(nextGJ.getCurr_Data()) > 0)
+				{
+					DevGJData devGJ = new DevGJData();
+					devGJ.sn = sn;
+					devGJ.Base_Height = nextGJ.getBase_Height();
+					devGJ.Top_Height = nextGJ.getTop_Height();
+					devGJ.Equip_Height = nextGJ.getEquip_Height();
+					devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height()) - CommUtil.StrToFloat(nextGJ.getEquip_Height()) + CommUtil.StrToFloat(nextGJ.getCurr_Data());
+					if(devGJ.water - CommUtil.StrToFloat(devGJ.Base_Height) >= 0.06) {
+						devList.add(devGJ);
+					}
+				}
+				outGXId = nextGJ.getOut_Id();
+				nextGX = (DevGXBean) HashGet(objGXTable, outGXId);
+				if(null != nextGX)
+				{
+					String outGJId = nextGX.getEnd_Id();
+					String startGJId = nextGX.getStart_Id();
+					//System.out.println("outGJId["+outGJId+"]startGJId["+startGJId+"]");
+					if(outGJId.substring(2,5).equals(startGJId.substring(2,5)))
+					{
+						nextGJ = (DevGJBean) HashGet(objGJTable, outGJId);
+						sn++;
+						gjList.add(nextGJ);
+					}
+					else
+					{
+						option = 1;
+					}
+				}
+			}catch(Exception e){
+				e.printStackTrace();
+				return null;
 			}
 		}
 		while (option == 0);

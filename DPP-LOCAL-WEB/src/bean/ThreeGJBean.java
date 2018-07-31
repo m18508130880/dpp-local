@@ -1,6 +1,7 @@
 package bean;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -76,6 +77,111 @@ public class ThreeGJBean extends RmiBean
 		request.getSession().setAttribute("Three_Model_" + Sid, (Object) modelList);
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void getCanvasOneGJ(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		Subsys_Id = Id.substring(2, 5);
+		msgBean = pRmi.RmiExec(0, this, 0, 25);
+		ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
+		
+		ThreeGXBean threeGXBean = new ThreeGXBean(currStatus);
+		threeGXBean.setSubsys_Id(Subsys_Id);
+		msgBean = pRmi.RmiExec(0, threeGXBean, 0, 25);
+		ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
+
+		String canvas = getCanvas(gj_List, gx_List, Id);
+		
+		PrintWriter outprint = response.getWriter();
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(canvas);
+	}
+	public String getCanvas(ArrayList<?> gj_List, ArrayList<?> gx_List, String Id){
+		String Resp = "";
+		HashMap<String, ThreeGJBean> gjMap = new HashMap<String, ThreeGJBean>();
+		for(int i = 0; i < gj_List.size(); i ++){	// list转map
+			ThreeGJBean bean = (ThreeGJBean) gj_List.get(i);
+			gjMap.put(bean.getId(), bean);
+		}
+		HashMap<String, ThreeGXBean> gxMap = new HashMap<String, ThreeGXBean>();
+		for(int i = 0; i < gx_List.size(); i ++){	// list转map
+			ThreeGXBean bean = (ThreeGXBean) gx_List.get(i);
+			gxMap.put(bean.getId(), bean);
+		}
+		String color = "";
+		double x = 0;
+		double y = 0;
+		if(gjMap.containsKey(Id)){
+			ThreeGJBean cenGJ= gjMap.get(Id);
+			String [] inIdList = cenGJ.getIn_Id().split(",");
+			for(int i = 0; i < inIdList.length; i ++){
+				if(gxMap.containsKey(inIdList[i])){
+					color = "green";
+					ThreeGXBean inGx = gxMap.get(inIdList[i]);	// 取到进口管线
+					String inGxInfo = inGx.getId() + "|" + inGx.getDiameter() + "|" + inGx.getStart_Height() + "|" + inGx.getEnd_Height();
+					ThreeGJBean inGj = gjMap.get(inGx.getStart_Id());	// 取到进口管井
+					Resp += getResp(cenGJ, inGj, color, inGxInfo);
+				}
+			}
+			String outId = cenGJ.getOut_Id();
+			if(gxMap.containsKey(outId)){
+				color = "red";
+				ThreeGXBean outGx = gxMap.get(outId);	// 取到出口管线
+				String outGxInfo = outGx.getId() + "|" + outGx.getDiameter() + "|" + outGx.getStart_Height() + "|" + outGx.getEnd_Height();
+				ThreeGJBean outGj = gjMap.get(outGx.getEnd_Id());	// 取到出口管井
+				Resp += getResp(cenGJ, outGj, color, outGxInfo);
+			}
+		}
+		return Resp;
+	}
+
+	public String getResp(ThreeGJBean cenGJ, ThreeGJBean gj, String color, String info){
+		double x = 0;
+		double y = 0;
+		double pX = (Double.valueOf(gj.getLongitude()) - Double.valueOf(cenGJ.getLongitude()))*100000000;
+		double pY = (Double.valueOf(gj.getLatitude()) - Double.valueOf(cenGJ.getLatitude()))*100000000;
+		
+		int IsOK = 0;
+		double angle = 0;
+		if(pX == 0){IsOK = 1;}
+		else{angle = Math.atan(Math.abs(pY/pX));}
+		if(pY > 0 && pX >= 0){ // 第一象限
+			if(IsOK == 1){x = 0.5;y = 0;}
+			else {
+				x = 0.5 + Math.cos(angle)/2;
+				y = 0.5 - Math.sin(angle)/2;
+			}
+			//System.out.println(gj.getId()+"[1]gj["+gj.getId()+"]angle["+angle+"]x["+x*170+"]y["+y*170+"]");
+		}else if(pY >= 0 && pX < 0){ // 第二象限
+			if(pY == 0){x = 0;y = 0.5;}
+			else {
+				x = 0.5 - Math.cos(angle)/2;
+				y = 0.5 - Math.sin(angle)/2;
+			}
+			//System.out.println(gj.getId()+"[2]gj["+gj.getId()+"]angle["+angle+"]x["+x*170+"]y["+y*170+"]");
+		}else if(pY < 0 && pX <= 0){ // 第三象限
+			if(IsOK == 1){x = 0.5;y = 1;}
+			else {
+				x = 0.5 - Math.cos(angle)/2;
+				y = 0.5 + Math.sin(angle)/2;
+			}
+			//System.out.println(gj.getId()+"[3]gj["+gj.getId()+"]angle["+angle+"]x["+x*170+"]y["+y*170+"]");
+		}else if(pY <= 0 && pX > 0){ // 第四象限
+			if(pY == 0){x = 1;y = 0.5;}
+			else {
+				x = 0.5 + Math.cos(angle)/2;
+				y = 0.5 + Math.sin(angle)/2;
+			}
+			//System.out.println(gj.getId()+"[4]gj["+gj.getId()+"]angle["+angle+"]x["+x*170+"]y["+y*170+"]");
+		}
+		if(x < 0.001){x = 0;}
+		if(y < 0.001){y = 0;}
+		return x + "|" + y + "|" + color + "|" + info + ";";
 	}
 	
 	public ArrayList<ThreeModel> getModel(ArrayList<?> gj_List, ArrayList<?> gx_List, String Id){
@@ -262,6 +368,7 @@ public class ThreeGJBean extends RmiBean
 		model.setDes(des);
 		return model;
 	}
+	
 	/**
 	 * 获取相应sql语句
 	 * 

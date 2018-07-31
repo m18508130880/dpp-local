@@ -4,14 +4,20 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
-import util.*;
-import bean.*;
+import util.Cmd_Sta;
+import util.CommUtil;
+import util.DBUtil;
+import bean.BaseCmdBean;
+import bean.EquipInfoBean;
+import bean.UpdateDataBean;
+import bean.WeatherNowBean;
 
 public class AlertCtrl extends Thread
 {	
 	private DBUtil m_DBUtil = null;
 	private BaseCmdBean m_CmdBean = null;
 	private EquipInfoBean m_EquipInfo = null;
+	private WeatherNowBean m_WeatherNow = null;
 	
 	private int m_Seq = (int)new Date().getTime();
 
@@ -32,6 +38,7 @@ public class AlertCtrl extends Thread
 			m_CmdBean = new UpdateDataBean(Cmd_Sta.CMD_SUBMIT_2001, getSeq());
 			equipInfo = new ArrayList<EquipInfoBean>();
 			m_EquipInfo = new EquipInfoBean();
+			m_WeatherNow = new WeatherNowBean();
 
 			m_CmdBean.execRequest(this);
 			this.start();
@@ -66,6 +73,8 @@ public class AlertCtrl extends Thread
 //			        //System.out.println(entry.getKey() + entry.getValue());  
 //			    }  
 				CommUtil.PRINT("设备离线计算["+(i ++)+"] Time["+CommUtil.getDateTime()+"]");
+				
+				m_WeatherNow.doWeatherNow(this);
 			}
 			catch(Exception ex)
 			{

@@ -38,76 +38,85 @@ public class DevGJBean extends RmiBean
 		String Sql = "";
 		switch (pCmd)
 		{
-			case 0:// 查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
-				break;
-			case 1:// 查询（全部）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + Project_Id + "' "  + " order by t.id  ";
-				break;
-			case 2:// 查询（类型&项目）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
-				break;
+		case 0:// 查询（类型&项目）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t where t.id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " + " and t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
+			break;
+		case 1:// 查询（全部）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t where t.project_id = '" + Project_Id + "' "  + " order by t.id  ";
+			break;
+		case 2:// 查询（类型&项目）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t where t.project_id = '" + currStatus.getFunc_Project_Id() + "' " + " order by t.id  ";
+			break;
 
-			case 3:// 查询（单个）
-			case 6:
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
-				break;
-			case 4:// 查询（多个）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
-				break;
-			case 5:// 查询（项目&子系统）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.project_id = '" + Project_Id + "'" + " and substr(t.id, 3, 3) = '" + Subsys_Id + "'" + " order by t.id";
-				break;
-			case 7:// 查询（下载地图）
-				Sql = " select t.id, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
-				break;
-			case 10:// 添加
-				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', " + Sign + ")";
-				break;
-			case 11:// 编辑
-				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
-				break;
-			case 19:// 编辑
-				Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 12:// 删除
-				Sql = " delete from dev_gj where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
-				break;
+		case 3:// 查询（单个）
+		case 6:
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
+			break;
+		case 4:// 查询（多个）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t " + " where instr('" + Id + "', t.id) > 0 and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" + " order by t.id  ";
+			break;
+		case 5:// 查询（项目&子系统）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t " + " where t.project_id = '" + Project_Id + "'" + " and substr(t.id, 3, 3) = '" + Subsys_Id + "'" + " order by t.id";
+			break;
+		case 7:// 查询（下载地图）
+			Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation, t.user_id, t.des, t.status " + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
+			break;
+		case 10:// 添加
+			Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', " + Sign + ")";
+			break;
 
-			case 13:// 管井更新
-				Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "',t.sign = '" + Sign + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
+		case 53:// 添加-没有经纬度
+			Sql = "insert into dev_gj(id, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road) " + "values('" + Id + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "')";
+			break;
+		case 11:// 编辑
+			Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "',t.user_id = '" + User_Id + "',t.status = '" + Status + "' " + " where t.id = '" + Id + "' and t.project_id = '" + currStatus.getFunc_Project_Id() + "'";
+			break;
+		case 19:// 编辑
+			Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "', t.gj_name = '" + Equip_Name + "',t.equip_height = '" + Equip_Height + "',t.equip_tel = '" + Equip_Tel + "',t.road = '" + Road + "',t.user_id = '" + User_Id + "',t.status = '" + Status + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 12:// 删除
+			Sql = " delete from dev_gj where id = '" + Id + "' and project_id = '" + currStatus.getFunc_Project_Id() + "'";
+			break;
 
-			case 14:// 窨井内图更新
-				Sql = " update dev_gj t set t.in_Img = '" + In_Img + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 18:// 窨井外图更新
-				Sql = " update dev_gj t set t.out_Img = '" + Out_Img + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 15:// 地图拖拽同步更新
-				Sql = " update dev_gj t set t.longitude = '" + Longitude + "', t.latitude = '" + Latitude + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 16:// 删除标注接口
-				Sql = " update dev_gj t set t.sign = '0' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 17:// 添加标注接口
-				Sql = " update dev_gj t set t.sign = '1', t.longitude = '" + Longitude + "', t.latitude = '" + Latitude + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 21:// 获取已标注管井
-				Sql = "{? = call Func_GJ_Get('" + Id + "', '" + Road + "')}";
-				break;
-			case 22:// 获取已标注管井
-				Sql = "{? = call Func_GJ_Analog('" + Id + "','" + currStatus.getFunc_Sub_Type_Id() + "')}";
-				break;
-			case 23:// 获取未标注管井
-				Sql = "{? = call Func_UnMark_GJ_Get('" + Project_Id + "')}";
-				break;
-			case 50:// 地图拖拽更新旋转角度
-				Sql = " update dev_gj t set t.rotation = '" + Rotation + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
-			case 51:// 百度坐标系转腾讯坐标系
-				Sql = " update dev_gj t set t.wx_lng = '" + WX_Lng + "',t.wx_lat = '" + WX_Lat + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
-				break;
+		case 13:// 管井更新
+			Sql = " update dev_gj t set t.wgs84_lng = '" + Wgs84_Lng + "',t.Wgs84_Lat= '" + Wgs84_Lat + "',t.Longitude= '" + Longitude + "',t.latitude= '" + Latitude + "',t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "',t.sign = '" + Sign + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 52:// 管井更新-不更新经纬度
+			Sql = " update dev_gj t set t.in_id= '" + In_Id + "', t.out_id = '" + Out_Id + "' ,t.top_height= '" + Top_Height + "', t.base_height = '" + Base_Height + "', t.size = '" + Size + "', t.Flag = '" + Flag + "', t.Data_Lev = '" + Data_Lev + "',t.material = '" + Material + "',t.road = '" + Road + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 14:// 窨井内图更新
+			Sql = " update dev_gj t set t.in_Img = '" + In_Img + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 18:// 窨井外图更新
+			Sql = " update dev_gj t set t.out_Img = '" + Out_Img + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 15:// 地图拖拽同步更新
+			Sql = " update dev_gj t set t.longitude = '" + Longitude + "', t.latitude = '" + Latitude + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 16:// 删除标注接口
+			Sql = " update dev_gj t set t.sign = '0' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 17:// 添加标注接口
+			Sql = " update dev_gj t set t.sign = '1', t.longitude = '" + Longitude + "', t.latitude = '" + Latitude + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 21:// 获取已标注管井
+			Sql = "{? = call Func_GJ_Get('" + Id + "', '" + Road + "')}";
+			break;
+		case 22:// 获取已标注管井
+			Sql = "{? = call Func_GJ_Analog('" + Id + "','" + currStatus.getFunc_Sub_Type_Id() + "')}";
+			break;
+		case 23:// 获取未标注管井
+			Sql = "{? = call Func_UnMark_GJ_Get('" + Project_Id + "')}";
+			break;
+		case 24: // 查询本项目的所有子系统
+			Sql = "{? = call Func_SysId_Get('" + Project_Id + "')}";
+			break;
+		case 50:// 地图拖拽更新旋转角度
+			Sql = " update dev_gj t set t.rotation = '" + Rotation + "' " + " where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
+		case 51:// 百度坐标系转腾讯坐标系
+			Sql = " update dev_gj t set t.wx_lng = '" + WX_Lng + "',t.wx_lat = '" + WX_Lat + "' where t.id = '" + Id + "' and t.project_id = '" + Project_Id + "'";
+			break;
 
 		}
 		return Sql;
@@ -123,29 +132,34 @@ public class DevGJBean extends RmiBean
 		try
 		{
 			setId(pRs.getString(1));
-			setLongitude(pRs.getString(2));
-			setLatitude(pRs.getString(3));
-			setTop_Height(pRs.getString(4));
-			setBase_Height(pRs.getString(5));
-			setSize(pRs.getString(6));
-			setIn_Id(pRs.getString(7));
-			setOut_Id(pRs.getString(8));
-			setMaterial(pRs.getString(9));
-			setFlag(pRs.getString(10));
-			setData_Lev(pRs.getString(11));
-			setCurr_Data(pRs.getString(12));
-			setSign(pRs.getString(13));
-			setProject_Id(pRs.getString(14));
-			setProject_Name(pRs.getString(15));
-			setEquip_Id(pRs.getString(16));
-			setEquip_Name(pRs.getString(17));
-			setEquip_Height(pRs.getString(18));
-			setEquip_Tel(pRs.getString(19));
-			setIn_Img(pRs.getString(20));
-			setOut_Img(pRs.getString(21));
-			setEquip_Time(pRs.getString(22));
-			setRoad(pRs.getString(23));
-			setRotation(pRs.getString(24));
+			setWgs84_Lng(pRs.getString(2));
+			setWgs84_Lat(pRs.getString(3));
+			setLongitude(pRs.getString(4));
+			setLatitude(pRs.getString(5));
+			setTop_Height(pRs.getString(6));
+			setBase_Height(pRs.getString(7));
+			setSize(pRs.getString(8));
+			setIn_Id(pRs.getString(9));
+			setOut_Id(pRs.getString(10));
+			setMaterial(pRs.getString(11));
+			setFlag(pRs.getString(12));
+			setData_Lev(pRs.getString(13));
+			setCurr_Data(pRs.getString(14));
+			setSign(pRs.getString(15));
+			setProject_Id(pRs.getString(16));
+			setProject_Name(pRs.getString(17));
+			setEquip_Id(pRs.getString(18));
+			setEquip_Name(pRs.getString(19));
+			setEquip_Height(pRs.getString(20));
+			setEquip_Tel(pRs.getString(21));
+			setIn_Img(pRs.getString(22));
+			setOut_Img(pRs.getString(23));
+			setEquip_Time(pRs.getString(24));
+			setRoad(pRs.getString(25));
+			setRotation(pRs.getString(26));
+			setUser_Id(pRs.getString(27));
+			setDes(pRs.getString(28));
+			setStatus(pRs.getString(29));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -167,6 +181,7 @@ public class DevGJBean extends RmiBean
 		{
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 			setId(CommUtil.StrToGB2312(request.getParameter("Id")));
+			setUser_Id(CommUtil.StrToGB2312(request.getParameter("User_Id")));
 			setWgs84_Lng(CommUtil.StrToGB2312(request.getParameter("Wgs84_Lng")));
 			setWgs84_Lat(CommUtil.StrToGB2312(request.getParameter("Wgs84_Lat")));
 			setLongitude(CommUtil.StrToGB2312(request.getParameter("Longitude")));
@@ -191,6 +206,8 @@ public class DevGJBean extends RmiBean
 			setEquip_Time(CommUtil.StrToGB2312(request.getParameter("Equip_Time")));
 			setRoad(CommUtil.StrToGB2312(request.getParameter("Road")));
 			setRotation(CommUtil.StrToGB2312(request.getParameter("Rotation")));
+			setDes(CommUtil.StrToGB2312(request.getParameter("Des")));
+			setStatus(CommUtil.StrToGB2312(request.getParameter("Status")));
 			setpSimu(CommUtil.StrToGB2312(request.getParameter("pSimu")));
 		}
 		catch (Exception Exp)
@@ -201,9 +218,12 @@ public class DevGJBean extends RmiBean
 	}
 
 	private String	Id;
+	private String	User_Id;
+	private String	Des;
+	private String	Status;
 	
-	private String Wgs84_Lng;
-	private String Wgs84_Lat;
+	private String  Wgs84_Lng;
+	private String  Wgs84_Lat;
 	
 	private String	Longitude;
 	private String	Latitude;
@@ -230,7 +250,31 @@ public class DevGJBean extends RmiBean
 	private String	WX_Lng;
 	private String	WX_Lat;
 	
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
+	}
+
+	public String getDes() {
+		return Des;
+	}
+
+	public void setDes(String des) {
+		Des = des;
+	}
+
 	private String	pSimu; //降雨强度
+
+	public String getUser_Id() {
+		return User_Id;
+	}
+
+	public void setUser_Id(String user_Id) {
+		User_Id = user_Id;
+	}
 
 	public String getWX_Lng() {
 		return WX_Lng;
