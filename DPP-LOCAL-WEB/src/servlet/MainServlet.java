@@ -31,7 +31,9 @@ import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
+import bean.TextLLJBean;
 import bean.ThreeGJBean;
+import bean.ThreeGXBean;
 import bean.UserInfoBean;
 import bean.UserRoleBean;
 import bean.WeatherBean;
@@ -356,10 +358,13 @@ public class MainServlet extends HttpServlet
         	new DataHandBean().GraphData(request, response, m_Rmi, false);
 
         /************************************user-三维图*****************************************************/
-        else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//获取三维图数据
+        else if (strUrl.equalsIgnoreCase("doThreeOneGJ.do"))			         		//获取三维图数据-管井
         	new ThreeGJBean().getThreeOneGJ(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getCanvasOneGJ.do"))			         		//交汇井简单图
         	new ThreeGJBean().getCanvasOneGJ(request, response, m_Rmi, false);
+        
+        else if (strUrl.equalsIgnoreCase("doThreeOneGX.do"))			         		//获取三维图数据-管线
+        	new ThreeGXBean().getThreeOneGX(request, response, m_Rmi, false);
         
         /************************************user-检测任务*****************************************************/
         else if (strUrl.equalsIgnoreCase("getUser_Info.do"))			         		//获取用户列表
@@ -384,6 +389,14 @@ public class MainServlet extends HttpServlet
         	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
         	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
+
+        
+        /************************************测试流量计*****************************************************/
+        else if (strUrl.equalsIgnoreCase("TextLLJ.do"))			         				//获取实时数据
+        	new TextLLJBean().getShow(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("TextLLJ_Export.do"))			         				//下载全部
+        	new TextLLJBean().XLQRExcel(request, response, m_Rmi, false);
+        
     }
     
     private class Connect extends Thread

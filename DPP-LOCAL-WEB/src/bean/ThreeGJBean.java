@@ -63,6 +63,12 @@ public class ThreeGJBean extends RmiBean
 		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
 		currStatus.getHtmlData(request, pFromZone);
 		
+		DevGJBean dBean = new DevGJBean();
+		dBean.setId(Id);
+		dBean.setProject_Id(currStatus.getFunc_Project_Id());
+		msgBean = pRmi.RmiExec(7, dBean, 0, 25);
+		request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (DevGJBean) ((ArrayList<?>) msgBean.getMsg()).get(0));
+		
 		Subsys_Id = Id.substring(2, 5);
 		msgBean = pRmi.RmiExec(0, this, 0, 25);
 		ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
@@ -73,7 +79,7 @@ public class ThreeGJBean extends RmiBean
 		ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
 
 		ArrayList<ThreeModel> modelList = getModel(gj_List, gx_List, Id);
-		currStatus.setJsp("three.jsp?Sid=" + Sid);
+		currStatus.setJsp("GJ_Three.jsp?Sid=" + Sid + "&Id=" + Id);
 		request.getSession().setAttribute("Three_Model_" + Sid, (Object) modelList);
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
@@ -234,7 +240,7 @@ public class ThreeGJBean extends RmiBean
 		ThreeModel model = new ThreeModel();
 		model.setId(cenGJ.getId());
 		model.setType("1");
-		model.setColor("#000000");
+		model.setColor(cenGJ.getMaterial());
 		model.setPositionX("0");
 		model.setPositionY("0");
 		model.setPositionZ("0");
@@ -310,7 +316,11 @@ public class ThreeGJBean extends RmiBean
 			rX = Math.PI/2 + Math.atan(rotaZ/rotaX); // 管线模型旋转角度-绕Y轴
 		}
 		if(pLat <= 0 && pLng <= 0){ // 第一象限
-			rZ = - Math.atan(Math.abs(pLat/pLng)); // 管线模型旋转角度-绕Z轴
+			if(pLng == 0){
+				rZ = - Math.PI/2; // 管线模型旋转角度-绕Z轴
+			}else{
+				rZ = - Math.atan(Math.abs(pLat/pLng)); // 管线模型旋转角度-绕Z轴
+			}
 			pZ = - Math.cos(rZ)*(height/2 + cenRadii - 10); // 管线模型与中心管井模型的左右差
 			pX = Math.sin(rZ)*(height/2 + cenRadii - 10); // 管线模型与中心管井的前后差
 			pZ_Y = - Math.cos(rZ)*(height + cenRadii - 10); // 管线模型与中心管井模型的左右差
@@ -328,7 +338,11 @@ public class ThreeGJBean extends RmiBean
 			pZ_Y = Math.cos(rZ)*(height + cenRadii - 10);
 			pX_Y = - Math.sin(rZ)*(height + cenRadii - 10);
 		}else if(pLat > 0 && pLng <= 0){ // 第四象限
-			rZ = Math.atan(Math.abs(pLat/pLng));
+			if(pLng == 0){
+				rZ = Math.PI/2; // 管线模型旋转角度-绕Z轴
+			}else{
+				rZ = Math.atan(Math.abs(pLat/pLng));
+			}
 			pZ = - Math.cos(rZ)*(height/2 + cenRadii - 10);
 			pX = Math.sin(rZ)*(height/2 + cenRadii - 10);
 			pZ_Y = - Math.cos(rZ)*(height + cenRadii - 10);
@@ -337,7 +351,7 @@ public class ThreeGJBean extends RmiBean
 		
 		model.setId(gx.getId());
 		model.setType("1");
-		model.setColor("#000000");
+		model.setColor(gx.getMaterial());
 		model.setPositionX(String.valueOf(pX));
 		model.setPositionY(String.valueOf(pY));
 		model.setPositionZ(String.valueOf(pZ));

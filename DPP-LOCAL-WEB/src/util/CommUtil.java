@@ -903,6 +903,63 @@ public class CommUtil
         ByteArrayInputStream swapStream = new ByteArrayInputStream(baos.toByteArray());
         return swapStream;
     }
+    
+    // 将16进制转化为中文 jspDecode
+	public static String jspDecode(String unicodeStr) {
+		String mStr = jspStrInit(unicodeStr);
+		return decode(mStr);
+	}
+    public static String decode(String unicodeStr) {
+		if (unicodeStr == null) {
+			return null;
+		}
+		StringBuffer retBuf = new StringBuffer();
+		int maxLoop = unicodeStr.length();
+		for (int i = 0; i < maxLoop; i++) {
+			if (unicodeStr.charAt(i) == '\\') {
+				if ((i < maxLoop - 5)
+						&& ((unicodeStr.charAt(i + 1) == 'u') || (unicodeStr
+								.charAt(i + 1) == 'U')))
+					try {
+						retBuf.append((char) Integer.parseInt(
+								unicodeStr.substring(i + 2, i + 6), 16));
+						i += 5;
+					} catch (NumberFormatException localNumberFormatException) {
+						retBuf.append(unicodeStr.charAt(i));
+					}
+				else
+					retBuf.append(unicodeStr.charAt(i));
+			} else {
+				retBuf.append(unicodeStr.charAt(i));
+			}
+		}
+		return retBuf.toString();
+	}
+	public static String jspStrInit(String sourceStr) {
+		String[] sourceStrArray = sourceStr.split(",");
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < sourceStrArray.length; i++) {
+			if (sourceStrArray[i].length() <= 2)
+				sb.append(hexStr2Str(sourceStrArray[i].toUpperCase()));
+			else
+				sb.append("\\u" + sourceStrArray[i]);
+		}
+		return sb.toString();
+	}
+	public static String hexStr2Str(String hexStr) {
+		String str = "0123456789ABCDEF";
+		char[] hexs = hexStr.toCharArray();
+		byte[] bytes = new byte[hexStr.length() / 2];
+		int n;
+		for (int i = 0; i < bytes.length; i++) {
+			n = str.indexOf(hexs[2 * i]) * 16;
+			n += str.indexOf(hexs[2 * i + 1]);
+			bytes[i] = (byte) (n & 0xff);
+		}
+		return new String(bytes);
+	}
+    
+	
 	/** 判断一个字符串是不是数字[可以判断小数，正负数，整数]
 	 * @param str
 	 * @return

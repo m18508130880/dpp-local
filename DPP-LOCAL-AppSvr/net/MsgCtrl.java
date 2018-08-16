@@ -12,9 +12,10 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-
-import util.*;
-import bean.*;
+import util.Cmd_Sta;
+import util.CommUtil;
+import util.DBUtil;
+import bean.BaseCmdBean;
 
 public class MsgCtrl extends Thread
 {	
@@ -80,7 +81,7 @@ public class MsgCtrl extends Thread
 				msgHead.setUnMsgSeq(CommUtil.converseInt(DinStream.readInt()));
 				msgHead.setUnReserve(CommUtil.converseInt(DinStream.readInt()));
 				DinStream.close();
-				
+
 				dealData = new String(data, 40, data.length - 40);
 				String dealReserve = dealData.substring(0,  20);
 				String dealCmd = dealData.substring(24, 28);	

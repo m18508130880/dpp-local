@@ -25,8 +25,6 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 		// TODO Auto-generated method stub
 
 		String strCData = CommUtil.BytesToHexString(CommUtil.BSubstring(strRequest, 115, 2).getBytes(), 2);	
-		System.out.println("strCData[" + strCData + "]");
-		
 		this.setActionSource(srcKey);
 		this.setReserve(strRequest.substring(0, 20));
 		this.setAction(Integer.parseInt(strRequest.substring(24, 28)));
@@ -55,8 +53,49 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			Dev_RealData = String.valueOf(fData);
 		}
 		else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_041103_0001))		//星仪液位，水位高度，精度0.003
-		{			
+		{		
+			// 2字节整形转float
 			float fData = (float) (Integer.parseInt(CommUtil.BytesToHexString(byteData, 2), 16) * 0.003);
+			Dev_RealData = String.valueOf(fData);
+		}
+		else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_051101_0001))		//多普勒流量计
+		{	
+			/*综合查询
+			01   地址	  03 功能码 	1C   字节总数
+			00 00 00 00       水深值      单位：m
+			00 00 00 00	    没用     
+			00 00 00 00       没用
+			00 00 00 00       没用  
+			00 00 00 00       没用   
+			00 00 00 00       温度瞬时值  单位：℃
+			00 00 00 00       流速瞬时值  单位：m/s
+			5C A5  校验码
+			byte[] waterLevByte = new byte[4];	//水深
+			byte[] tmpByte = new byte[4];		//温度
+			byte[] velocityByte = new byte[4];	//流速
+			waterLevByte[0] = strData[155];
+			waterLevByte[1] = strData[156];
+			waterLevByte[2] = strData[157];
+			waterLevByte[3] = strData[158];
+
+			tmpByte[0] = strData[175];
+			tmpByte[1] = strData[176];
+			tmpByte[2] = strData[177];
+			tmpByte[3] = strData[178];
+
+			velocityByte[0] = strData[179];
+			velocityByte[1] = strData[180];
+			velocityByte[2] = strData[181];
+			velocityByte[3] = strData[182];
+			*/
+			byte[] bData = new byte[4];
+			bData[0] = strData[155];
+			bData[1] = strData[156];
+			bData[2] = strData[157];
+			bData[3] = strData[158];
+			// 4字节单精度转float
+			float fData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(bData, 4),16));
+			CommUtil.LOG("Dev_CData["+fData+"]");
 			Dev_RealData = String.valueOf(fData);
 		}
 		else
@@ -132,6 +171,18 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			  	  	     "'"+ Dev_RealData +"', " +
 			  	  	     "'m')";
 			}
+			else if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_051101_0001))		//星仪液位，精度0.0025
+			{
+				Sql = "insert into data_dpl(cpm_id, id, cname, attr_id, attr_name, ctime, value, unit)" +
+						"values('"+ this.getActionSource().trim() +"', " +
+			  	  	     "'"+ Dev_Id +"', " +
+			  	  	     "'流量计', " +
+			  	  	     "'1002', " +
+			  	  	     "'温度 水位 流速 流速', " +
+			  	  	     "date_format('"+ Dev_CTime +"', '%Y-%m-%d %H-%i-%S'), " +
+			  	  	     "'"+ Dev_RealData +"', " +
+			  	  	     "'℃ m m/s m/s')";
+			}
 			else
 			{
 				Sql = "insert into data(cpm_id, id, cname, attr_id, attr_name, ctime, value, unit)" +
@@ -144,16 +195,20 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 					  	  	     "'"+ Dev_CData +"', " +
 					  	  	     "'"+ Dev_Unit +"')";
 			}
-			if(m_MsgCtrl.getM_DBUtil().doUpdate(Sql))
-			{
-				ret = Cmd_Sta.STA_SUCCESS;
-				String Project_IdAndGJ_Id = m_MsgCtrl.getM_DBUtil().GetProject_IdAndGJ_Id(this.getActionSource().trim(),Dev_Id);
-				sendStr = CommUtil.StrBRightFillSpace("", 20);									//保留字
-				sendStr += CommUtil.StrBRightFillSpace("0000", 4);								//命令发送状态
-				sendStr += CommUtil.StrBRightFillSpace(Cmd_Sta.CMD_SUBMIT_2002 + "", 4);		//处理指令
-				sendStr += CommUtil.StrBRightFillSpace(Project_IdAndGJ_Id, 10);					//项目和子系统ID
-				m_MsgCtrl.getM_TcpSvr().DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Cmd_Sta.DATA_00000_0001, 20), sendStr);
-				
+			if((Dev_Id.substring(0,6) + Dev_Attr_Id).equals(Cmd_Sta.DATA_051101_0001)){
+				m_MsgCtrl.getM_DBUtil().doUpdate(Sql);
+			}else{
+				if(m_MsgCtrl.getM_DBUtil().doUpdate(Sql))
+				{
+					ret = Cmd_Sta.STA_SUCCESS;
+					String Project_IdAndGJ_Id = m_MsgCtrl.getM_DBUtil().GetProject_IdAndGJ_Id(this.getActionSource().trim(),Dev_Id);
+					sendStr = CommUtil.StrBRightFillSpace("", 20);									//保留字
+					sendStr += CommUtil.StrBRightFillSpace("0000", 4);								//命令发送状态
+					sendStr += CommUtil.StrBRightFillSpace(Cmd_Sta.CMD_SUBMIT_2002 + "", 4);		//处理指令
+					sendStr += CommUtil.StrBRightFillSpace(Project_IdAndGJ_Id, 10);					//项目和子系统ID
+					m_MsgCtrl.getM_TcpSvr().DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Cmd_Sta.DATA_00000_0001, 20), sendStr);
+					
+				}
 			}
 		}
 		

@@ -77,6 +77,7 @@ public class DevGJBean extends RmiBean
 		getHtmlData(request);
 		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
 		currStatus.getHtmlData(request, pFromZone);
+		
 		switch (currStatus.getCmd())
 		{
 			case 10:// 添加
@@ -107,6 +108,9 @@ public class DevGJBean extends RmiBean
 				request.getSession().setAttribute("Admin_DevGJ_Info_" + Sid, (Object) msgBean.getMsg());
 				currStatus.setJsp("Dev_GJ.jsp?Sid=" + Sid);
 				break;
+			case 8:// User查询(道路)
+				System.out.println("\u6570\u636e\u672a\u5f55\u5165");
+				System.out.println(CommUtil.jspDecode(Road));
 			case 1:// User查询
 				msgBean = pRmi.RmiExec(0, this, currStatus.getCurrPage(), 25);
 				currStatus.setTotalRecord(msgBean.getCount());
@@ -551,6 +555,7 @@ public class DevGJBean extends RmiBean
 	 */
 	public void ImportExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig)
 	{
+		System.out.println("base_Height["+1+"]");
 		try
 		{
 			SmartUpload mySmartUpload = new SmartUpload();
@@ -594,6 +599,7 @@ public class DevGJBean extends RmiBean
 								continue;
 							}else{
 								String id = getString(row.getCell(1));
+								System.out.println("id["+id+"]");
 								if(id.trim().length() <= 0){continue;}
 								
 								String wgs84_Lng = getString(row.getCell(2));
@@ -604,6 +610,7 @@ public class DevGJBean extends RmiBean
 
 								String top_Height = getString(row.getCell(6));
 								String base_Height = getString(row.getCell(7));
+								System.out.println("base_Height["+base_Height+"]");
 								String size = getString(row.getCell(8));
 								String in_Id = "";
 								for (int j = 9; j < 13; j++)
@@ -613,6 +620,7 @@ public class DevGJBean extends RmiBean
 										in_Id += getString(row.getCell(j)) + ",";
 									}
 								}
+								System.out.println("in_Id["+in_Id+"]");
 								String out_Id = getString(row.getCell(13));
 								String material = getString(row.getCell(14));
 								String flag = "1";
@@ -1233,6 +1241,9 @@ public class DevGJBean extends RmiBean
 				break;
 			case 7:// 查询（下载地图）
 				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.id like '" + Id + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
+				break;
+			case 8:// 查询（道路）
+				Sql = " select t.id, t.wgs84_lng, t.wgs84_lat, t.Longitude, t.latitude, t.top_Height, t.base_height, t.Size, t.in_id, t.out_id, t.Material, t.Flag, t.Data_Lev, round((t.curr_data),2) , t.sign , t.project_id, t.project_name, t.equip_id ,t.equip_name ,t.equip_height ,t.equip_tel, t.In_Img, t.Out_Img, t.equip_time, t.road, t.rotation" + " from view_dev_gj t " + " where t.road like '" + Road + "%' and t.project_id = '" + Project_Id + "'" + " order by t.id  ";
 				break;
 			case 10:// 添加
 				Sql = "insert into dev_gj(id, wgs84_lng, wgs84_lat, Longitude, latitude, top_Height, base_height, Size, in_id, out_id, Material, Flag, Data_Lev, project_id, road, sign) " + "values('" + Id + "','" + Wgs84_Lng + "','" + Wgs84_Lat + "','" + Longitude + "','" + Latitude + "','" + Top_Height + "','" + Base_Height + "','" + Size + "','" + In_Id + "','" + Out_Id + "','" + Material + "','" + Flag + "','" + Data_Lev + "','" + Project_Id + "','" + Road + "', " + Sign + ")";

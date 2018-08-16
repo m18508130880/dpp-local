@@ -1244,6 +1244,7 @@ public class DevGXBean extends RmiBean
 		}
 		catch(Exception exp)
 		{
+			System.out.println(exp);
 			exp.printStackTrace();
 		}
 	}

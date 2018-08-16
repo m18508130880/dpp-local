@@ -34,6 +34,7 @@ import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
+import bean.TextLLJBean;
 import bean.ThreeGJBean;
 import bean.ThreeGXBean;
 import bean.UserInfoBean;
@@ -275,6 +276,10 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						
 					case RmiBean.RMI_WEATHER:
 						rmiBean = new WeatherBean();
+						break;
+
+					case RmiBean.RMI_TEXT_LLJ:
+						rmiBean = new TextLLJBean();
 						break;
 				}
 				rmiBean.getData(rs);
