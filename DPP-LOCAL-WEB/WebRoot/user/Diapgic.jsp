@@ -101,7 +101,7 @@ $(function () {
  			 Iterator iter = MoreDev_GJ.iterator();
 			 while(iter.hasNext())
 			  {
-					DevQLBean jBean = (DevQLBean)iter.next();
+					DevKCBean jBean = (DevKCBean)iter.next();
  					if(null != MoreDev_GX)
  					{
  			 			Iterator it = MoreDev_GX.iterator();

@@ -11,12 +11,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jsonBean.DevGJJsonBean;
 import jxl.Workbook;
 import jxl.format.Alignment;
 import jxl.format.Border;
@@ -42,6 +44,7 @@ import util.CoordConv;
 import util.CurrStatus;
 import util.MsgBean;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jspsmart.upload.SmartUpload;
 
 public class DevGJBean extends RmiBean
@@ -109,8 +112,11 @@ public class DevGJBean extends RmiBean
 				currStatus.setJsp("Dev_GJ.jsp?Sid=" + Sid);
 				break;
 			case 8:// User查询(道路)
-				System.out.println("\u6570\u636e\u672a\u5f55\u5165");
-				System.out.println(CommUtil.jspDecode(Road));
+				msgBean = pRmi.RmiExec(8, this, currStatus.getCurrPage(), 25);
+				currStatus.setTotalRecord(msgBean.getCount());
+				request.getSession().setAttribute("User_DevGJ_Info_" + Sid, (Object) msgBean.getMsg());
+				currStatus.setJsp("Dev_GJ.jsp?Sid=" + Sid);
+				break;
 			case 1:// User查询
 				msgBean = pRmi.RmiExec(0, this, currStatus.getCurrPage(), 25);
 				currStatus.setTotalRecord(msgBean.getCount());
@@ -236,7 +242,7 @@ public class DevGJBean extends RmiBean
 		String path = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/analogData/";
 		File file = new File(path);
 		File[] array = file.listFiles();
-		ArrayList<WaterAccBean> WaterAcc = new ArrayList<WaterAccBean>();
+		ArrayList<Object> WaterAcc = new ArrayList<Object>();
 		
 		if(currStatus.getFunc_Type_Id().equals("YJ"))
 		{
@@ -314,6 +320,14 @@ public class DevGJBean extends RmiBean
 				}
 			}
 		}
+//		PrintWriter outprint = response.getWriter();
+//		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		String jsonObj = JSONObject.toJSONString(WaterAcc);
+		System.out.println(jsonObj.length());
+//		response.setCharacterEncoding("UTF-8");
+//		outprint.write(jsonObj);
+//		outprint.flush();
+		
 		request.getSession().setAttribute("WaterAcc_" + Sid, WaterAcc);
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
@@ -624,17 +638,19 @@ public class DevGJBean extends RmiBean
 								String out_Id = getString(row.getCell(13));
 								String material = getString(row.getCell(14));
 								String flag = "1";
-								if (in_Id.substring(5).contains("000"))
-								{
-									flag = "0";
-								}
-								else if (out_Id.substring(5).contains("999"))
-								{
-									flag = "2";
-								}
-								else
-								{
-									flag = "1";
+								if(in_Id.length() > 5 && out_Id.length() > 5 ){
+									if (in_Id.substring(5).contains("000"))
+									{
+										flag = "0";
+									}
+									else if (out_Id.substring(5).contains("999"))
+									{
+										flag = "2";
+									}
+									else
+									{
+										flag = "1";
+									}
 								}
 								String data_Lev = getString(row.getCell(15));
 								if (data_Lev.length() <= 0)
@@ -775,17 +791,19 @@ public class DevGJBean extends RmiBean
 								String out_Id = getString(row.getCell(13));
 								String material = getString(row.getCell(14));
 								String flag = "1";
-								if (in_Id.substring(5).contains("000"))
-								{
-									flag = "0";
-								}
-								else if (out_Id.substring(5).contains("999"))
-								{
-									flag = "2";
-								}
-								else
-								{
-									flag = "1";
+								if(in_Id.length() > 5 && out_Id.length() > 5 ){
+									if (in_Id.substring(5).contains("000"))
+									{
+										flag = "0";
+									}
+									else if (out_Id.substring(5).contains("999"))
+									{
+										flag = "2";
+									}
+									else
+									{
+										flag = "1";
+									}
 								}
 								String data_Lev = getString(row.getCell(15));
 								if (data_Lev.length() <= 0)
@@ -1209,6 +1227,60 @@ public class DevGJBean extends RmiBean
 			}
 		}
 		return str;
+	}
+	
+	//获取当前项目下的所有管井
+	public void getGJAll(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		
+		msgBean = pRmi.RmiExec(2, this, 0, 0);
+		
+		List<Object> CData = new ArrayList<Object>();
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			ArrayList<?> gjList = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> gjListIterator = gjList.iterator();
+			while (gjListIterator.hasNext()) {
+				DevGJBean bean = (DevGJBean)gjListIterator.next();
+				DevGJJsonBean jsonBean = new DevGJJsonBean();
+				jsonBean.setId(bean.getId());
+				jsonBean.setLongitude(bean.getLongitude());
+				jsonBean.setLatitude(bean.getLatitude());
+				jsonBean.setTop_Height(bean.getTop_Height());
+				jsonBean.setBase_Height(bean.getBase_Height());
+				jsonBean.setSize(bean.getSize());
+				jsonBean.setIn_Id(bean.getIn_Id());
+				jsonBean.setOut_Id(bean.getOut_Id());
+				jsonBean.setMaterial(bean.getMaterial());
+				jsonBean.setFlag(bean.getFlag());
+				jsonBean.setData_Lev(bean.getData_Lev());
+				jsonBean.setSign(bean.getSign());
+				jsonBean.setProject_Id(bean.getProject_Id());
+				jsonBean.setProject_Name(bean.getProject_Name());
+				jsonBean.setEquip_Id(bean.getEquip_Id());
+				jsonBean.setEquip_Name(bean.getEquip_Height());
+				jsonBean.setEquip_Height(bean.getEquip_Height());
+				jsonBean.setEquip_Tel(bean.getEquip_Tel());
+				jsonBean.setEquip_Time(bean.getEquip_Time());
+				jsonBean.setRoad(bean.getRoad());
+				jsonBean.setUser_Id(bean.getUser_Id());
+				jsonBean.setDes(bean.getDes());
+				jsonBean.setStatus(bean.getStatus());
+				CData.add(jsonBean);
+			}
+		}
+		//System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		String jsonObj = JSONObject.toJSONString(CData);
+		response.setCharacterEncoding("UTF-8");
+		outprint = response.getWriter();
+		outprint.write(jsonObj);
+		outprint.flush();
 	}
 	/**
 	 * 获取相应sql语句

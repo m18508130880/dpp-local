@@ -76,21 +76,21 @@
 					</tr>
 		      <%
 		      	if(null != Admin_DevGJ_Info)
-		      		      		      			{
-		      		      		      				Iterator deviter = Admin_DevGJ_Info.iterator();
-		      		      		      				while(deviter.hasNext())
-		      		      		      				{ 
-		      		      		      				  DevQLBean dBean = (DevQLBean)deviter.next();
-		      		      		      				  String equip_Name ="无";
-		      		      		      				  if(dBean.getEquip_Name()!=null){
-		      		      		      				    equip_Name = dBean.getEquip_Name();
-		      		      		      				  }
-		      		      		      				  String project_Name ="无";
-		      		      		      				  if(dBean.getProject_Name()!=null){
-		      		      		      				    project_Name = dBean.getProject_Name();
-		      		      		      				  }
-		      		      		      				  sn++;
-		      		      		      					String Id = dBean.getId();
+		      		      		      		      			{
+		      		      		      		      				Iterator deviter = Admin_DevGJ_Info.iterator();
+		      		      		      		      				while(deviter.hasNext())
+		      		      		      		      				{ 
+		      		      		      		      				  DevKCBean dBean = (DevKCBean)deviter.next();
+		      		      		      		      				  String equip_Name ="无";
+		      		      		      		      				  if(dBean.getEquip_Name()!=null){
+		      		      		      		      				    equip_Name = dBean.getEquip_Name();
+		      		      		      		      				  }
+		      		      		      		      				  String project_Name ="无";
+		      		      		      		      				  if(dBean.getProject_Name()!=null){
+		      		      		      		      				    project_Name = dBean.getProject_Name();
+		      		      		      		      				  }
+		      		      		      		      				  sn++;
+		      		      		      		      					String Id = dBean.getId();
 		      %>   		    	
 					<tr height='30' <%=((sn%2)==0?"class='table_blue'":"class='table_white_l'")%>>
 						<td  align=center style="cursor:hand " onmouseout="this.style.color='#000000';" onmouseover="this.style.color='#FF0000';"  title="点击查看" onClick="doEdit('<%=Id%>')"><U><%=Id%>&nbsp; </U></td>

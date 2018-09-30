@@ -69,7 +69,7 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			00 00 00 00       没用   
 			00 00 00 00       温度瞬时值  单位：℃
 			00 00 00 00       流速瞬时值  单位：m/s
-			5C A5  校验码
+			5C A5  校验码*/
 			byte[] waterLevByte = new byte[4];	//水深
 			byte[] tmpByte = new byte[4];		//温度
 			byte[] velocityByte = new byte[4];	//流速
@@ -87,16 +87,25 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			velocityByte[1] = strData[180];
 			velocityByte[2] = strData[181];
 			velocityByte[3] = strData[182];
-			*/
-			byte[] bData = new byte[4];
+			
+			/*byte[] bData = new byte[4];
 			bData[0] = strData[155];
 			bData[1] = strData[156];
 			bData[2] = strData[157];
-			bData[3] = strData[158];
+			bData[3] = strData[158];*/
 			// 4字节单精度转float
-			float fData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(bData, 4),16));
-			CommUtil.LOG("Dev_CData["+fData+"]");
-			Dev_RealData = String.valueOf(fData);
+			//float fData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(bData, 4),16));
+			float waterLevData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(waterLevByte, 4),16));
+			float tmpData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(tmpByte, 4),16));
+			float velocityData = Float.intBitsToFloat(Integer.parseInt(CommUtil.BytesToHexString(velocityByte, 4),16));
+			//new java.text.DecimalFormat("#.00").format(3.1415926);
+			String strTmp = new java.text.DecimalFormat("#.0").format(tmpData);
+			String strWaterlev = new java.text.DecimalFormat("#.000").format(waterLevData);
+			String strVeloc = new java.text.DecimalFormat("#.0000").format(velocityData);
+			String fData = strTmp + " " + strWaterlev + " " +strVeloc;
+			CommUtil.LOG("fData[" + fData + "]");
+			Dev_CData = fData;
+			Dev_RealData = "0.0";
 		}
 		else
 		{
@@ -180,7 +189,7 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 			  	  	     "'1002', " +
 			  	  	     "'温度 水位 流速 流速', " +
 			  	  	     "date_format('"+ Dev_CTime +"', '%Y-%m-%d %H-%i-%S'), " +
-			  	  	     "'"+ Dev_RealData +"', " +
+			  	  	     "'"+ Dev_CData +"', " +
 			  	  	     "'℃ m m/s m/s')";
 			}
 			else

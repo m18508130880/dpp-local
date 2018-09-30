@@ -191,7 +191,9 @@ public class EquipInfoBean extends RmiBean
 		{
 			case 0://≤È—Ø                
 				Sql = " select  t.tid, t.pid, t.onoff, t.cname, t.tel, t.project_Id, t.project_name, t.g_id, t.ctime, t.value " +
-					  " from view_equip_info t order by t.ctime";
+					  " from view_equip_info t " + 
+					  " where project_id like '%" + currStatus.getFunc_Project_Id() +"%'" +
+					  " order by t.ctime";
 				break;
 			case 1://≤È—Ødevice_deatail                
 				Sql = " select  t.tid, t.pid, t.cname, t.demo, t.pwd, t.onoff " +

@@ -83,7 +83,7 @@ public class TextLLJBean extends RmiBean
 		if(MsgBean.STA_SUCCESS == msgBean.getStatus()){
 			Resp = "0000";
 			TextLLJBean bean = (TextLLJBean) ((ArrayList<?>) msgBean.getMsg()).get(0);
-			Resp += bean.getCTime() + "|" + bean.getValue();
+			Resp += bean.getSN() + "|" + bean.getCTime() + "|" + bean.getValue();
 		}
 		
 		PrintWriter outprint = response.getWriter();
@@ -106,7 +106,7 @@ public class TextLLJBean extends RmiBean
 			String SheetName = "多普勒流量计";
 			String UPLOAD_NAME = SimFormat.format(new Date());
 			//System.out.println("SheetName [" + SheetName + "]");
-			msgBean = pRmi.RmiExec(0, this, 0, 25);
+			msgBean = pRmi.RmiExec(2, this, 0, 0);
 			ArrayList<?> list = (ArrayList<?>) msgBean.getMsg();
 			int row_Index = 0;
 			Label cell = null;
@@ -138,33 +138,52 @@ public class TextLLJBean extends RmiBean
 				sheet.addCell(cell);
 				cell = new Label(1, 0, "时间", font1);
 				sheet.addCell(cell);
-				cell = new Label(2, 0, "温度", font1);
+				cell = new Label(2, 0, "温度(℃)", font1);
 				sheet.addCell(cell);
-				cell = new Label(3, 0, "水位", font1);
+				cell = new Label(3, 0, "水位(m)", font1);
 				sheet.addCell(cell);
-				cell = new Label(4, 0, "流速", font1);
+				cell = new Label(4, 0, "流速(m/s)", font1);
 				sheet.addCell(cell);
 
 				Iterator<?> iterator = list.iterator();
-				
+				//double ll = 0.0;
 				int sn = 1;
 				while (iterator.hasNext())
 				{
 					TextLLJBean devGJBean = (TextLLJBean) iterator.next();
 					CTime = devGJBean.getCTime();
 					Value = devGJBean.getValue();
+					//System.out.println("Value["+Value+"]");
 					String tmp = "";
 					String waterLev = "";
 					String velocity = "";
-					if(Value.length() > 0){
-						String[] str = Value.split(" ");
+					if(Value.length() > 20){
+						String[] str = Value.split("  ");
 						tmp = str[0];
 						waterLev = str[1];
 						velocity = str[3];
+					}else if(Value.length() < 20 && Value.length() > 10){
+						String[] str = Value.split(" ");
+						tmp = str[0];
+						waterLev = str[1];
+						velocity = str[2];
+					}else{
+						if(Double.valueOf(Value) > 10){
+							tmp = Value;
+							waterLev = velocity = "无";
+						}else{
+							tmp = "无";
+							waterLev = velocity = Value;
+						}
 					}
+
+//					System.out.println("tmp["+tmp+"]");
+//					System.out.println("waterLev["+waterLev+"]");
+//					System.out.println("velocity["+velocity+"]");
+					//ll += Double.valueOf(velocity);
 					row_Index++;
 					sheet.setRowView(row_Index, 400);
-					sheet.setColumnView(row_Index, 25); // row_Index 列宽度
+					sheet.setColumnView(row_Index, 20); // row_Index 列宽度
 
 					cell = new Label(0, row_Index, String.valueOf(sn), font2);
 					sheet.addCell(cell);
@@ -179,6 +198,11 @@ public class TextLLJBean extends RmiBean
 					
 					sn ++;
 				}
+				
+//				cell = new Label(3, row_Index+1, "流量", font2);
+//				sheet.addCell(cell);
+//				cell = new Label(4, row_Index+1, String.valueOf(ll/sn), font2);
+//				sheet.addCell(cell);
 
 				book.write();
 				book.close();
@@ -211,11 +235,15 @@ public class TextLLJBean extends RmiBean
 		{
 			case 0:// 查询（子系统&项目）
 				Sql = " select t.SN, t.CPM_Id, t.Id, t.CName, t.Attr_Id, t.CTime, t.Value, t.Unit, t.Lev, t.Des " + 
-					  " from data_dpl t order by t.CName ";
+					  " from data_dpl t order by t.ctime desc ";
 				break;
 			case 1:// 查询最新
 				Sql = " select t.SN, t.CPM_Id, t.Id, t.CName, t.Attr_Id, t.CTime, t.Value, t.Unit, t.Lev, t.Des " + 
-					  " FROM data_dpl ORDER BY sn DESC LIMIT 0, 1 ";
+					  " FROM data_dpl t ORDER BY t.ctime DESC LIMIT 0, 1 ";
+				break;
+			case 2:// 查询最新7天
+				Sql = " select t.SN, t.CPM_Id, t.Id, t.CName, t.Attr_Id, t.CTime, t.Value, t.Unit, t.Lev, t.Des " + 
+					  " FROM data_dpl t ORDER BY t.ctime DESC LIMIT 0, 2016 ";
 				break;
 		}
 		return Sql;

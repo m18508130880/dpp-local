@@ -419,7 +419,55 @@ public class CommUtil
 		}
 		return ret;
 	} 
-
+	//cj
+	public static Date StrToDate(String pTime)
+	{
+		Date retVal = null;
+		try
+		{
+			SimpleDateFormat SimFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			retVal = SimFormat.parse(pTime);
+		}catch(Exception exp){exp.printStackTrace();}
+		return retVal;
+	}
+	//cj
+	public static String getDateHourAfter(Date startTime, int hour)
+	{
+		String endTime = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try
+		{
+			Calendar now = Calendar.getInstance();
+			now.setTime(startTime);
+			now.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY) + hour);
+			endTime = sdf.format(now.getTime());
+		}
+		catch(Exception e)
+		{
+			endTime = "1970-01-01 00:00:00";
+			e.printStackTrace();
+		}
+		return endTime;
+	}
+	//cj
+	public static String getDateDayAfter(Date startTime, int day)
+	{
+		String endTime = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try
+		{
+			Calendar now = Calendar.getInstance();
+			now.setTime(startTime);
+			now.set(Calendar.DATE, now.get(Calendar.DATE) + day);
+			endTime = sdf.format(now.getTime());
+		}
+		catch(Exception e)
+		{
+			endTime = "1970-01-01 00:00:00";
+			e.printStackTrace();
+		}
+		return endTime;
+	}
 
 //*******************整型转换成其它类型********************************
 	/*

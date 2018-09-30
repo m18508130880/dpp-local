@@ -389,13 +389,26 @@ public class MainServlet extends HttpServlet
         	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
         	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
-
+        
+        /************************************数据分析*****************************************************/
+        else if (strUrl.equalsIgnoreCase("getAllGJ.do"))			         			//获取全部管井
+        	new DevGJBean().getGJAll(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getAllGX.do"))			         			//获取全部管线
+        	new DevGXBean().getGXAll(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getData_GJId.do"))			         		//获取有水位计的管井
+        	new DataGJBean().getGJ_Id(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Import_WaterData.do"))			         		//获取有水位计的管井
+        	new DataGJBean().Import_WaterData(request, response, m_Rmi, false);
         
         /************************************测试流量计*****************************************************/
         else if (strUrl.equalsIgnoreCase("TextLLJ.do"))			         				//获取实时数据
         	new TextLLJBean().getShow(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("TextLLJ_Export.do"))			         				//下载全部
         	new TextLLJBean().XLQRExcel(request, response, m_Rmi, false);
+        
+        /************************************自动计算模拟数据************************************************/
+        else if (strUrl.equalsIgnoreCase("getAnalogData_Auot.do"))			         				//获取实时数据
+        	new DevGXBean().getAnalogExcel(request, response, m_Rmi, false, Config);
         
     }
     

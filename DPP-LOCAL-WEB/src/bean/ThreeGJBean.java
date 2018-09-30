@@ -79,7 +79,8 @@ public class ThreeGJBean extends RmiBean
 		ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
 
 		ArrayList<ThreeModel> modelList = getModel(gj_List, gx_List, Id);
-		currStatus.setJsp("GJ_Three.jsp?Sid=" + Sid + "&Id=" + Id);
+		currStatus.setJsp("three.jsp?Sid=" + Sid + "&Id=" + Id);
+		//currStatus.setJsp("GJ_Three.jsp?Sid=" + Sid + "&Id=" + Id);
 		request.getSession().setAttribute("Three_Model_" + Sid, (Object) modelList);
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		response.sendRedirect(currStatus.getJsp());
@@ -210,7 +211,14 @@ public class ThreeGJBean extends RmiBean
 			ThreeModel cenModel = new ThreeModel();
 			ThreeGJBean cenGJ= gjMap.get(Id);
 			cenHeight = (Float.valueOf(cenGJ.getTop_Height()) - Float.valueOf(cenGJ.getBase_Height()))*100;
-			cenRadii = Float.valueOf(cenGJ.getSize())/10/2;
+			float radii = 0;
+			if(cenGJ.getSize().contains("*")){
+				System.out.println(cenGJ.getSize());
+				radii = Float.valueOf(cenGJ.getSize().split("\\*")[0]);
+			}else{
+				radii = Float.valueOf(cenGJ.getSize());
+			}
+			cenRadii = radii/10/2;
 			cenModel = getGJModel(cenGJ, cenHeight, cenRadii);
 			modelList.add(cenModel);
 			String [] inIdList = cenGJ.getIn_Id().split(",");

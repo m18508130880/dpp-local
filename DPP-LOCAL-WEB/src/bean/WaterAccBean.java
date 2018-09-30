@@ -1,26 +1,8 @@
 package bean;
 
-import java.sql.ResultSet;
-import java.util.ArrayList;
 
-import rmi.RmiBean;
-import util.CommUtil;
-
-public class WaterAccBean extends RmiBean
+public class WaterAccBean
 {
-	public final static long	serialVersionUID	= RmiBean.RMI_WATERACC;
-
-	public long getClassId()
-	{
-		return serialVersionUID;
-	}
-
-	public WaterAccBean()
-	{
-		super.className = "WaterAccBean";
-
-	}
-
 	public String analog_Y(String FileName, String p1)
 	{
 		AnalogBean analog = new AnalogBean();
@@ -78,19 +60,4 @@ public class WaterAccBean extends RmiBean
 	{
 		Status = status;
 	}
-
-	@Override
-	public String getSql(int pCmd)
-	{
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public boolean getData(ResultSet pRs)
-	{
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 }

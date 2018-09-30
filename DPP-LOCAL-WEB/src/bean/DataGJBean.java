@@ -1,10 +1,14 @@
 package bean;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -14,6 +18,18 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jxl.Workbook;
+import jxl.format.Alignment;
+import jxl.format.Border;
+import jxl.format.BorderLineStyle;
+import jxl.format.Colour;
+import jxl.format.VerticalAlignment;
+import jxl.write.Label;
+import jxl.write.WritableCellFormat;
+import jxl.write.WritableFont;
+import jxl.write.WritableSheet;
+import jxl.write.WritableWorkbook;
+import jxl.write.WriteException;
 import rmi.Rmi;
 import rmi.RmiBean;
 import util.CommUtil;
@@ -375,6 +391,226 @@ public class DataGJBean extends RmiBean
 	    	outprint.close();
 	    }
 	}
+	
+	// 获取有水位计的管井
+	public void getGJ_Id(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+		String Rsep = "9999";
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS){
+			Rsep = (String) msgBean.getMsg();
+		}
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Rsep);
+	}
+	
+	// 计算并下载水位数据
+	public void Import_WaterData(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+
+		String Rsep = "9999";
+		int key = Integer.valueOf(request.getParameter("key"));
+		switch (key) {
+		case 1:
+			Rsep = "0000" + DayData(pRmi);
+			break;
+		case 2:
+			Rsep = "0000" + DayData(pRmi);
+			break;
+		case 3:
+			Rsep = "0000" + MonthData(pRmi);
+			break;
+		case 4:
+			Rsep = "0000" + MonthData(pRmi);
+			break;
+		case 5:
+			Rsep = "0000" + MonthData(pRmi);
+			break;
+		default:
+			break;
+		}
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		PrintWriter outprint = response.getWriter();
+		outprint.write(Rsep);
+	}
+	
+	public String DayData(Rmi pRmi) throws IOException{
+		SimpleDateFormat SimFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		String UPLOAD_NAME = SimFormat.format(new Date()) + ".xls";
+		DecimalFormat df = new DecimalFormat("###.##");
+		try {
+			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/waterData/";
+			String SheetName = "日查询";
+			Label cell = null;
+			WritableWorkbook book = Workbook.createWorkbook(new File(PATH + UPLOAD_NAME));
+			// 生成名为"SheetName"的工作表，参数0表示这是第一页
+			WritableSheet sheet = book.createSheet(SheetName, 0);
+			
+			// 字体格式1,黑色
+			WritableFont wf1 = new WritableFont(WritableFont.createFont("normal"), 10, WritableFont.NO_BOLD, false);
+			WritableCellFormat font1 = new WritableCellFormat(wf1);
+			wf1.setColour(Colour.BLACK);			// 字体颜色
+			font1.setAlignment(Alignment.CENTRE);	// 设置居中
+			font1.setVerticalAlignment(VerticalAlignment.CENTRE); 	// 设置为垂直居中
+			font1.setBorder(Border.ALL, BorderLineStyle.THIN);		// 设置边框线
+			
+			sheet.setRowView(0, 450);
+			sheet.setColumnView(0, 25);
+			cell = new Label(0, 0, "时间", font1);
+			sheet.addCell(cell);
+			String bTime = currStatus.getVecDate().get(0).toString();
+			String eTime = currStatus.getVecDate().get(1).toString();
+			Map<String, Integer> timeMap = new HashMap<String, Integer>();
+			int row = 1;
+			while(true){
+				Date bt = CommUtil.StrToDate(bTime);
+				Date et = CommUtil.StrToDate(eTime);
+				if (bt.before(et)){ //表示bt小于et
+					sheet.setRowView(row, 450);
+					sheet.setColumnView(row, 25);
+					cell = new Label(0, row, bTime.substring(0,13)+":00", font1);
+					sheet.addCell(cell);
+					timeMap.put(bTime.substring(0,13), row);
+					bTime = CommUtil.getDateHourAfter(bt, 1);//小时+1
+				}else{
+					break;
+				}
+				row ++;
+			}
+			String [] idList = currStatus.getFunc_Sort_Id().split(",");
+			for(int i = 0; i < idList.length; i ++){
+				GJ_Id = idList[i];
+				sheet.setRowView(i+1, 450);
+				sheet.setColumnView(i+1, 25);
+				cell = new Label(i+1, 0, GJ_Id, font1);
+				sheet.addCell(cell);
+				
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				ArrayList<?> waterList = (ArrayList<?>) msgBean.getMsg();
+				if(waterList == null){continue;}
+				Iterator<?> iterator = waterList.iterator();
+				int row_ = 0;
+				while (iterator.hasNext())
+				{
+					DataGJBean bean = (DataGJBean) iterator.next();
+					GJ_Id = bean.getGJ_Id();
+					CTime = bean.getCTime();
+					Value = bean.getValue();
+					Top_Height = bean.getTop_Height();
+					Equip_Height = bean.getEquip_Height();
+					if(timeMap.containsKey(CTime.substring(0, 13))){
+						row_ = timeMap.get(CTime.substring(0, 13));
+					}else{
+						continue;
+					}
+					float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
+					sheet.setRowView(row, 450);
+					sheet.setColumnView(row, 25);
+					cell = new Label(i+1, row_, df.format(water), font1);
+					sheet.addCell(cell);
+				}
+			}
+			book.write();
+			book.close();
+		} catch (WriteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return UPLOAD_NAME;
+	}
+	
+	public String MonthData(Rmi pRmi) throws IOException{
+		SimpleDateFormat SimFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+		String UPLOAD_NAME = SimFormat.format(new Date()) + ".xls";
+		DecimalFormat df = new DecimalFormat("###.##");
+		try {
+			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/waterData/";
+			String SheetName = "月查询";
+			Label cell = null;
+			WritableWorkbook book = Workbook.createWorkbook(new File(PATH + UPLOAD_NAME));
+			// 生成名为"SheetName"的工作表，参数0表示这是第一页
+			WritableSheet sheet = book.createSheet(SheetName, 0);
+			
+			// 字体格式1,黑色
+			WritableFont wf1 = new WritableFont(WritableFont.createFont("normal"), 10, WritableFont.NO_BOLD, false);
+			WritableCellFormat font1 = new WritableCellFormat(wf1);
+			wf1.setColour(Colour.BLACK);			// 字体颜色
+			font1.setAlignment(Alignment.CENTRE);	// 设置居中
+			font1.setVerticalAlignment(VerticalAlignment.CENTRE); 	// 设置为垂直居中
+			font1.setBorder(Border.ALL, BorderLineStyle.THIN);		// 设置边框线
+			
+			sheet.setRowView(0, 450);
+			sheet.setColumnView(0, 25);
+			cell = new Label(0, 0, "时间", font1);
+			sheet.addCell(cell);
+			String bTime = currStatus.getVecDate().get(0).toString();
+			String eTime = currStatus.getVecDate().get(1).toString();
+			Map<String, Integer> timeMap = new HashMap<String, Integer>();
+			int row = 1;
+			while(true){
+				Date bt = CommUtil.StrToDate(bTime);
+				Date et = CommUtil.StrToDate(eTime);
+				if (bt.before(et)){ //表示bt小于et
+					sheet.setRowView(row, 450);
+					sheet.setColumnView(row, 25);
+					cell = new Label(0, row, bTime.substring(0,10), font1);
+					sheet.addCell(cell);
+					timeMap.put(bTime.substring(0,10), row);
+					bTime = CommUtil.getDateDayAfter(bt, 1);//天+1
+				}else{
+					break;
+				}
+				row ++;
+			}
+			String [] idList = currStatus.getFunc_Sort_Id().split(",");
+			for(int i = 0; i < idList.length; i ++){
+				GJ_Id = idList[i];
+				sheet.setRowView(i+1, 450);
+				sheet.setColumnView(i+1, 25);
+				cell = new Label(i+1, 0, GJ_Id, font1);
+				sheet.addCell(cell);
+				
+				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+				ArrayList<?> waterList = (ArrayList<?>) msgBean.getMsg();
+				if(waterList == null){continue;}
+				Iterator<?> iterator = waterList.iterator();
+				int row_ = 0;
+				while (iterator.hasNext())
+				{
+					DataGJBean bean = (DataGJBean) iterator.next();
+					GJ_Id = bean.getGJ_Id();
+					CTime = bean.getCTime();
+					Value = bean.getValue();
+					Top_Height = bean.getTop_Height();
+					Equip_Height = bean.getEquip_Height();
+					if(timeMap.containsKey(CTime.substring(0, 10))){
+						row_ = timeMap.get(CTime.substring(0, 10));
+					}else{
+						continue;
+					}
+					float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
+					sheet.setRowView(row, 450);
+					sheet.setColumnView(row, 25);
+					cell = new Label(i+1, row_, df.format(water), font1);
+					sheet.addCell(cell);
+				}
+			}
+			book.write();
+			book.close();
+		} catch (WriteException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return UPLOAD_NAME;
+	}
 	public String getSql(int pCmd)
 	{
 		String Sql = "";
@@ -509,40 +745,19 @@ public class DataGJBean extends RmiBean
 					  " and ctime > DATE_SUB(NOW(),INTERVAL 1 HOUR) " +
 					  " ORDER BY t.ctime" ;
 				break;
-				
-//			case 4://历史   最近二十四小时均值折线图
-//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-//					  " FROM view_data_gj t  " +
-//					  " where t.gj_id = '"+ GJ_Id +"'" + 
-//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-//					  "   and t.ctime >= date_format('" + SqlBTime + "', '%Y-%m-%d %H-%i-%S')" +
-//				  	  "   and t.ctime <= date_format('" + SqlETime + "', '%Y-%m-%d %H-%i-%S')" +
-//					  " GROUP BY SUBSTR(ctime,1,13)" +
-//					  " ORDER BY t.ctime " ;
-//				break;
-//			case 5://历史   最近一周均值折线图
-//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-//					  " FROM view_data_gj t  " +
-//					  " where t.gj_id = '"+ GJ_Id +"'" + 
-//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-//					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
-//				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
-//					  " GROUP BY SUBSTR(ctime,1,10)" +
-//					  " ORDER BY t.ctime " ;
-//				break;
-//			case 6://历史  最近一月折线图	
-//				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(avg(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material " +
-//					  " FROM view_data_gj t  " +
-//					  " where t.gj_id = '"+ GJ_Id +"'" + 
-//					  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
-//					  "   and t.ctime >= date_format('" + SqlBTime+"', '%Y-%m-%d %H-%i-%S')" +
-//				  	  "   and t.ctime <= date_format('" + SqlETime+"', '%Y-%m-%d %H-%i-%S')" +
-//					  " GROUP BY SUBSTR(ctime,1,10)" +
-//					  " ORDER BY t.ctime " ;
-//				break;
-			
-				
-				
+			case 9: // 根据选择查询数据{算法(max,avg,min),时间区间,时间分组长度}
+				Sql = " select '' AS sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, round(min(t.value),2), t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
+					  " FROM view_data_gj t " +
+					  " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+					  " and gj_id = '" + GJ_Id + "'" +
+					  " and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+					  " and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+					  " GROUP BY left(ctime," + currStatus.getFunc_Type_Id() + ")" +
+					  " ORDER BY t.ctime ";
+				break;
+			case 21: // 获取有水位计的管井
+				Sql = "{? = call Func_Data_GJId('" + currStatus.getFunc_Project_Id() + "')}";
+				break;
 		}
 		return Sql;
 	}

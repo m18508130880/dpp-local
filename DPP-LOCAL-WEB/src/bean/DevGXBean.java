@@ -20,6 +20,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import jsonBean.DevGXJsonBean;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.format.Alignment;
@@ -39,6 +40,7 @@ import util.CommUtil;
 import util.CurrStatus;
 import util.MsgBean;
 
+import com.alibaba.fastjson.JSONObject;
 import com.jspsmart.upload.SmartUpload;
 
 public class DevGXBean extends RmiBean
@@ -956,6 +958,7 @@ public class DevGXBean extends RmiBean
 	 * @throws ServletException
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unchecked")
 	public void getSysIdNow(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
 	{
 		getHtmlData(request);
@@ -965,19 +968,32 @@ public class DevGXBean extends RmiBean
 		PrintWriter outprint = response.getWriter();
 		String Resp = "0000";
 		
-		msgBean = pRmi.RmiExec(4, this, 0, 25);				
+		DevGJBean tmpGJBean = new DevGJBean();
+		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+		tmpGJBean.setId(Id.substring(0, 5));
+
+		msgBean = pRmi.RmiExec(7, tmpGJBean, 0, 25);
+		@SuppressWarnings("rawtypes")
+		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		Id = dealGXID(Id).substring(0, 5);
+		msgBean = pRmi.RmiExec(6, this, 0, 25);				
 		@SuppressWarnings("rawtypes")
 		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
 
-		DevGJBean tmpGJBean = new DevGJBean();
-		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
-		tmpGJBean.setSubsys_Id(Id.substring(2, 5));
-
-		msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
-		@SuppressWarnings("rawtypes")
-		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
-
-		Resp = this.sysIdNowGJ(gjObj, gxObj, Id);
+		AnalysisBean bean = new AnalysisBean();
+		bean.subSystem(gjObj, gxObj);
+		ArrayList<String> gjHeightExp = bean.getGjHeightExp();
+		ArrayList<String> gxSlopeExp = bean.getGxSlopeExp();
+		ArrayList<String> gxDiameterExp = bean.getGxDiameterExp();
+		ArrayList<String> gjTopSort = bean.getGjTopSort();
+		ArrayList<String> gjBaseSort = bean.getGjBaseSort();
+		
+		Resp += JSONObject.toJSONString(gjHeightExp) + ";";
+		Resp += JSONObject.toJSONString(gxSlopeExp) + ";";
+		Resp += JSONObject.toJSONString(gxDiameterExp) + ";";
+		Resp += JSONObject.toJSONString(gjTopSort) + ";";
+		Resp += JSONObject.toJSONString(gjBaseSort) + ";";
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		outprint.write(Resp);
@@ -1133,6 +1149,359 @@ public class DevGXBean extends RmiBean
 		return Resp;
 	}
 
+	/**
+	 * 管线命名
+	 * 
+	 * @param GJ_Id
+	 * @return
+	 */
+	public String dealGXID(String GJ_Id)
+	{
+		String temGJ_Id = ""; // "WJ", "WG" "YJ", "YG"
+		if (GJ_Id.contains("WJ"))
+		{
+			temGJ_Id = GJ_Id.replace("WJ", "WG");
+		}
+		if (GJ_Id.contains("YJ"))
+		{
+			temGJ_Id = GJ_Id.replace("YJ", "YG");
+		}
+		return temGJ_Id;
+	}
+	
+	/**
+	 * 自动获取模拟的数据表格
+	 * @param request
+	 * @param response
+	 * @param pRmi
+	 * @param pFromZone
+	 * @param pConfig
+	 */
+	public void getAnalogExcel(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone, ServletConfig pConfig) 
+	{
+
+		try {
+			getHtmlData(request);
+			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+			currStatus.getHtmlData(request, pFromZone);
+			
+			SimpleDateFormat SimFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+			
+			String SheetName = "模拟数据表格";
+			String UPLOAD_NAME = SimFormat.format(new Date());
+			
+			String Sys_Id = Id.substring(0, 5);//子系统
+			String NN = "";//节点数
+			String NP = "";//管段数
+			String NStart = "";//起点数
+			String Npline = "";//最大管段数
+			String Nr_node = "";//最大节点数
+			String Nend = "";//出口号
+			String NT = "";//模拟时段
+			String Ncol = "";//节点最大流入数+3
+			String Hw_end = "";//出口标高
+			// 管井数据
+			DevGJBean dbean = new DevGJBean();
+			dbean.setId(Id.substring(0, 5));
+			dbean.setProject_Id(currStatus.getFunc_Project_Id());
+			msgBean = pRmi.RmiExec(7, dbean, 0, 0);
+			ArrayList<?> gj_List = (ArrayList<?>) msgBean.getMsg();
+			
+			Id = dealGXID(Id).substring(0, 5);
+			msgBean = pRmi.RmiExec(6, this, 0, 0);
+			ArrayList<?> gx_List = (ArrayList<?>) msgBean.getMsg();
+			
+			int row_Index = 0;
+			Label cell = null;
+			if (null != gj_List && null != gx_List) {
+				WritableWorkbook book = Workbook.createWorkbook(new File(UPLOAD_PATH + UPLOAD_NAME + ".xls"));
+				// 生成名为"第一页"的工作表，参数0表示这是第一页
+				WritableSheet sheet = book.createSheet(SheetName, 0);
+				
+				// 字体格式1
+				WritableFont wf = new WritableFont(WritableFont.createFont("normal"), 14,WritableFont.BOLD, false);
+				WritableCellFormat font1 = new WritableCellFormat(wf);
+				// wf.setColour(Colour.BLACK);//字体颜色
+				font1.setAlignment(Alignment.CENTRE);// 设置居中
+				font1.setVerticalAlignment(VerticalAlignment.CENTRE); //设置为垂直居中
+				font1.setBorder(Border.ALL, BorderLineStyle.THIN);//设置边框线
+				
+				// 字体格式2
+				WritableFont wf2 = new WritableFont(WritableFont.createFont("normal"), 10,WritableFont.NO_BOLD, false);
+				WritableCellFormat font2 = new WritableCellFormat(wf2);
+				wf2.setColour(Colour.BLACK);// 字体颜色
+				font2.setAlignment(Alignment.CENTRE);// 设置居中
+				font2.setVerticalAlignment(VerticalAlignment.CENTRE); //设置为垂直居中
+				font2.setBorder(Border.ALL, BorderLineStyle.THIN);// 设置边框线
+				
+				NN = String.valueOf(gj_List.size());//节点数
+				
+				row_Index = 6;
+				
+				AnalogBean analogBean = new AnalogBean();
+				
+				Hashtable<String, DevGXBean> objGXTable = new Hashtable<String, DevGXBean>();
+				Iterator<?> iterGX = gx_List.iterator();
+				String gxNo = "";
+				String gxIo = "";
+				String gxJo = "";
+				String gxLp = "";
+				String gxDp = "";
+				String gxRunoff = "";
+				String gxStart_Height = "";
+				String gxEnd_Height = "";
+				
+				String End_ = "";
+				ArrayList<String> End_I = new ArrayList<String>();
+				int gxNo_ = 1;
+				while (iterGX.hasNext())
+				{
+					gxNo = String.valueOf(gxNo_);
+					DevGXBean gxBean = (DevGXBean) iterGX.next();
+					String gxId = gxBean.getId();
+					analogBean.HashPut(objGXTable, gxId, gxBean);
+					
+					gxIo = String.valueOf(Integer.valueOf(gxBean.getStart_Id().substring(5)) - 1);
+					gxJo = String.valueOf(Integer.valueOf(gxBean.getEnd_Id().substring(5)) - 1);
+					gxLp = gxBean.getLength();
+					gxDp = String.valueOf(Float.valueOf(gxBean.getDiameter()) / 1000);
+					gxRunoff = "0.014";
+					gxStart_Height = gxBean.getStart_Height();
+					gxEnd_Height = gxBean.getEnd_Height();
+					
+					if(End_.contains(gxBean.getEnd_Id())){
+						End_I.add(gxBean.getEnd_Id());
+					}else{
+						End_ += gxBean.getEnd_Id();
+					}
+					
+					sheet.setRowView(row_Index, 400);
+					sheet.setColumnView(row_Index, 25); // row_Index 列宽度
+					cell = new Label(0, row_Index, gxNo, font2);
+					sheet.addCell(cell);
+					cell = new Label(1, row_Index, gxIo, font2);
+					sheet.addCell(cell);
+					cell = new Label(2, row_Index, gxJo, font2);
+					sheet.addCell(cell);
+					cell = new Label(3, row_Index, gxLp, font2);
+					sheet.addCell(cell);
+					cell = new Label(4, row_Index, gxDp, font2);
+					sheet.addCell(cell);
+					cell = new Label(5, row_Index, gxRunoff, font2);
+					sheet.addCell(cell);
+					cell = new Label(6, row_Index, gxStart_Height, font2);
+					sheet.addCell(cell);
+					cell = new Label(7, row_Index, gxEnd_Height, font2);
+					sheet.addCell(cell);
+					
+					gxNo_ ++;
+					row_Index ++;
+				}
+				// 计算节点最大流入管段数+3
+				int Ncol_ = 1;
+				ArrayList<String> End_I_ = End_I;
+				do{
+					End_I.clear();
+					String End_II = "";
+					for(int i = 0; i < End_I_.size(); i ++){
+						if(End_II.contains(End_I_.get(i))){
+							End_I.add(End_I_.get(i));
+						}else{
+							End_II += End_I_.get(i);
+						}
+					}
+					Ncol_ ++;
+				}while(End_I.size() > 0);
+			    Ncol = String.valueOf(Ncol_+3);
+			    
+			    sheet.setRowView(4, 450);
+				sheet.setColumnView(4, 25); // row_Index 列宽度
+				cell = new Label(0, row_Index + 1, "管井数据表格", font1);
+				sheet.addCell(cell);
+				sheet.setRowView(4, 400);
+				sheet.setColumnView(4, 25); // row_Index 列宽度
+				cell = new Label(0, row_Index + 2, "No", font2);
+				sheet.addCell(cell);
+				cell = new Label(1, row_Index + 2, "汇水面积ha", font2);
+				sheet.addCell(cell);
+				cell = new Label(2, row_Index + 2, "径流系数", font2);
+				sheet.addCell(cell);
+				cell = new Label(3, row_Index + 2, "地面标高", font2);
+				sheet.addCell(cell);
+				
+				String gjNo = "";
+				String gjArea = "0.28";
+				String gjRunoff = "0.62";
+				String gjTop_Height = "";
+				row_Index += 3;
+				Hashtable<String, DevGJBean> objGJTable = new Hashtable<String, DevGJBean>();
+				ArrayList<DevGJBean> StartGJList = new ArrayList<DevGJBean>(); // 起点数
+				Iterator<?> iterGJ = gj_List.iterator();
+				int gjNo_ = 0;
+				while (iterGJ.hasNext())
+				{
+					DevGJBean gjBean = (DevGJBean) iterGJ.next();
+					String gjId = gjBean.getId();
+					int gjId_ = Integer.valueOf(gjId.substring(5)) - 1;
+					gjNo = String.valueOf(gjNo_);
+					while(gjNo_ < gjId_){
+						System.out.println("gjNo_["+gjNo_+"] < gjId_["+gjId_+"]");
+						sheet.setRowView(row_Index, 400);
+						sheet.setColumnView(row_Index, 25); // row_Index 列宽度
+						cell = new Label(0, row_Index, gjNo, font2);
+						sheet.addCell(cell);
+						cell = new Label(1, row_Index, "0", font2);
+						sheet.addCell(cell);
+						cell = new Label(2, row_Index, "0", font2);
+						sheet.addCell(cell);
+						cell = new Label(3, row_Index, "0", font2);
+						sheet.addCell(cell);
+						gjNo_ ++;
+						row_Index ++;
+					}
+					gjNo = String.valueOf(gjNo_);
+					String flag = gjBean.getFlag();
+					if(flag.equals("0")){
+						StartGJList.add(gjBean);
+					}
+					if(flag.equals("2") || flag.equals("6")){
+						Nend = String.valueOf(Integer.valueOf(gjId.substring(5)) - 1); // 计算出口管井
+						Hw_end = gjBean.getBase_Height(); // 出口标高
+					}
+					analogBean.HashPut(objGJTable, gjId, gjBean);
+					
+					gjTop_Height = gjBean.getTop_Height();
+				
+					sheet.setRowView(row_Index, 400);
+					sheet.setColumnView(row_Index, 25); // row_Index 列宽度
+					cell = new Label(0, row_Index, gjNo, font2);
+					sheet.addCell(cell);
+					cell = new Label(1, row_Index, gjArea, font2);
+					sheet.addCell(cell);
+					cell = new Label(2, row_Index, gjRunoff, font2);
+					sheet.addCell(cell);
+					cell = new Label(3, row_Index, gjTop_Height, font2);
+					sheet.addCell(cell);
+					
+					gjNo_ ++;
+					row_Index ++;
+				}
+				NStart = String.valueOf(StartGJList.size()); // 起点数
+				NP = String.valueOf(gx_List.size());//管段数
+				
+				// 计算最大路径管段数和节点数
+				int Npline_ = 0;
+				int Nr_node_ = 0;
+				for(int i = 0; i < StartGJList.size(); i ++){
+					int _Nr_node_ = 0;
+					DevGJBean nextGJ = StartGJList.get(i);
+					boolean ok = true;
+					do{
+						_Nr_node_ ++;
+						if(nextGJ.getFlag().equals("2") || nextGJ.getFlag().equals("6")){
+							if(_Nr_node_ > Nr_node_){
+								Nr_node_ = _Nr_node_;
+								Npline_ = Nr_node_ - 1;
+							}
+							ok = false;
+						}else {
+							DevGXBean nextGX = (DevGXBean) analogBean.HashGet(objGXTable, nextGJ.getOut_Id());
+							nextGJ = (DevGJBean) analogBean.HashGet(objGJTable, nextGX.getEnd_Id());
+						}
+					}while(ok);
+				}
+				Npline = String.valueOf(Npline_);
+				Nr_node = String.valueOf(Nr_node_);
+				
+				sheet.setRowView(4, 450);
+				sheet.setColumnView(4, 25); // row_Index 列宽度
+				cell = new Label(0, 0, "基础数据表格", font1);
+				sheet.addCell(cell);
+				sheet.setRowView(row_Index, 450);
+				sheet.setColumnView(row_Index, 25);
+				cell=new Label(0,1,"子系统号",font2);   
+			    sheet.addCell(cell);   
+			    cell=new Label(1,1,"节点数(NN)",font2);   
+			    sheet.addCell(cell);   
+			    cell=new Label(2,1,"管段数(NP)",font2);  
+			    sheet.addCell(cell);   
+			    cell=new Label(3,1,"起点数(NStart)",font2);  
+			    sheet.addCell(cell);   
+			    cell=new Label(4,1,"最大路径管段数",font2);  
+			    sheet.addCell(cell);   
+			    cell=new Label(5,1,"最大路径节点数",font2);  
+			    sheet.addCell(cell);
+			    cell=new Label(6,1,"终点出口号",font2);  
+			    sheet.addCell(cell);
+			    cell=new Label(7,1,"模拟时段",font2);  
+			    sheet.addCell(cell);
+			    cell=new Label(8,1,"节点最大流入管段数+3",font2);  
+			    sheet.addCell(cell); 
+			    cell=new Label(9,1,"出口标高",font2);  
+			    sheet.addCell(cell);
+			    
+			    NT = "60";
+			    sheet.setRowView(2, 400);
+				sheet.setColumnView(2, 25); // row_Index 列宽度
+				cell = new Label(0, 2, Sys_Id, font2);
+				sheet.addCell(cell);
+				cell = new Label(1, 2, NN, font2);
+				sheet.addCell(cell);
+				cell = new Label(2, 2, NP, font2);
+				sheet.addCell(cell);
+				cell = new Label(3, 2, NStart, font2);
+				sheet.addCell(cell);
+				cell = new Label(4, 2, Npline, font2);
+				sheet.addCell(cell);
+				cell = new Label(5, 2, Nr_node, font2);
+				sheet.addCell(cell);
+				cell = new Label(6, 2, Nend, font2);
+				sheet.addCell(cell);
+				cell = new Label(7, 2, NT, font2);
+				sheet.addCell(cell);
+				cell = new Label(8, 2, Ncol, font2);
+				sheet.addCell(cell);
+				cell = new Label(9, 2, Hw_end, font2);
+				sheet.addCell(cell);
+			    
+				sheet.setRowView(4, 450);
+				sheet.setColumnView(4, 25); // row_Index 列宽度
+				cell = new Label(0, 4, "管段数据表格", font1);
+				sheet.addCell(cell);
+				sheet.setRowView(4, 400);
+				sheet.setColumnView(4, 25); // row_Index 列宽度
+				cell = new Label(0, 5, "No", font2);
+				sheet.addCell(cell);
+				cell = new Label(1, 5, "起点号I0", font2);
+				sheet.addCell(cell);
+				cell = new Label(2, 5, "终点号J0", font2);
+				sheet.addCell(cell);
+				cell = new Label(3, 5, "长度LP", font2);
+				sheet.addCell(cell);
+				cell = new Label(4, 5, "直径DP", font2);
+				sheet.addCell(cell);
+				cell = new Label(5, 5, "摩阻系数", font2);
+				sheet.addCell(cell);
+				cell = new Label(6, 5, "起端标高", font2);
+				sheet.addCell(cell);
+				cell = new Label(7, 5, "终端标高", font2);
+				sheet.addCell(cell);
+
+				book.write();
+				book.close();
+				try {
+					PrintWriter out = response.getWriter();
+					out.print(UPLOAD_NAME);
+				} catch (Exception exp) {
+					exp.printStackTrace();
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	
+	}
 	
 	/** 导入Excel文档  解析文档中的管线详细数据  
 	 * @param request
@@ -1576,6 +1945,57 @@ public class DevGXBean extends RmiBean
 		}
 
 	}
+	
+	//获取当前项目下的所有管线
+	public void getGXAll(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		
+		msgBean = pRmi.RmiExec(2, this, 0, 0);
+		
+		List<Object> CData = new ArrayList<Object>();
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			ArrayList<?> gxList = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> gxListIterator = gxList.iterator();
+			while (gxListIterator.hasNext()) {
+				DevGXBean bean = (DevGXBean)gxListIterator.next();
+				DevGXJsonBean jsonBean = new DevGXJsonBean();
+				jsonBean.setId(bean.getId());
+				jsonBean.setDiameter(bean.getDiameter());
+				jsonBean.setLength(bean.getLength());
+				jsonBean.setStart_Id(bean.getStart_Id());
+				jsonBean.setEnd_Id(bean.getEnd_Id());
+				jsonBean.setStart_Height(bean.getStart_Height());
+				jsonBean.setEnd_Height(bean.getEnd_Height());
+				jsonBean.setMaterial(bean.getMaterial());
+				jsonBean.setBuried_Year(bean.getBuried_Year());
+				jsonBean.setData_Lev(bean.getData_Lev());
+				jsonBean.setRoad(bean.getRoad());
+				jsonBean.setFlag(bean.getFlag());
+				jsonBean.setFlow(bean.getFlow());
+				jsonBean.setPort(bean.getPort());
+				jsonBean.setStatus(bean.getStatus());
+				jsonBean.setDes(bean.getDes());
+				jsonBean.setEquip_Id(bean.getEquip_Id());
+				jsonBean.setEquip_Name(bean.getEquip_Name());
+				jsonBean.setCurr_Data(bean.getCurr_Data());
+				CData.add(jsonBean);
+			}
+		}
+		//System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		String jsonObj = JSONObject.toJSONString(CData);
+		System.out.println(jsonObj);
+		response.setCharacterEncoding("UTF-8");
+		outprint = response.getWriter();
+		outprint.write(jsonObj);
+		outprint.flush();
+	}
 		
 	public String getSql(int pCmd)
 	{  
@@ -1615,7 +2035,12 @@ public class DevGXBean extends RmiBean
 					   break;
 				}
 				break;
-  
+
+		    case 2:
+				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +
+	    	 	   	  " from view_dev_gx t " +		
+	    	 	   	  " where t.project_id='" + currStatus.getFunc_Project_Id() + "'";	 		         
+			   break;
 		    case 3://查询(单个)
 		    case 5:
 				Sql = " select t.id, t.diameter, t.length, t.start_id, t.end_id, t.start_height, t.end_height, t.material, t.buried_year, t.data_lev, t.project_id, t.project_name, t.equip_id, t.equip_name ,round((t.curr_data),2), t.road, t.flag, t.flow, t.port, t.status, t.des " +

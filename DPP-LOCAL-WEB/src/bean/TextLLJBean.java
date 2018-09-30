@@ -105,17 +105,18 @@ public class TextLLJBean extends RmiBean
 			// currStatus.getVecDate().get(1).toString().substring(5, 10);
 			String SheetName = "多普勒流量计";
 			String UPLOAD_NAME = SimFormat.format(new Date());
-			//System.out.println("SheetName [" + SheetName + "]");
-			msgBean = pRmi.RmiExec(0, this, 0, 25);
+			System.out.println("UPLOAD_NAME [" + UPLOAD_NAME + "]");
+			msgBean = pRmi.RmiExec(2, this, 0, 0);
 			ArrayList<?> list = (ArrayList<?>) msgBean.getMsg();
 			int row_Index = 0;
 			Label cell = null;
 			if (null != list)
 			{
 				WritableWorkbook book = Workbook.createWorkbook(new File(UPLOAD_PATH + UPLOAD_NAME + ".xls"));
+				System.out.println("UPLOAD_NAME [" + UPLOAD_PATH + UPLOAD_NAME + "]");
 				// 生成名为"第一页"的工作表，参数0表示这是第一页
 				WritableSheet sheet = book.createSheet(SheetName, 0);
-
+				System.out.println("1");
 				// 字体格式1
 				WritableFont wf = new WritableFont(WritableFont.createFont("normal"), 14, WritableFont.BOLD, false);
 				WritableCellFormat font1 = new WritableCellFormat(wf);
@@ -123,7 +124,7 @@ public class TextLLJBean extends RmiBean
 				font1.setAlignment(Alignment.CENTRE);// 设置居中
 				font1.setVerticalAlignment(VerticalAlignment.CENTRE); // 设置为垂直居中
 				font1.setBorder(Border.ALL, BorderLineStyle.THIN);// 设置边框线
-
+				System.out.println("2");
 				// 字体格式2
 				WritableFont wf2 = new WritableFont(WritableFont.createFont("normal"), 10, WritableFont.NO_BOLD, false);
 				WritableCellFormat font2 = new WritableCellFormat(wf2);
@@ -131,7 +132,7 @@ public class TextLLJBean extends RmiBean
 				font2.setAlignment(Alignment.CENTRE);// 设置居中
 				font2.setVerticalAlignment(VerticalAlignment.CENTRE); // 设置为垂直居中
 				font2.setBorder(Border.ALL, BorderLineStyle.THIN);// 设置边框线
-
+				System.out.println("3");
 				sheet.setRowView(row_Index, 450);
 				sheet.setColumnView(row_Index, 25);
 				cell = new Label(0, 0, "序号", font1);
@@ -144,16 +145,17 @@ public class TextLLJBean extends RmiBean
 				sheet.addCell(cell);
 				cell = new Label(4, 0, "流速(m/s)", font1);
 				sheet.addCell(cell);
-
+				System.out.println("4");
 				Iterator<?> iterator = list.iterator();
-				double ll = 0.0;
+				//double ll = 0.0;
 				int sn = 1;
 				while (iterator.hasNext())
 				{
+					System.out.println("5.beta");
 					TextLLJBean devGJBean = (TextLLJBean) iterator.next();
 					CTime = devGJBean.getCTime();
 					Value = devGJBean.getValue();
-					System.out.println("Value["+Value+"]");
+					//System.out.println("Value["+Value+"]");
 					String tmp = "";
 					String waterLev = "";
 					String velocity = "";
@@ -162,6 +164,11 @@ public class TextLLJBean extends RmiBean
 						tmp = str[0];
 						waterLev = str[1];
 						velocity = str[3];
+					}else if(Value.length() < 20 && Value.length() > 10){
+						String[] str = Value.split(" ");
+						tmp = str[0];
+						waterLev = str[1];
+						velocity = str[2];
 					}else{
 						if(Double.valueOf(Value) > 10){
 							tmp = Value;
@@ -171,11 +178,11 @@ public class TextLLJBean extends RmiBean
 							waterLev = velocity = Value;
 						}
 					}
-
+					System.out.println("5[" + sn + "]");
 //					System.out.println("tmp["+tmp+"]");
 //					System.out.println("waterLev["+waterLev+"]");
 //					System.out.println("velocity["+velocity+"]");
-					ll += Double.valueOf(velocity);
+					//ll += Double.valueOf(velocity);
 					row_Index++;
 					sheet.setRowView(row_Index, 400);
 					sheet.setColumnView(row_Index, 20); // row_Index 列宽度
@@ -194,15 +201,16 @@ public class TextLLJBean extends RmiBean
 					sn ++;
 				}
 				
-				cell = new Label(3, row_Index+1, "流量", font2);
-				sheet.addCell(cell);
-				cell = new Label(4, row_Index+1, String.valueOf(ll/sn), font2);
-				sheet.addCell(cell);
-
+//				cell = new Label(3, row_Index+1, "流量", font2);
+//				sheet.addCell(cell);
+//				cell = new Label(4, row_Index+1, String.valueOf(ll/sn), font2);
+//				sheet.addCell(cell);
+				System.out.println("6");
 				book.write();
 				book.close();
 				try
 				{
+					System.out.println("UPLOAD_NAME[" + UPLOAD_NAME + "]");
 					PrintWriter out = response.getWriter();
 					out.print(UPLOAD_NAME);
 				}
@@ -235,6 +243,10 @@ public class TextLLJBean extends RmiBean
 			case 1:// 查询最新
 				Sql = " select t.SN, t.CPM_Id, t.Id, t.CName, t.Attr_Id, t.CTime, t.Value, t.Unit, t.Lev, t.Des " + 
 					  " FROM data_dpl t ORDER BY t.ctime DESC LIMIT 0, 1 ";
+				break;
+			case 2:// 查询最新7天
+				Sql = " select t.SN, t.CPM_Id, t.Id, t.CName, t.Attr_Id, t.CTime, t.Value, t.Unit, t.Lev, t.Des " + 
+					  " FROM data_dpl t ORDER BY t.ctime DESC LIMIT 0, 2016 ";
 				break;
 		}
 		return Sql;

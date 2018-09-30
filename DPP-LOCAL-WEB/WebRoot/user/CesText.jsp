@@ -98,7 +98,7 @@ $(function () {
  			 Iterator iter = MoreDev_GJ.iterator();
 			 while(iter.hasNext())
 			  {
-						DevQLBean jBean = (DevQLBean)iter.next();
+						DevKCBean jBean = (DevKCBean)iter.next();
 						data1 += jBean.getBase_Height()+",";							
 						data2 += jBean.getWaterLev()+",";
 						

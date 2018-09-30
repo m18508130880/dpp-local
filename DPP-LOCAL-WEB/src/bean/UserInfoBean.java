@@ -309,7 +309,7 @@ public class UserInfoBean extends RmiBean
 			
 			PrintWriter outprint = response.getWriter();
 			String Resp = "3006";
-			
+			System.out.println("Id["+Id+"]");
 			msgBean = pRmi.RmiExec(2, this, 0, 25);//查找是否有该用户存在
 			switch(msgBean.getStatus())
 			{
