@@ -5,10 +5,7 @@ import java.rmi.RemoteException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
-
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -120,6 +117,54 @@ public class DBUtil
 		return rslt;
 	}
 	
+	public String Func(String Func_Name, String strReauest)
+	{
+		String rslt = null;
+		Connection conn = null;
+		CallableStatement cstat = null;
+		try
+		{
+			conn = objConnPool.getConnection();
+			if(null != conn)
+			{
+				conn.setAutoCommit(false);
+				cstat = conn.prepareCall("{? = call " + Func_Name + "(?)}");
+				cstat.setString(2, strReauest);
+				cstat.registerOutParameter(1, java.sql.Types.VARCHAR);
+				cstat.execute();
+				rslt = cstat.getString(1);
+				conn.commit();	
+			}
+		}
+		catch(SQLException ex)
+		{
+			ex.printStackTrace();
+			return  CommUtil.IntToStringLeftFillSpace(Cmd_Sta.STA_UNKHOWN_ERROR, 4);
+		}
+		finally
+		{
+			try
+			{
+				if(null != cstat)
+				{
+					cstat.close();
+					cstat = null;					
+				}
+				if(null != conn)
+				{
+					conn.close();
+					conn = null;	
+				}
+			}
+			catch(Exception ex)
+			{
+				ex.printStackTrace();
+			}
+		}
+		CommUtil.PRINT("DB_IN["+strReauest+"] DB_OUT[" + rslt + "]");	
+		return rslt;
+	}
+
 	public String GetProject_IdAndGJ_Id(String strCpm_Id, String strId)
 	{
 		String rslt = null;

@@ -643,4 +643,17 @@ public class CommUtil
 		}
 		return strRet;
 	}
+	
+	public static byte[] hexStrToBinaryStr(String hexString) {
+ 		hexString = hexString.replaceAll(" ", "");
+ 		int len = hexString.length();
+		int index = 0;
+ 		byte[] bytes = new byte[len / 2];
+ 		while (index < len) {
+ 			String sub = hexString.substring(index, index + 2);
+ 			bytes[index/2] = (byte)Integer.parseInt(sub,16);
+ 			index += 2;
+		}
+ 		return bytes;
+	}
 }

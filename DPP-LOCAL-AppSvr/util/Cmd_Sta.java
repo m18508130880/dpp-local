@@ -7,6 +7,7 @@ public class Cmd_Sta
 	public static final int COMM_ACTIVE_TEST 			= 0x00000003;	//链接测试
 	public static final int COMM_SUBMMIT 				= 0x00000004;	//客户端提交
 	public static final int COMM_DELIVER 				= 0x00000005;	//服务器派发
+	public static final int COMM_COLLECT 				= 0x00000006;	//服务器下发采集指令
 	public static final int COMM_RESP 					= 0x80000000; 	//回应标记
 
 //	==================常量定义=====================================================	
@@ -23,13 +24,13 @@ public class Cmd_Sta
 	public static final byte CODEC_ERR       = 4;
 
 //	==========================AppSvr ~ CPM========================================
-	public static final int CMD_SUBMIT_0001	 				= 0001;//重启指令
-	public static final int CMD_SUBMIT_0002	 				= 0002;//对时指令
+	public static final int CMD_SUBMIT_0001	 				= 0001;//数据上传（新）
+	public static final int CMD_SUBMIT_0002	 				= 0002;//
 	public static final int CMD_SUBMIT_1000	 				= 1000;
-	public static final int CMD_SUBMIT_1001	 				= 1001;
-	public static final int CMD_SUBMIT_1003	 				= 1003;
-	public static final int CMD_SUBMIT_1004	 				= 1004;
-	public static final int CMD_SUBMIT_1011	 				= 1011;
+	public static final int CMD_SUBMIT_1001	 				= 1001;//数据上传（老）
+	public static final int CMD_SUBMIT_1003	 				= 1003;//立即采集数据
+	public static final int CMD_SUBMIT_1004	 				= 1004;//重新设置单个采集任务
+	public static final int CMD_SUBMIT_1005	 				= 1005;//重新设置全部任务
 
 //	==========================AppSvr ~ Alert========================================
 	public static final int CMD_SUBMIT_2001	 				= 2001;//更新数据

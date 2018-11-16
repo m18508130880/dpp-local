@@ -21,6 +21,7 @@ import util.CmdUtil;
 import util.Cmd_Sta;
 import util.CommUtil;
 import util.DBUtil;
+import bean.DeviceTimedTaskBean;
 import container.ClientContainer;
 
 public class TcpSvr extends Thread
@@ -35,6 +36,9 @@ public class TcpSvr extends Thread
 	}
 	
 	public Hashtable<String, String> objTelStaTable = null;//服务网关表
+	
+	// 设备定时任务  陈键2018/9/13
+	public DeviceTimedTaskBean dveiceTimedTask;
 	
 	//TCP服务器
 	private ServerSocket objTcpSvrSock = null;
@@ -58,6 +62,7 @@ public class TcpSvr extends Thread
 		Document document = reader.read(new FileInputStream("Config.xml"));
 		Element root = document.getRootElement();
 		m_iPort      = Integer.parseInt(root.element("app_server").element("server_prot").getText());
+		System.out.println("m_iPort["+m_iPort+"]");
 		m_iTimeOut   = Integer.parseInt(root.element("app_server").element("server_timeout").getText());
 		m_iStatus    = Integer.parseInt(root.element("app_client").element("client_sta").getText());
 		m_DbUtil     = dbUtil;
@@ -82,6 +87,7 @@ public class TcpSvr extends Thread
 			recvMsgList = new LinkedList<Object>();		
 			objClientTable = new Hashtable<String, ClientSocket>(); 
 			objTelStaTable = new Hashtable<String, String>(); 
+			dveiceTimedTask = new DeviceTimedTaskBean(m_DbUtil, this);
 			this.start();                  
 			return true;
 		}
@@ -275,6 +281,9 @@ public class TcpSvr extends Thread
 				//CPM网关恢复在线
 				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关恢复在线')";
 				onoff = "1";
+
+				// 打开定时任务
+				dveiceTimedTask.openTimedTask(strClientKey);
 				break;
 			}
 			case STATUS_CLIENT_OFFLINE:
@@ -282,6 +291,9 @@ public class TcpSvr extends Thread
 				//CPM网关离线
 				sql = "INSERT INTO device_alert(id, ctime, des) VALUES('" + strClientKey + "', +date_format('"+ CommUtil.getDateTime() +"', '%Y-%m-%d %H-%i-%S'), '网关离线')";
 				onoff = "0";
+
+				// 关闭定时任务
+				dveiceTimedTask.closeTimedTask(strClientKey);
 				break;
 			}
 		}
@@ -389,6 +401,10 @@ public class TcpSvr extends Thread
 	public byte[] EnCode(int msgCode, String pData)
 	{
 		byte[] byteData = null;
+		if(msgCode == Cmd_Sta.COMM_COLLECT){
+			byteData = CommUtil.hexStrToBinaryStr(pData);
+			return byteData;
+		}
 		try
 		{
 			ByteArrayOutputStream boutStream = new ByteArrayOutputStream();
@@ -441,7 +457,7 @@ public class TcpSvr extends Thread
 				
 				objSendThrd = new SendThrd(objClient);
 				objSendThrd.start();
-						
+				
 				this.start();			
 			}
 			catch(Exception exp)

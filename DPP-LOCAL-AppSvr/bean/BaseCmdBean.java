@@ -1,7 +1,9 @@
 package bean;
 
 import net.MsgCtrl;
-import util.*;
+import util.Cmd_Sta;
+import util.CommUtil;
+import util.DBUtil;
 
 public abstract class BaseCmdBean
 {
@@ -25,14 +27,11 @@ public abstract class BaseCmdBean
 		BaseCmdBean retBean = null;
 		switch(Cmd)
 		{
+			case Cmd_Sta.CMD_SUBMIT_0001:
+				retBean = new AppDeviceDataReqBeanNew(Cmd, Seq);
+				break;
 			case Cmd_Sta.CMD_SUBMIT_1001:
 				retBean = new AppDeviceDataReqBean(Cmd, Seq);
-				break;
-			case Cmd_Sta.CMD_SUBMIT_0001:
-				retBean = new DTURestartBean(Cmd, Seq);
-				break;
-			case Cmd_Sta.CMD_SUBMIT_0002:
-				retBean = new DTUUpdateTimeBean(Cmd, Seq);
 				break;
 			case Cmd_Sta.CMD_SUBMIT_2001:
 				retBean = new AlertCenterCtrlBean(Cmd, Seq);
