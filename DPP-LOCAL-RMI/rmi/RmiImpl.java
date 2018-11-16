@@ -16,6 +16,7 @@ import util.CommUtil;
 import util.DBUtil;
 import util.MsgBean;
 import bean.AlertInfoBean;
+import bean.AnalogComputeBean;
 import bean.CheckTaskBean;
 import bean.CheckTaskGJBean;
 import bean.CheckTaskGXBean;
@@ -30,8 +31,13 @@ import bean.DevGJBean;
 import bean.DevGXBean;
 import bean.DevHandBean;
 import bean.DevMapBean;
+import bean.DevSWBean;
 import bean.EquipAlertBean;
 import bean.EquipInfoBean;
+import bean.MacAnalysisBean;
+import bean.MacManBean;
+import bean.MacReadBean;
+import bean.MacSendBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
 import bean.TextLLJBean;
@@ -280,6 +286,27 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 
 					case RmiBean.RMI_TEXT_LLJ:
 						rmiBean = new TextLLJBean();
+						break;
+						
+					case RmiBean.RMI_COMPUTE:
+						rmiBean = new AnalogComputeBean();
+						break;
+					case RmiBean.RMI_DEVSW:
+						rmiBean = new DevSWBean();
+						break;
+						
+					/**************…Ë±∏±‡º≠*************/
+					case RmiBean.RMI_MAC_ANALYZE:
+						rmiBean = new MacAnalysisBean();
+						break;
+					case RmiBean.RMI_MAC_READ:
+						rmiBean = new MacReadBean();
+						break;
+					case RmiBean.RMI_MAC_SEND:
+						rmiBean = new MacSendBean();
+						break;
+					case RmiBean.RMI_MAC_MAN:
+						rmiBean = new MacManBean();
 						break;
 				}
 				rmiBean.getData(rs);

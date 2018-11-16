@@ -15,6 +15,7 @@ import util.CheckCode;
 import util.CommUtil;
 import bean.AlertInfoBean;
 import bean.AnalogBean;
+import bean.AnalogComputeBean;
 import bean.CheckTaskBean;
 import bean.CheckTaskGJBean;
 import bean.CheckTaskGXBean;
@@ -27,8 +28,13 @@ import bean.DevGJBean;
 import bean.DevGXBean;
 import bean.DevHandBean;
 import bean.DevMapBean;
+import bean.DevSWBean;
 import bean.EquipAlertBean;
 import bean.EquipInfoBean;
+import bean.MacAnalysisBean;
+import bean.MacManBean;
+import bean.MacReadBean;
+import bean.MacSendBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
 import bean.TextLLJBean;
@@ -295,11 +301,15 @@ public class MainServlet extends HttpServlet
         	new DataGJBean().GraphData(request, response, m_Rmi, false); 
         
         /************************************user-管井模拟*****************************************************/
+        else if (strUrl.equalsIgnoreCase("Analog_Compute.do"))				        //模拟计算数据存入数据库
+        	new AnalogComputeBean().Compute(request, response, m_Rmi, false);  
+        else if (strUrl.equalsIgnoreCase("getAnalogData.do"))			        	//从数据库获取模拟数据
+        	new AnalogComputeBean().getAnalogData(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Analog_rainfall.do"))				        //上传数据
-        	new AnalogBean().ImportData(request, response, m_Rmi, false, Config);  
+        	new AnalogBean().ImportData(request, response, m_Rmi, false, Config); 
         else if (strUrl.equalsIgnoreCase("DeleteData.do"))				       		//删除数据
         	new DevGJBean().DeleteData(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("Analog_ToPo_GJ.do"))				        //查询单个子系统
+        else if (strUrl.equalsIgnoreCase("Analog_ToPo_GJ.do"))				        //查询
         	new DevGJBean().AnalogToPo(request, response, m_Rmi, false);  
         else if (strUrl.equalsIgnoreCase("FileName_ToPo_GJ.do"))				    //返回子系统号
         	new DevGJBean().FileToPo(request, response, m_Rmi, false);  
@@ -313,6 +323,8 @@ public class MainServlet extends HttpServlet
         	new DevGJBean().WaterAcc(request, response, m_Rmi, false);  
         
         /************************************user-管线模拟*****************************************************/
+        else if (strUrl.equalsIgnoreCase("Analog_ToPo_GX.do"))				        	//查询
+        	new DevGXBean().AnalogToPo(request, response, m_Rmi, false);  
         else if (strUrl.equalsIgnoreCase("Analog_DevGX_Info.do"))				    	//管线信息
         	new DevGXBean().AnalogFlow(request, response, m_Rmi, false); 
         else if (strUrl.equalsIgnoreCase("Analog_Graph_FlowLoad.do"))				    //流量负荷
@@ -407,8 +419,24 @@ public class MainServlet extends HttpServlet
         	new TextLLJBean().XLQRExcel(request, response, m_Rmi, false);
         
         /************************************自动计算模拟数据************************************************/
-        else if (strUrl.equalsIgnoreCase("getAnalogData_Auot.do"))			         				//获取实时数据
+        else if (strUrl.equalsIgnoreCase("getAnalogData_Auot.do"))			         		//自动计算模拟数据表格
         	new DevGXBean().getAnalogExcel(request, response, m_Rmi, false, Config);
+        
+        /************************************水文信息************************************************/
+        else if (strUrl.equalsIgnoreCase("getSWNow.do"))			         		//获取水文信息
+        	new DevSWBean().getDataNow(request, response, m_Rmi, false);
+        
+        /************************************设备编辑************************************************/
+        else if (strUrl.equalsIgnoreCase("Admin_Mac_Man.do"))			         		// 
+        	new MacManBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Mac_Read.do"))			         		// 
+        	new MacReadBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Mac_Send.do"))			         		// 
+        	new MacSendBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Mac_Analysis.do"))			         	// 
+        	new MacAnalysisBean().ExecCmd(request, response, m_Rmi, false);
+        
+        
         
     }
     

@@ -1,6 +1,4 @@
 package net;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.net.InetAddress;
 import java.util.Date;
@@ -12,9 +10,9 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
-
-import util.*;
-import bean.*;
+import util.Cmd_Sta;
+import util.CommUtil;
+import bean.BaseCmdBean;
 
 public class MsgCtrl extends Thread
 {	
@@ -95,6 +93,7 @@ public class MsgCtrl extends Thread
 						break;
 					}
 					case Cmd_Sta.CMD_SUBMIT_2002://¸æ¾¯¼ÆËã
+						System.out.println("dealData["+dealData+"]");
 						String Project_IdAndSysId = dealData.substring(28, 39);
 						System.out.println(CommUtil.getDateTime());
 						m_AlertCtrl.doAlert(Project_IdAndSysId);

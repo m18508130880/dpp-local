@@ -57,7 +57,16 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_WEATHER					= 46;
 
 	public static final int	RMI_TEXT_LLJ					= 47;
+	public static final int	RMI_COMPUTE					= 48;
+
+	public static final int	RMI_DEVSW					= 49;
 	
+	/****************************…Ë±∏±‡º≠**********************/
+	
+	public static final int	RMI_MAC_ANALYZE				= 60;
+	public static final int	RMI_MAC_READ				= 61;
+	public static final int	RMI_MAC_SEND				= 62;
+	public static final int	RMI_MAC_MAN					= 63;
 	public MsgBean    msgBean = null;
 	public String     className;
 	public CurrStatus currStatus = null;

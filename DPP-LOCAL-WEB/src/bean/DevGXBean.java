@@ -571,18 +571,18 @@ public class DevGXBean extends RmiBean
 				msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
 				request.getSession().setAttribute("Analog_Graph_Cut_GJ_" + Sid, (Object)msgBean.getMsg());
 				
-				AnalogBean analogBean = new AnalogBean();
-				String WaterLev = "";
-				if(Id.substring(0,2).equals("YJ"))
-				{
-					//System.out.println("Func_Project_Id["+currStatus.getFunc_Project_Id()+"]Id["+Id+"]pSimu["+pSimu+"]");
-					WaterLev = analogBean.AnalogWaterLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
-				}else
-				{
-					WaterLev = analogBean.AnalogSewageLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
-				}
-				//System.out.println("WaterLev"+WaterLev);
-				request.getSession().setAttribute("Analog_WaterLev_" + Sid, WaterLev);				
+//				AnalogBean analogBean = new AnalogBean();
+//				String WaterLev = "";
+//				if(Id.substring(0,2).equals("YJ"))
+//				{
+//					//System.out.println("Func_Project_Id["+currStatus.getFunc_Project_Id()+"]Id["+Id+"]pSimu["+pSimu+"]");
+//					//WaterLev = analogBean.AnalogWaterLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
+//				}else
+//				{
+//					WaterLev = analogBean.AnalogSewageLev(currStatus.getFunc_Project_Id() + "_" + Id.substring(0,5), timePeriod, Double.parseDouble(pSimu));
+//				}
+//				//System.out.println("WaterLev"+WaterLev);
+//				request.getSession().setAttribute("Analog_WaterLev_" + Sid, WaterLev);				
 				currStatus.setJsp("Analog_Graph_Cut.jsp?Sid=" + Sid 
 						+ "&TimePeriod=" + timePeriod 
 						+ "&Id=" + Id);
@@ -591,6 +591,27 @@ public class DevGXBean extends RmiBean
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void AnalogToPo(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			String yjResp = ((String) msgBean.getMsg()).substring(4);
+			Resp = "0000" + yjResp;
+		}
+
+		//System.out.println("Resp["+Resp+"]");
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
 	}
 	
 	public void AnalogFlow(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
@@ -2120,6 +2141,9 @@ public class DevGXBean extends RmiBean
 				break;
 			case 24://获取子系统的排出口个数
 				Sql = "{? = call Func_Sum_OutGJ('"+Id+"', '"+currStatus.getFunc_Project_Id()+"')}";
+				break;
+			case 25://获取模拟管线状态
+				Sql = "{? = call Func_GX_Analog('"+ currStatus.getFunc_Project_Id() + "')}";
 				break;
 			case 40://编辑设备EquipInfo
 				Sql = "{call pro_update_dev_gx('" + Equip_Id + "', '" + Equip_Name + "', '" + Id + "' , '" + Project_Id + "', '" + After_Project_Id + "')}";

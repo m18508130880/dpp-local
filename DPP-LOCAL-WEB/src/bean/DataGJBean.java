@@ -264,10 +264,11 @@ public class DataGJBean extends RmiBean
 		}*/
 
 		//msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		
 		AnalogBean analog = new AnalogBean();
 		String WaterAccGJ = "";
 		if(GJ_Id.substring(0,2).equals("YJ")){
-			WaterAccGJ = analog.AnalogWaterAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(pSimu));
+			//WaterAccGJ = analog.AnalogWaterAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(pSimu));
 		}else
 		{
 			WaterAccGJ = analog.AnalogSewageAccGj(currStatus.getFunc_Project_Id() + "_" + GJ_Id, Double.parseDouble(pSimu));
@@ -420,17 +421,11 @@ public class DataGJBean extends RmiBean
 		int key = Integer.valueOf(request.getParameter("key"));
 		switch (key) {
 		case 1:
-			Rsep = "0000" + DayData(pRmi);
-			break;
 		case 2:
 			Rsep = "0000" + DayData(pRmi);
 			break;
 		case 3:
-			Rsep = "0000" + MonthData(pRmi);
-			break;
 		case 4:
-			Rsep = "0000" + MonthData(pRmi);
-			break;
 		case 5:
 			Rsep = "0000" + MonthData(pRmi);
 			break;
@@ -463,7 +458,7 @@ public class DataGJBean extends RmiBean
 			font1.setBorder(Border.ALL, BorderLineStyle.THIN);		// 设置边框线
 			
 			sheet.setRowView(0, 450);
-			sheet.setColumnView(0, 25);
+			sheet.setColumnView(0, 15);
 			cell = new Label(0, 0, "时间", font1);
 			sheet.addCell(cell);
 			String bTime = currStatus.getVecDate().get(0).toString();
@@ -475,7 +470,7 @@ public class DataGJBean extends RmiBean
 				Date et = CommUtil.StrToDate(eTime);
 				if (bt.before(et)){ //表示bt小于et
 					sheet.setRowView(row, 450);
-					sheet.setColumnView(row, 25);
+					sheet.setColumnView(row, 15);
 					cell = new Label(0, row, bTime.substring(0,13)+":00", font1);
 					sheet.addCell(cell);
 					timeMap.put(bTime.substring(0,13), row);
@@ -486,18 +481,23 @@ public class DataGJBean extends RmiBean
 				row ++;
 			}
 			String [] idList = currStatus.getFunc_Sort_Id().split(",");
+			int col = 0;
 			for(int i = 0; i < idList.length; i ++){
 				GJ_Id = idList[i];
-				sheet.setRowView(i+1, 450);
-				sheet.setColumnView(i+1, 25);
-				cell = new Label(i+1, 0, GJ_Id, font1);
+				col = (i+1)*2 - 1;
+				sheet.setRowView(col, 450);
+				sheet.setColumnView(col, 10);
+				cell = new Label(col, 0, GJ_Id, font1);
+				sheet.addCell(cell);
+				sheet.setRowView(col+1, 450);
+				sheet.setColumnView(col+1, 25);
+				cell = new Label(col+1, 0, "备注", font1);
 				sheet.addCell(cell);
 				
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
 				ArrayList<?> waterList = (ArrayList<?>) msgBean.getMsg();
 				if(waterList == null){continue;}
 				Iterator<?> iterator = waterList.iterator();
-				int row_ = 0;
 				while (iterator.hasNext())
 				{
 					DataGJBean bean = (DataGJBean) iterator.next();
@@ -507,15 +507,55 @@ public class DataGJBean extends RmiBean
 					Top_Height = bean.getTop_Height();
 					Equip_Height = bean.getEquip_Height();
 					if(timeMap.containsKey(CTime.substring(0, 13))){
-						row_ = timeMap.get(CTime.substring(0, 13));
+						row = timeMap.get(CTime.substring(0, 13));
 					}else{
 						continue;
 					}
 					float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
 					sheet.setRowView(row, 450);
-					sheet.setColumnView(row, 25);
-					cell = new Label(i+1, row_, df.format(water), font1);
+					sheet.setColumnView(row, 10);
+					cell = new Label(col, row, df.format(water), font1);
 					sheet.addCell(cell);
+				}
+				// 查询常水位
+				msgBean = pRmi.RmiExec(22, this, 0, 0);
+				String oftenWaterLev = ((String)msgBean.getMsg()).substring(4);
+				// 查询当前的全部水位
+				msgBean = pRmi.RmiExec(1, this, 0, 0);
+				ArrayList<?> waterListAll = (ArrayList<?>) msgBean.getMsg();
+				if(waterListAll == null){continue;}
+				Iterator<?> iteratorAll = waterListAll.iterator();
+				int row_ = -1;row = 0;
+				String str = "";
+				while (iteratorAll.hasNext())
+				{
+					DataGJBean bean = (DataGJBean) iteratorAll.next();
+					Value = bean.getValue();
+					if(Float.valueOf(Value) > Float.valueOf(oftenWaterLev)){
+						CTime = bean.getCTime();
+						if(timeMap.containsKey(CTime.substring(0, 13))){
+							row = timeMap.get(CTime.substring(0, 13));
+						}else{
+							continue;
+						}
+						if(row_ > -1 && row_ != row){
+							sheet.setRowView(row, 450);
+							sheet.setColumnView(row, 25);
+							cell = new Label(col + 1, row_, str, font1);
+							sheet.addCell(cell);
+							str = "";
+						}
+						Top_Height = bean.getTop_Height();
+						Equip_Height = bean.getEquip_Height();
+						float val = Float.valueOf(Equip_Height) - Float.valueOf(Value);
+						float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
+						if(val <= 0.3){
+							str += "["+CTime+"]离地面["+df.format(val)+"m]实际["+df.format(water)+"]地面["+Top_Height+"]";
+						}else if(val < 0.0){
+							str += "["+CTime+"]溢出地面["+df.format(-val)+"m]实际["+df.format(water)+"]地面["+Top_Height+"]";
+						}
+						row_ = row;
+					}
 				}
 			}
 			book.write();
@@ -548,7 +588,7 @@ public class DataGJBean extends RmiBean
 			font1.setBorder(Border.ALL, BorderLineStyle.THIN);		// 设置边框线
 			
 			sheet.setRowView(0, 450);
-			sheet.setColumnView(0, 25);
+			sheet.setColumnView(0, 15);
 			cell = new Label(0, 0, "时间", font1);
 			sheet.addCell(cell);
 			String bTime = currStatus.getVecDate().get(0).toString();
@@ -560,7 +600,7 @@ public class DataGJBean extends RmiBean
 				Date et = CommUtil.StrToDate(eTime);
 				if (bt.before(et)){ //表示bt小于et
 					sheet.setRowView(row, 450);
-					sheet.setColumnView(row, 25);
+					sheet.setColumnView(row, 15);
 					cell = new Label(0, row, bTime.substring(0,10), font1);
 					sheet.addCell(cell);
 					timeMap.put(bTime.substring(0,10), row);
@@ -571,18 +611,24 @@ public class DataGJBean extends RmiBean
 				row ++;
 			}
 			String [] idList = currStatus.getFunc_Sort_Id().split(",");
+			int col = 0;
 			for(int i = 0; i < idList.length; i ++){
 				GJ_Id = idList[i];
-				sheet.setRowView(i+1, 450);
-				sheet.setColumnView(i+1, 25);
-				cell = new Label(i+1, 0, GJ_Id, font1);
+				col = (i+1)*2 - 1;
+				sheet.setRowView(col, 450);
+				sheet.setColumnView(col, 10);
+				cell = new Label(col, 0, GJ_Id, font1);
+				sheet.addCell(cell);
+
+				sheet.setRowView(col+1, 450);
+				sheet.setColumnView(col+1, 25);
+				cell = new Label(col+1, 0, "备注", font1);
 				sheet.addCell(cell);
 				
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
 				ArrayList<?> waterList = (ArrayList<?>) msgBean.getMsg();
 				if(waterList == null){continue;}
 				Iterator<?> iterator = waterList.iterator();
-				int row_ = 0;
 				while (iterator.hasNext())
 				{
 					DataGJBean bean = (DataGJBean) iterator.next();
@@ -592,15 +638,56 @@ public class DataGJBean extends RmiBean
 					Top_Height = bean.getTop_Height();
 					Equip_Height = bean.getEquip_Height();
 					if(timeMap.containsKey(CTime.substring(0, 10))){
-						row_ = timeMap.get(CTime.substring(0, 10));
+						row = timeMap.get(CTime.substring(0, 10));
 					}else{
 						continue;
 					}
 					float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
 					sheet.setRowView(row, 450);
-					sheet.setColumnView(row, 25);
-					cell = new Label(i+1, row_, df.format(water), font1);
+					sheet.setColumnView(row, 10);
+					cell = new Label(col, row, df.format(water), font1);
 					sheet.addCell(cell);
+				}
+				// 查询常水位
+				msgBean = pRmi.RmiExec(22, this, 0, 0);
+				String oftenWaterLev = ((String)msgBean.getMsg()).substring(4);
+				// 查询当前的全部水位
+				msgBean = pRmi.RmiExec(1, this, 0, 0);
+				ArrayList<?> waterListAll = (ArrayList<?>) msgBean.getMsg();
+				if(waterListAll == null){continue;}
+				Iterator<?> iteratorAll = waterListAll.iterator();
+				int row_ = -1;row = 0;
+				String str = "";
+				while (iteratorAll.hasNext())
+				{
+					DataGJBean bean = (DataGJBean) iteratorAll.next();
+					Value = bean.getValue();
+					float dValue = Float.valueOf(Value) - Float.valueOf(oftenWaterLev);
+					if(dValue > 0){
+						CTime = bean.getCTime();
+						if(timeMap.containsKey(CTime.substring(0, 10))){
+							row = timeMap.get(CTime.substring(0, 10));
+						}else{
+							continue;
+						}
+						if(row_ > -1 && row_ != row){
+							sheet.setRowView(row, 450);
+							sheet.setColumnView(row, 25);
+							cell = new Label(col + 1, row_, str, font1);
+							sheet.addCell(cell);
+							str = "";
+						}
+						Top_Height = bean.getTop_Height();
+						Equip_Height = bean.getEquip_Height();
+						float val = Float.valueOf(Equip_Height) - Float.valueOf(Value);
+						float water = Float.valueOf(Top_Height) - Float.valueOf(Equip_Height) + Float.valueOf(Value);
+						if(val <= 0.5){
+							str += "["+CTime+"]离地面["+df.format(val)+"m]实际["+df.format(water)+"]地面["+Top_Height+"]";
+						}else if(val < 0.0){
+							str += "["+CTime+"]溢出地面["+df.format(-val)+"m]实际["+df.format(water)+"]地面["+Top_Height+"]";
+						}
+						row_ = row;
+					}
 				}
 			}
 			book.write();
@@ -757,6 +844,9 @@ public class DataGJBean extends RmiBean
 				break;
 			case 21: // 获取有水位计的管井
 				Sql = "{? = call Func_Data_GJId('" + currStatus.getFunc_Project_Id() + "')}";
+				break;
+			case 22: // 管井内一个月/一季度/一年内的常水位
+				Sql = "{? = call Func_Often_WaterLev('" + currStatus.getFunc_Project_Id() + "','" + GJ_Id + "','" + currStatus.getVecDate().get(1).toString() + "')}";
 				break;
 		}
 		return Sql;

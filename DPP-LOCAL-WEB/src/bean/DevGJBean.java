@@ -322,8 +322,7 @@ public class DevGJBean extends RmiBean
 		}
 //		PrintWriter outprint = response.getWriter();
 //		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
-		String jsonObj = JSONObject.toJSONString(WaterAcc);
-		System.out.println(jsonObj.length());
+//		String jsonObj = JSONObject.toJSONString(WaterAcc);
 //		response.setCharacterEncoding("UTF-8");
 //		outprint.write(jsonObj);
 //		outprint.flush();

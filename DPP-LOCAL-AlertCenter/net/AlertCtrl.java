@@ -55,6 +55,7 @@ public class AlertCtrl extends Thread
 	public void run()
 	{
 		int i = 0;
+		int cou  = 6;
 		while (true)
 		{
 			try
@@ -73,8 +74,11 @@ public class AlertCtrl extends Thread
 //			        //System.out.println(entry.getKey() + entry.getValue());  
 //			    }  
 				CommUtil.PRINT("设备离线计算["+(i ++)+"] Time["+CommUtil.getDateTime()+"]");
-				
-				m_WeatherNow.doWeatherNow(this);
+				if(cou > 5){
+					cou = 0;
+					m_WeatherNow.doWeatherNow(this);
+				}
+				cou ++;
 			}
 			catch(Exception ex)
 			{

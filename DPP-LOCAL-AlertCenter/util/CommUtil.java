@@ -644,7 +644,45 @@ public class CommUtil
 		}
 		return strRet;
 	}
-	
+	public static String getDateHourAfter(String startTime, int hour)
+	{
+		String endTime = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		try
+		{
+			Calendar now = Calendar.getInstance();
+			Date pTime = sdf.parse(startTime);
+			now.setTime(pTime);
+			now.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY) + hour);
+			endTime = sdf.format(now.getTime());
+		}
+		catch(Exception e)
+		{
+			endTime = "1970-01-01 00:00:00";
+			e.printStackTrace();
+		}
+		return endTime;
+	}
+
+	public static String getDateHourAfter_(String startTime, int hour)
+	{
+		String endTime = "";
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		try
+		{
+			Calendar now = Calendar.getInstance();
+			Date pTime = sdf.parse(startTime);
+			now.setTime(pTime);
+			now.set(Calendar.HOUR_OF_DAY, now.get(Calendar.HOUR_OF_DAY) + hour);
+			endTime = sdf.format(now.getTime());
+		}
+		catch(Exception e)
+		{
+			endTime = "1970-01-01 00:00:00";
+			e.printStackTrace();
+		}
+		return endTime;
+	}
 	// ·µ»ØÐ¡Ê±²î
 	public static int getHoursBetween(String startTime, String endTime)
 	{
