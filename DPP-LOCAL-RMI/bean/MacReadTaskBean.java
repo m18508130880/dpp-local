@@ -14,17 +14,17 @@ import util.CommUtil;
 import util.CurrStatus;
 import util.MsgBean;
 
-public class MacManBean extends RmiBean 
+public class MacReadTaskBean extends RmiBean 
 {
-	public final static long serialVersionUID = RmiBean.RMI_MAC_MAN;
+	public final static long serialVersionUID = RmiBean.RMI_READ_TASK;
 	public long getClassId()
 	{
 		return serialVersionUID;
 	}
 	
-	public MacManBean()
+	public MacReadTaskBean()
 	{
-		super.className = "MacManBean";
+		super.className = "MacReadTaskBean";
 	}
 	
 	public void ExecCmd(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
@@ -56,15 +56,15 @@ public class MacManBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.cname, t.man_name, t.man_tel, t.man_addrs "
-						+ " from mac_man t order by t.sn";
+				Sql = " select  t.sn, t.pid, t.tid, t.read "
+						+ " from mac_read_task t order by t.sn";
 				break;
 			case 10://ÃÌº”
-				Sql = " insert into mac_man(cname, man_name, man_tel, man_addrs)" +
-					  " values('"+ CName +"', '"+ Man_Name +"', '"+ Man_Tel +"', '"+ Man_Addrs +"')";
+				Sql = " insert into mac_read_task(pid, tid, read)" +
+					  " values('"+ PId + "', '" + TId +"', '"+ Read +"')";
 				break;
 			case 11://±‡º≠
-				Sql = " update mac_man t set t.cname= '"+ CName +"', t.man_name= '"+ Man_Name +"', t.man_tel= '"+ Man_Tel +"', t.man_addrs= '"+ Man_Addrs +"' " +
+				Sql = " update mac_read_task t set t.pid= '"+ PId +"', t.tid= '"+ TId +"', t.read= '"+ Read +"' " +
 					  " where t.sn = '"+ SN +"'";
 				break;
 		}
@@ -77,10 +77,9 @@ public class MacManBean extends RmiBean
 		try
 		{
 			setSN(pRs.getString(1));
-			setCName(pRs.getString(2));
-			setMan_Name(pRs.getString(3));
-			setMan_Tel(pRs.getString(4));
-			setMan_Addrs(pRs.getString(5));
+			setPId(pRs.getString(2));
+			setTId(pRs.getString(3));
+			setRead(pRs.getString(4));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -95,10 +94,9 @@ public class MacManBean extends RmiBean
 		try
 		{
 			setSN(CommUtil.StrToGB2312(request.getParameter("SN")));
-			setCName(CommUtil.StrToGB2312(request.getParameter("CName")));
-			setMan_Name(CommUtil.StrToGB2312(request.getParameter("Man_Name")));
-			setMan_Tel(CommUtil.StrToGB2312(request.getParameter("Man_Tel")));
-			setMan_Addrs(CommUtil.StrToGB2312(request.getParameter("Man_Addrs")));
+			setPId(CommUtil.StrToGB2312(request.getParameter("PId")));
+			setTId(CommUtil.StrToGB2312(request.getParameter("TId")));
+			setRead(CommUtil.StrToGB2312(request.getParameter("Read")));
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
 		catch (Exception Exp)
@@ -109,10 +107,9 @@ public class MacManBean extends RmiBean
 	}
 	
 	private String SN;
-	private String CName;
-	private String Man_Name;
-	private String Man_Tel;
-	private String Man_Addrs;
+	private String PId;
+	private String TId;
+	private String Read;
 
 	private String Sid;
 
@@ -124,36 +121,28 @@ public class MacManBean extends RmiBean
 		SN = sN;
 	}
 
-	public String getCName() {
-		return CName;
+	public String getPId() {
+		return PId;
 	}
 
-	public void setCName(String cName) {
-		CName = cName;
+	public void setPId(String pId) {
+		PId = pId;
 	}
 
-	public String getMan_Name() {
-		return Man_Name;
+	public String getTId() {
+		return TId;
 	}
 
-	public void setMan_Name(String man_Name) {
-		Man_Name = man_Name;
+	public void setTId(String tId) {
+		TId = tId;
 	}
 
-	public String getMan_Tel() {
-		return Man_Tel;
+	public String getRead() {
+		return Read;
 	}
 
-	public void setMan_Tel(String man_Tel) {
-		Man_Tel = man_Tel;
-	}
-
-	public String getMan_Addrs() {
-		return Man_Addrs;
-	}
-
-	public void setMan_Addrs(String man_Addrs) {
-		Man_Addrs = man_Addrs;
+	public void setRead(String read) {
+		Read = read;
 	}
 
 	public String getSid() {

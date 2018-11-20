@@ -14,17 +14,17 @@ import util.CommUtil;
 import util.CurrStatus;
 import util.MsgBean;
 
-public class MacReadBean extends RmiBean 
+public class MacSendTaskBean extends RmiBean 
 {
-	public final static long serialVersionUID = RmiBean.RMI_MAC_READ;
+	public final static long serialVersionUID = RmiBean.RMI_SEND_TASK;
 	public long getClassId()
 	{
 		return serialVersionUID;
 	}
 	
-	public MacReadBean()
+	public MacSendTaskBean()
 	{
-		super.className = "MacReadBean";
+		super.className = "MacSendTaskBean";
 	}
 	
 	public void ExecCmd(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
@@ -41,13 +41,10 @@ public class MacReadBean extends RmiBean
 				currStatus.setResult(MsgBean.GetResult(msgBean.getStatus()));
 				msgBean = pRmi.RmiExec(0, this, 0, 25);
 			case 0://≤È—Ø
-		    	request.getSession().setAttribute("Mac_Read_" + Sid, ((Object)msgBean.getMsg()));
-		    	currStatus.setJsp("Mac_Read.jsp?Sid=" + Sid);		    
+		    	request.getSession().setAttribute("Mac_Man_" + Sid, ((Object)msgBean.getMsg()));
+		    	currStatus.setJsp("Mac_Man.jsp?Sid=" + Sid);		    
 		    	break;
 		}
-		MacAnalysisBean macAnalysisBean = new MacAnalysisBean();
-		msgBean = pRmi.RmiExec(0, macAnalysisBean, 0, 25);
-		request.getSession().setAttribute("Mac_Analysis_" + Sid, ((Object)msgBean.getMsg()));
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
@@ -59,15 +56,15 @@ public class MacReadBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.cname, t.addrs, t.code, t.sign, t.analysis "
-						+ " from mac_read t order by t.sn";
+				Sql = " select  t.sn, t.pid, t.tid, t.cycle, t.send "
+						+ " from mac_send_task t order by t.sn";
 				break;
 			case 10://ÃÌº”
-				Sql = " insert into mac_read(cname, addrs, code, sign, analysis)" +
-					  " values('"+ CName +"', '"+ Addrs +"', '"+ Code +"', '" + Sign +"', '"+ Analysis +"')";
+				Sql = " insert into mac_send_task(pid, tid, cycle, send)" +
+					  " values('"+ PId +"', '"+ TId +"', '"+ Cycle +"', '"+ Send +"')";
 				break;
 			case 11://±‡º≠
-				Sql = " update mac_read t set t.cname= '"+ CName +"', t.addrs= '"+ Addrs +"', t.code= '"+ Code + "', t.sign= '"+ Sign + "', t.analysis= '"+ Analysis +"' " +
+				Sql = " update mac_send_task t set t.pid= '"+ PId +"', t.tid= '"+ TId +"', t.cycle= '"+ Cycle +"', t.send= '"+ Send +"' " +
 					  " where t.sn = '"+ SN +"'";
 				break;
 		}
@@ -80,11 +77,10 @@ public class MacReadBean extends RmiBean
 		try
 		{
 			setSN(pRs.getString(1));
-			setCName(pRs.getString(2));
-			setAddrs(pRs.getString(3));
-			setCode(pRs.getString(4));
-			setSign(pRs.getString(5));
-			setAnalysis(pRs.getString(6));
+			setPId(pRs.getString(2));
+			setTId(pRs.getString(3));
+			setCycle(pRs.getString(4));
+			setSend(pRs.getString(5));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -99,11 +95,10 @@ public class MacReadBean extends RmiBean
 		try
 		{
 			setSN(CommUtil.StrToGB2312(request.getParameter("SN")));
-			setCName(CommUtil.StrToGB2312(request.getParameter("CName")));
-			setAddrs(CommUtil.StrToGB2312(request.getParameter("Addrs")));
-			setCode(CommUtil.StrToGB2312(request.getParameter("Code")));
-			setSign(CommUtil.StrToGB2312(request.getParameter("Sign")));
-			setAnalysis(CommUtil.StrToGB2312(request.getParameter("Analysis")));
+			setPId(CommUtil.StrToGB2312(request.getParameter("PId")));
+			setTId(CommUtil.StrToGB2312(request.getParameter("TId")));
+			setCycle(CommUtil.StrToGB2312(request.getParameter("Cycle")));
+			setSend(CommUtil.StrToGB2312(request.getParameter("Send")));
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
 		catch (Exception Exp)
@@ -114,11 +109,10 @@ public class MacReadBean extends RmiBean
 	}
 	
 	private String SN;
-	private String CName;
-	private String Addrs;
-	private String Code;
-	private String Sign;
-	private String Analysis;
+	private String PId;
+	private String TId;
+	private String Cycle;
+	private String Send;
 
 	private String Sid;
 
@@ -130,44 +124,36 @@ public class MacReadBean extends RmiBean
 		SN = sN;
 	}
 
-	public String getCName() {
-		return CName;
+	public String getPId() {
+		return PId;
 	}
 
-	public void setCName(String cName) {
-		CName = cName;
+	public void setPId(String pId) {
+		PId = pId;
 	}
 
-	public String getAddrs() {
-		return Addrs;
+	public String getTId() {
+		return TId;
 	}
 
-	public void setAddrs(String addrs) {
-		Addrs = addrs;
+	public void setTId(String tId) {
+		TId = tId;
 	}
 
-	public String getCode() {
-		return Code;
+	public String getCycle() {
+		return Cycle;
 	}
 
-	public void setCode(String code) {
-		Code = code;
+	public void setCycle(String cycle) {
+		Cycle = cycle;
 	}
 
-	public String getSign() {
-		return Sign;
+	public String getSend() {
+		return Send;
 	}
 
-	public void setSign(String sign) {
-		Sign = sign;
-	}
-
-	public String getAnalysis() {
-		return Analysis;
-	}
-
-	public void setAnalysis(String analysis) {
-		Analysis = analysis;
+	public void setSend(String send) {
+		Send = send;
 	}
 
 	public String getSid() {

@@ -23,6 +23,7 @@ import bean.CorpInfoBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
 import bean.DataHandBean;
+import bean.DataNowBean;
 import bean.DevBZBean;
 import bean.DevGJBean;
 import bean.DevGXBean;
@@ -32,7 +33,7 @@ import bean.DevSWBean;
 import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MacAnalysisBean;
-import bean.MacManBean;
+import bean.MacConfigBean;
 import bean.MacReadBean;
 import bean.MacSendBean;
 import bean.MapImageBean;
@@ -112,6 +113,9 @@ public class MainServlet extends HttpServlet
         {
         	CheckCode.CreateCheckCode(request, response, strSid);
         	return;
+        }
+        else if (strUrl.equalsIgnoreCase("dtu.do")){						     	// 查询DTU数据
+        	new DataNowBean().getDTU(request, response, m_Rmi, false);
         }
         else if(strUrl.equalsIgnoreCase("AdminILogout.do"))                      //第二层:admin安全退出
         {
@@ -427,14 +431,14 @@ public class MainServlet extends HttpServlet
         	new DevSWBean().getDataNow(request, response, m_Rmi, false);
         
         /************************************设备编辑************************************************/
-        else if (strUrl.equalsIgnoreCase("Admin_Mac_Man.do"))			         		// 
-        	new MacManBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Mac_Read.do"))			         		// 
         	new MacReadBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Mac_Send.do"))			         		// 
         	new MacSendBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Mac_Analysis.do"))			         	// 
         	new MacAnalysisBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Equip_Config.do"))			         	// 
+        	new MacConfigBean().ExecCmd(request, response, m_Rmi, false);
         
         
         

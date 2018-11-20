@@ -1,8 +1,11 @@
 package bean;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,7 +13,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import rmi.Rmi;
 import rmi.RmiBean;
-import util.*;
+import util.CommUtil;
+import util.CurrStatus;
+import util.MsgBean;
 
 public class DataNowBean extends RmiBean 
 {
@@ -38,9 +43,43 @@ public class DataNowBean extends RmiBean
 		    	request.getSession().setAttribute("Data_Now_" + Sid, ((Object)msgBean.getMsg()));
 		    	currStatus.setJsp("Data_Now.jsp?Sid=" + Sid);		    
 		    	break;
+			case 1://≤È—Ø
+				request.getSession().setAttribute("DTU_Now_" + Sid, ((Object)msgBean.getMsg()));
+				currStatus.setJsp("dtu.jsp?Sid=" + Sid);		    
+				break;
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void getDTU(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = "0000";
+			ArrayList<?> list = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> iterator = list.iterator();
+			while (iterator.hasNext())
+			{
+				DataNowBean bean = (DataNowBean) iterator.next();
+				Cpm_Id = bean.getCpm_Id();
+				Id = bean.getId();
+				CTime = bean.getCTime();
+				Value = bean.getValue();
+				Resp += Cpm_Id + "|" + Id + "|" + CTime + "|" + Value + ";";
+			}
+		}
+
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
 	}
 	
 	public String getSql(int pCmd)
@@ -51,6 +90,11 @@ public class DataNowBean extends RmiBean
 			case 0://≤È—Ø               
 				Sql = " select t.sn, t.cpm_id, t.id, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, lev, des " +
 					  " from data_now t order by t.sn";
+				break;
+			case 1://≤È—Ø               
+				Sql = " select t.sn, t.cpm_id, t.id, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, lev, des " +
+						" from data_now t "+
+						" where t.cpm_id like '%"+Cpm_Id+"' order by t.sn";
 				break;
 		}
 		return Sql;

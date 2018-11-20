@@ -35,9 +35,11 @@ import bean.DevSWBean;
 import bean.EquipAlertBean;
 import bean.EquipInfoBean;
 import bean.MacAnalysisBean;
-import bean.MacManBean;
+import bean.MacConfigBean;
 import bean.MacReadBean;
+import bean.MacReadTaskBean;
 import bean.MacSendBean;
+import bean.MacSendTaskBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
 import bean.TextLLJBean;
@@ -305,8 +307,14 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 					case RmiBean.RMI_MAC_SEND:
 						rmiBean = new MacSendBean();
 						break;
-					case RmiBean.RMI_MAC_MAN:
-						rmiBean = new MacManBean();
+					case RmiBean.RMI_MAC_CONFIG:
+						rmiBean = new MacConfigBean();
+						break;
+					case RmiBean.RMI_SEND_TASK:
+						rmiBean = new MacSendTaskBean();
+						break;
+					case RmiBean.RMI_READ_TASK:
+						rmiBean = new MacReadTaskBean();
 						break;
 				}
 				rmiBean.getData(rs);
