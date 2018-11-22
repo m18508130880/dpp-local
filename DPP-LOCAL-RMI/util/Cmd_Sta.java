@@ -29,9 +29,8 @@ public class Cmd_Sta
 	public static final int CMD_DEVICE_SYN				    = 3003;	//远程同步
 	
 //	===========数据下行========================================================
-	public static final int CMD_RESTART					    = 0001;	//重启指令
-	public static final int CMD_UPDATE_TIME					= 0002;	//对时指令
 	public static final int CMD_UPDATE_DATA					= 2001;	//更新数据
+	public static final int CMD_DTU_ACTION					= 3001;	//DTU操作
 
 //	====================系统状态	
 	public static final int STA_SUCCESS						= 0000;	//成功	

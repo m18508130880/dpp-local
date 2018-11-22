@@ -56,7 +56,7 @@ public class MacReadTaskBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.pid, t.tid, t.read "
+				Sql = " select  t.sn, t.pid, t.tid, t.read, t.status "
 						+ " from mac_read_task t order by t.sn";
 				break;
 			case 10://ÃÌº”
@@ -80,6 +80,7 @@ public class MacReadTaskBean extends RmiBean
 			setPId(pRs.getString(2));
 			setTId(pRs.getString(3));
 			setRead(pRs.getString(4));
+			setStatus(pRs.getString(5));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -97,6 +98,8 @@ public class MacReadTaskBean extends RmiBean
 			setPId(CommUtil.StrToGB2312(request.getParameter("PId")));
 			setTId(CommUtil.StrToGB2312(request.getParameter("TId")));
 			setRead(CommUtil.StrToGB2312(request.getParameter("Read")));
+			setStatus(CommUtil.StrToGB2312(request.getParameter("Status")));
+			
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
 		catch (Exception Exp)
@@ -110,6 +113,7 @@ public class MacReadTaskBean extends RmiBean
 	private String PId;
 	private String TId;
 	private String Read;
+	private String Status;
 
 	private String Sid;
 
@@ -143,6 +147,14 @@ public class MacReadTaskBean extends RmiBean
 
 	public void setRead(String read) {
 		Read = read;
+	}
+
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
 	}
 
 	public String getSid() {

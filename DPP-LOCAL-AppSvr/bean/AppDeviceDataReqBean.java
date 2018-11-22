@@ -21,7 +21,7 @@ public class AppDeviceDataReqBean extends BaseCmdBean {
 	}
 
 	@Override
-	public void parseReqest(String srcKey, String strRequest, byte[] strData) {
+	public void parseReqest(String srcKey, String strRequest, byte[] strData, MsgCtrl msgCtrl) {
 		// TODO Auto-generated method stub
 
 		String strCData = CommUtil.BytesToHexString(CommUtil.BSubstring(strRequest, 115, 2).getBytes(), 2);	

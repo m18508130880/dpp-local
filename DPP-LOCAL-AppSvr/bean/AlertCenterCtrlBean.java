@@ -1,7 +1,6 @@
 package bean;
 
 import net.MsgCtrl;
-import bean.BaseCmdBean;
 import util.CmdUtil;
 import util.Cmd_Sta;
 import util.CommUtil;
@@ -17,7 +16,7 @@ public class AlertCenterCtrlBean extends BaseCmdBean {
 	}
 
 	@Override
-	public void parseReqest(String srcKey, String strRequest, byte[] strData) {
+	public void parseReqest(String srcKey, String strRequest, byte[] strData, MsgCtrl msgCtrl) {
 		// TODO Auto-generated method stub
 		this.setActionSource(srcKey);
 		this.setReserve(strRequest.substring(0, 20));

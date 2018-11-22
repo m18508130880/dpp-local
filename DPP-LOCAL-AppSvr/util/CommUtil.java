@@ -656,4 +656,41 @@ public class CommUtil
 		}
  		return bytes;
 	}
+
+	/**
+	 * @param s
+	 * @param radix
+	 * @return
+	 * @throws NumberFormatException
+	 */
+	public static long parseLong(String s, int radix) {
+		if (s == null) {
+			throw new NumberFormatException("null");
+		}
+ 
+		long result = 0;
+		boolean negative = false;
+		int i = 0, len = s.length();
+		int digit;
+ 
+		if (len > 0) {
+			char firstChar = s.charAt(0);
+			if (firstChar < '0') { // Possible leading "+" or "-"
+				if (firstChar == '-') {
+					negative = true;
+				}
+				i++;
+			}
+			while (i < len) {
+				// Accumulating negatively avoids surprises near MAX_VALUE
+				digit = Character.digit(s.charAt(i++), radix);
+				
+				result *= radix;
+				result -= digit;
+			}
+		} 
+		return negative ? result : -result;
+	}
+ 
+ 
 }

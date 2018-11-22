@@ -56,7 +56,7 @@ public class MacSendTaskBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.pid, t.tid, t.cycle, t.send "
+				Sql = " select  t.sn, t.pid, t.tid, t.cycle, t.send, t.status "
 						+ " from mac_send_task t order by t.sn";
 				break;
 			case 10://ÃÌº”
@@ -81,6 +81,7 @@ public class MacSendTaskBean extends RmiBean
 			setTId(pRs.getString(3));
 			setCycle(pRs.getString(4));
 			setSend(pRs.getString(5));
+			setStatus(pRs.getString(6));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -99,6 +100,8 @@ public class MacSendTaskBean extends RmiBean
 			setTId(CommUtil.StrToGB2312(request.getParameter("TId")));
 			setCycle(CommUtil.StrToGB2312(request.getParameter("Cycle")));
 			setSend(CommUtil.StrToGB2312(request.getParameter("Send")));
+			setStatus(CommUtil.StrToGB2312(request.getParameter("Status")));
+			
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
 		catch (Exception Exp)
@@ -113,6 +116,7 @@ public class MacSendTaskBean extends RmiBean
 	private String TId;
 	private String Cycle;
 	private String Send;
+	private String Status;
 
 	private String Sid;
 
@@ -154,6 +158,14 @@ public class MacSendTaskBean extends RmiBean
 
 	public void setSend(String send) {
 		Send = send;
+	}
+
+	public String getStatus() {
+		return Status;
+	}
+
+	public void setStatus(String status) {
+		Status = status;
 	}
 
 	public String getSid() {

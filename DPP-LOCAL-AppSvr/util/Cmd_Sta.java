@@ -32,6 +32,9 @@ public class Cmd_Sta
 	public static final int CMD_SUBMIT_1004	 				= 1004;//重新设置单个采集任务
 	public static final int CMD_SUBMIT_1005	 				= 1005;//重新设置全部任务
 
+//	==========================RMI ~ AppSvr========================================
+	public static final int CMD_SUBMIT_3001	 				= 3001;//更新数据
+	
 //	==========================AppSvr ~ Alert========================================
 	public static final int CMD_SUBMIT_2001	 				= 2001;//更新数据
 	public static final int CMD_SUBMIT_2002	 				= 2002;//告警计算

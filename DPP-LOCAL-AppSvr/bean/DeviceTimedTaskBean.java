@@ -30,7 +30,7 @@ public class DeviceTimedTaskBean {
 	 * 立即采集数据
 	 */
 	public void collectDataNow(String SN){
-		String taskList = m_DBUtil.Func("Func_Task_GetOne", SN); // 取出当前thread的所有定时任务
+		String taskList = m_DBUtil.Func("Func_Send_GetOne", SN); // 取出当前thread的所有定时任务
 		String [] task = taskList.split("\\|");
 
 		Id = task[1];
@@ -49,7 +49,7 @@ public class DeviceTimedTaskBean {
 	 * 立即采集全部数据
 	 */
 	public void collectDataNowAll(String pClientKey){
-		String taskList = m_DBUtil.Func("Func_Task_GetAll_TId", pClientKey); // 取出当前clien的所有定时任务
+		String taskList = m_DBUtil.Func("Func_Send_GetAll_TId", pClientKey); // 取出当前clien的所有定时任务
 		String [] task = taskList.split(";");
 		for(int i = 0; i < task.length; i ++){
 			String [] obj = task[i].split("\\|");
@@ -70,7 +70,7 @@ public class DeviceTimedTaskBean {
 	 * @param pClientKey
 	 */
 	public void openTimedTask(String pClientKey){
-		String taskList = m_DBUtil.Func("Func_Task_GetAll", pClientKey); // 取出当前clien的所有定时任务
+		String taskList = m_DBUtil.Func("Func_Send_GetAll", pClientKey); // 取出当前clien的所有定时任务
 		String [] task = taskList.split(";");
 		for(int i = 0; i < task.length; i ++){
 			String [] obj = task[i].split("\\|");
@@ -95,7 +95,7 @@ public class DeviceTimedTaskBean {
 	 * @param pClientKey
 	 */
 	public void closeTimedTask(String pClientKey){
-		String taskList = m_DBUtil.Func("Func_Task_GetSN", pClientKey); // 取出当前clien的所有定时任务
+		String taskList = m_DBUtil.Func("Func_Send_GetSN", pClientKey); // 取出当前clien的所有定时任务
 		String [] task = taskList.split("\\|");
 		for(int i = 0; i < task.length; i ++){
 			SN = task[i];
@@ -117,7 +117,7 @@ public class DeviceTimedTaskBean {
 	 * @param SN
 	 */
 	public void openOneTimedTask(String SN){
-		String taskList = m_DBUtil.Func("Func_Task_GetOne", SN);
+		String taskList = m_DBUtil.Func("Func_Send_GetOne", SN);
 		String [] task = taskList.split("\\|");
 		SN = task[0];
 		if(objThrdTable.containsKey(SN)){

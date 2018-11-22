@@ -5,11 +5,17 @@ import java.rmi.RemoteException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+
+import bean.MacAnalysisBean;
+import bean.MacReadBean;
+import bean.MacReadTaskBean;
 
 
 public class DBUtil
@@ -256,6 +262,77 @@ public class DBUtil
 			}
 		}
 		return IsOK;
+	}
+	
+	/** 数据库查询操作
+	 * @param pSql
+	 * @param pClass 1.MacAnalysisBean 2.MacReadBean 3.MacReadTaskBean
+	 *    bean的类值
+	 * @return
+	 */
+	public ArrayList<?> doSelect(String pSql, long pClass) //Bean Type
+	{
+		ArrayList<Object> alist = new ArrayList<Object>();
+		MacAnalysisBean analysisBean = null;
+		MacReadBean readBean = null;
+		MacReadTaskBean readTaskBean = null;
+		Connection conn = null;
+		PreparedStatement pStmt = null;
+		ResultSet rs = null;
+		try 
+		{
+			conn = objConnPool.getConnection();
+			conn.setAutoCommit(false);
+			pStmt = conn.prepareStatement(pSql);
+			rs = pStmt.executeQuery();
+			while(rs.next())          //数据库中有多少条数据,循环加入alist集合中
+			{
+				switch((int)pClass)
+				{
+					case 1:
+						analysisBean = new MacAnalysisBean();
+						analysisBean.getData(rs);
+						alist.add(analysisBean);
+						break;
+					case 2:
+						readBean = new MacReadBean();
+						readBean.getData(rs);
+						alist.add(readBean);
+						break;
+					case 3:
+						readTaskBean = new MacReadTaskBean();
+						readTaskBean.getData(rs);
+						alist.add(readTaskBean);
+						break;
+				}
+			}
+		} catch (SQLException sqlExp)
+		{
+			sqlExp.printStackTrace();
+		}
+		finally
+		{
+			try
+			{
+				if(rs != null)
+				{				
+					rs.close();
+					rs = null;
+				}
+				if(pStmt != null)
+				{				
+					pStmt.close();
+					pStmt = null;
+				}
+				if(conn != null)
+				{
+					conn.close();	
+					conn = null;
+				}
+			}catch(Exception ex)
+			{ex.printStackTrace();}
+		}
+		return alist;
 	}
 	
 	

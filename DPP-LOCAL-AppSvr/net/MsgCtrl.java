@@ -94,7 +94,7 @@ public class MsgCtrl extends Thread
 						if(null != cmdBean)
 						{
 							CommUtil.PRINT("Bean[" + cmdBean.getBeanName() + "]");
-							cmdBean.parseReqest(strClientKey, dealData, data);
+							cmdBean.parseReqest(strClientKey, dealData, data, this);
 							cmdBean.execRequest(this);
 						}
 						else

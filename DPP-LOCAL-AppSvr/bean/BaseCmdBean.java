@@ -36,6 +36,9 @@ public abstract class BaseCmdBean
 			case Cmd_Sta.CMD_SUBMIT_2001:
 				retBean = new AlertCenterCtrlBean(Cmd, Seq);
 				break;
+			case Cmd_Sta.CMD_SUBMIT_3001:
+				retBean = new DTUActionBean(Cmd, Seq);
+				break;
 		}
 		return retBean;
 	}
@@ -48,7 +51,7 @@ public abstract class BaseCmdBean
 	{
 		return Seq;
 	}
-	public abstract void parseReqest(String key, String strRequest, byte[] strData);
+	public abstract void parseReqest(String key, String strRequest, byte[] strData, MsgCtrl msgCtrl);
 	public abstract int execRequest(MsgCtrl msgCtrl);
 
 	public abstract void parseReponse(String strResponse);

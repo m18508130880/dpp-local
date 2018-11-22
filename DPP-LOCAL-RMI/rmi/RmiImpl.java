@@ -605,34 +605,6 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 		String ret = "9999";
 		switch(pCmd)
 		{
-			case Cmd_Sta.CMD_RESTART:
-			{	
-				String SendData = CommUtil.StrBRightFillSpace(" ", 20)				//保留字
-								+ "0000"											//执行状态
-								+ "000" + Cmd_Sta.CMD_RESTART						//处理指令
-								+ CommUtil.StrBRightFillSpace(pClient_Id, 10)		//DTU编号
-								+ CommUtil.StrBRightFillSpace(pOprator, 10);		//操作人员
-				System.out.println("SendData["+SendData+"]");
-				if(m_TPCClient.SetSendMsg(SendData, 1))
-				{
-					ret = "0000";
-				}
-				break;
-			}
-			case Cmd_Sta.CMD_UPDATE_TIME:
-			{
-				String SendData = CommUtil.StrBRightFillSpace(" ", 20)
-								+ "0000"
-								+ "000" + Cmd_Sta.CMD_UPDATE_TIME
-								+ CommUtil.StrBRightFillSpace(pClient_Id, 10)
-								+ CommUtil.StrBRightFillSpace(pOprator, 10);
-				System.out.println("SendData["+SendData+"]");
-				if(m_TPCClient.SetSendMsg(SendData, 1))
-				{
-					ret = "0000";
-				}
-				break;
-			}
 			case Cmd_Sta.CMD_UPDATE_DATA:
 			{
 				String SendData = CommUtil.StrBRightFillSpace(" ", 20)
@@ -647,6 +619,25 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 				break;
 			}
 		}	
+		return ret;
+	}
+	public String DTUAction(int pCmd, String pSN, String pClient_Id, String pAction)throws RemoteException
+	{
+		System.out.println("pCmd["+pCmd+"]\npClient_Id["+pClient_Id+"]");
+		String ret = "9999";
+		switch(pCmd){
+			case Cmd_Sta.CMD_DTU_ACTION:
+				String SendData = CommUtil.StrBRightFillSpace(" ", 20)
+						+ CommUtil.StrBRightFillSpace(pSN, 8)
+						+ CommUtil.StrBRightFillSpace(pClient_Id, 10)
+						+ CommUtil.StrBRightFillSpace(pAction, 2);
+				System.out.println("SendData["+SendData+"]");
+				if(m_TPCClient.SetSendMsg(SendData, 1))
+				{
+					ret = "0000";
+				}
+			break;
+		}
 		return ret;
 	}
 }

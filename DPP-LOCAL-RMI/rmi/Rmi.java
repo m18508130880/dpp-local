@@ -2,7 +2,7 @@ package rmi;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 
-import util.*;
+import util.MsgBean;
 
 /**远程方法调用接口
  * @author Cui
@@ -24,4 +24,6 @@ public interface Rmi extends Remote
 	public MsgBean RmiExec(int pCmd, RmiBean pBean, int CurrPage, int PageSize) throws RemoteException;
 	
 	public String Client(int pCmd, String pClientId, String pOprator)throws RemoteException;
+	
+	public String DTUAction(int pCmd, String pSN, String pClient_Id, String pAction)throws RemoteException;
 }
