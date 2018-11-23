@@ -1,6 +1,7 @@
 package bean;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -48,6 +49,24 @@ public class MacSendTaskBean extends RmiBean
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void addSend(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS){
+			Resp = "0000";
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
 	}
 	
 	public String getSql(int pCmd)

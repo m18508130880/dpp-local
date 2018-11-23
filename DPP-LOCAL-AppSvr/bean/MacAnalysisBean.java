@@ -13,7 +13,7 @@ public class MacAnalysisBean
 			case 0://≤È—Ø
 				Sql = " select  t.sn, t.attr_id, t.attr_name, t.flow, t.type, t.addrs_s, t.addrs_e, t.unit, t.amend "
 						+ " from mac_analysis t "
-						+ " where sn = '" + SN + "' "
+						+ " where t.sn = '" + SN + "' "
 						+ " order by t.sn";
 				break;
 		}

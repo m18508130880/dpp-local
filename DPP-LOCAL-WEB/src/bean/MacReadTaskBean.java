@@ -1,6 +1,7 @@
 package bean;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -50,21 +51,39 @@ public class MacReadTaskBean extends RmiBean
 	   	response.sendRedirect(currStatus.getJsp());
 	}
 	
+	public void addRead(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS){
+			Resp = "0000";
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
 	public String getSql(int pCmd)
 	{
 		String Sql = "";
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.pid, t.tid, t.read, t.status "
+				Sql = " select  t.sn, t.pid, t.tid, t.read_sn, t.status "
 						+ " from mac_read_task t order by t.sn";
 				break;
 			case 10://ÃÌº”
-				Sql = " insert into mac_read_task(pid, tid, read)" +
+				Sql = " insert into mac_read_task(pid, tid, read_sn)" +
 					  " values('"+ PId + "', '" + TId +"', '"+ Read +"')";
 				break;
 			case 11://±‡º≠
-				Sql = " update mac_read_task t set t.pid= '"+ PId +"', t.tid= '"+ TId +"', t.read= '"+ Read +"' " +
+				Sql = " update mac_read_task t set t.pid= '"+ PId +"', t.tid= '"+ TId +"', t.read_sn= '"+ Read +"' " +
 					  " where t.sn = '"+ SN +"'";
 				break;
 		}

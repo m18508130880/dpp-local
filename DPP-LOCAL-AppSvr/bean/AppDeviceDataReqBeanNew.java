@@ -10,7 +10,7 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	
 	private String Dev_Id = "";
 	private String Dev_Name = "";
-	private String Dev_Attr_Id = "0001";
+	private String Dev_Attr_Id = "";
 	private String Dev_Attr_Name = "";
 	private String Dev_CTime = "";
 	private String Dev_CData = "";             
@@ -34,16 +34,18 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	public void parseReqest(String srcKey, String strRequest, byte[] strData, MsgCtrl m_MsgCtrl) {
 		// TODO Auto-generated method stub
 		//String strCData = CommUtil.BytesToHexString(CommUtil.BSubstring(strRequest, 115, 2).getBytes(), 2);	
+		analysisList = new ArrayList<MacAnalysisBean>();
+		String data = String.valueOf(CommUtil.BytesToHexString(strData, strData.length)).substring(80);
 		this.setActionSource(srcKey);
-		this.setReserve(strRequest.substring(0, 20));
-		this.setAction(Integer.parseInt(strRequest.substring(24, 28)));
-		Dev_Id        = CommUtil.BSubstring(strRequest, 28, 10).trim();
-		Dev_CData     = CommUtil.BSubstring(strRequest, 38, 128).trim();
+		this.setReserve(data.substring(0, 20*2));
+		this.setAction(Integer.parseInt(data.substring(24*2, 28*2)));
+		Dev_Id        = CommUtil.hexToString(CommUtil.BSubstring(data, 28*2, 10*2).trim());
+		Dev_CData     = CommUtil.BSubstring(data, 38*2, 128*2).trim();
 		Dev_CTime     = CommUtil.getDateTime();
-		
-		Addrs = Dev_CData.substring(0, 2);
-		Code = Dev_CData.substring(2, 4);
-		Sign = Dev_CData.substring(4, 6);
+
+		Addrs = Dev_CData.substring(0, 2).toUpperCase();
+		Code = Dev_CData.substring(2, 4).toUpperCase();
+		Sign = Dev_CData.substring(4, 6).toUpperCase();
 		
 		// 查找到PId对应的接收任务
 		MacReadTaskBean readTaskBean = new MacReadTaskBean();
@@ -62,10 +64,12 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 					// 根据接收任务的Addrs、Code、Sign，查找到对应的分析
 					for(int k = 0; k < readList.size(); k ++){
 						MacReadBean read = readList.get(k);
-						if(read.getAddrs().equals(Addrs) && read.getCode().equals(Code) && read.getSign().equals(Sign)){						
+						if(read.getAddrs().toUpperCase().equals(Addrs) 
+								&& read.getCode().toUpperCase().equals(Code) 
+								&& read.getSign().toUpperCase().equals(Sign)){						
 							Dev_Name = read.getCName();
 							String [] Analysis = read.getAnalysis().split(",");
-							for(int j = 0; j < Analysis.length; i ++){
+							for(int j = 0; j < Analysis.length; j ++){
 								MacAnalysisBean analysisBean = new MacAnalysisBean();
 								analysisBean.setSN(Analysis[j]);
 								MacAnalysisBean aBean =  (MacAnalysisBean) m_MsgCtrl.getM_DBUtil().
@@ -100,8 +104,8 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 				}
 				double Amend = Double.valueOf(analysisBean.getAmend());
 				Dev_RealData += new java.text.DecimalFormat("#.####").format(Amend*value) + " ";
-				Dev_Attr_Name += analysisBean.getAttr_Name() + "";
-				Dev_Attr_Id += analysisBean.getAttr_Id() + "";
+				Dev_Attr_Name += analysisBean.getAttr_Name() + " ";
+				Dev_Attr_Id += analysisBean.getAttr_Id() + " ";
 				Dev_Unit += analysisBean.getUnit() + " ";
 			}
 		}else{
@@ -114,6 +118,7 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	{
 		int ret = Cmd_Sta.STA_ERROR;
 		if(isError){
+			sleep(2000);
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
 			return ret;
 		}
@@ -155,6 +160,11 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 		return ret;
 	}
 	
+	private void sleep(int i) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void noticeTimeOut()
 	{
 		

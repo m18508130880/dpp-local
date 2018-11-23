@@ -13,7 +13,7 @@ public class MacReadBean
 			case 0://≤È—Ø
 				Sql = " select  t.sn, t.cname, t.addrs, t.code, t.sign, t.analysis "
 						+ " from mac_read t "
-						+ " where sn ='" + SN + "' "
+						+ " where t.sn ='" + SN + "' "
 						+ "order by t.sn";
 				break;
 		}

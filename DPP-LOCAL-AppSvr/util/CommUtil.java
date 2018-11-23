@@ -692,5 +692,14 @@ public class CommUtil
 		return negative ? result : -result;
 	}
  
- 
+	//把hex编码转换为string
+    public static String hexToString(String bytes) {
+    	String hexString = "0123456789ABCDEFabcdef";
+        bytes = bytes.toUpperCase();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(bytes.length() / 2);
+        // 将每2位16进制整数组装成一个字节
+        for (int i = 0; i < bytes.length(); i += 2)
+            baos.write((hexString.indexOf(bytes.charAt(i)) << 4 | hexString.indexOf(bytes.charAt(i + 1))));
+        return new String(baos.toByteArray());
+    }
 }

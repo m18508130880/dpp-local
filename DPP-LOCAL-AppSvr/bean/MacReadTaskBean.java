@@ -13,8 +13,8 @@ public class MacReadTaskBean
 			case 0://≤È—Ø
 				Sql = " select  t.sn, t.pid, t.tid, t.read "
 						+ " from mac_read_task t "
-						+ " where pid = '" + PId + "' "
-						+ " and status = '1' "
+						+ " where t.tid = '" + PId + "' "
+						+ " and t.status = '1' "
 						+ " order by t.sn";
 				break;
 		}

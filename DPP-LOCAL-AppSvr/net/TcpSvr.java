@@ -401,6 +401,7 @@ public class TcpSvr extends Thread
 	public byte[] EnCode(int msgCode, String pData)
 	{
 		byte[] byteData = null;
+		System.out.println(msgCode);
 		if(msgCode == Cmd_Sta.COMM_COLLECT){
 			byteData = CommUtil.hexStrToBinaryStr(pData);
 			return byteData;

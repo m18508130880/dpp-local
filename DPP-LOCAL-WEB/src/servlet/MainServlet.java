@@ -35,7 +35,9 @@ import bean.EquipInfoBean;
 import bean.MacAnalysisBean;
 import bean.MacConfigBean;
 import bean.MacReadBean;
+import bean.MacReadTaskBean;
 import bean.MacSendBean;
+import bean.MacSendTaskBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
 import bean.TextLLJBean;
@@ -439,6 +441,10 @@ public class MainServlet extends HttpServlet
         	new MacAnalysisBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Equip_Config.do"))			         	// 
         	new MacConfigBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Add_Send.do"))			         		// 
+        	new MacSendTaskBean().addSend(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Admin_Add_Read.do"))			         		// 
+        	new MacReadTaskBean().addRead(request, response, m_Rmi, false);
         
         
         
