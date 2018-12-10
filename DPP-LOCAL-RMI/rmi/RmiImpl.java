@@ -628,6 +628,8 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 		switch(pCmd){
 			case Cmd_Sta.CMD_DTU_ACTION:
 				String SendData = CommUtil.StrBRightFillSpace(" ", 20)
+						+ "0000"
+						+ Cmd_Sta.CMD_DTU_ACTION
 						+ CommUtil.StrBRightFillSpace(pSN, 8)
 						+ CommUtil.StrBRightFillSpace(pClient_Id, 10)
 						+ CommUtil.StrBRightFillSpace(pAction, 2);

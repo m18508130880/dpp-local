@@ -11,7 +11,7 @@ public class MacReadTaskBean
 		switch (pCmd)
 		{
 			case 0://≤È—Ø
-				Sql = " select  t.sn, t.pid, t.tid, t.read "
+				Sql = " select  t.sn, t.pid, t.tid, t.read_sn "
 						+ " from mac_read_task t "
 						+ " where t.tid = '" + PId + "' "
 						+ " and t.status = '1' "

@@ -38,7 +38,7 @@ public class DeviceTimedTaskBean {
 		Order = task[3];
 		
 		// 发送采集内容
-		if(m_TcpSvr.DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Id, 20), Order)){
+		if(m_TcpSvr.DisPatch(Cmd_Sta.COMM_COLLECT, CommUtil.StrBRightFillSpace(Id, 20), Order)){
 			CommUtil.PRINT("Thread [" + Id + "] Send Now [" + Order + "] SUCCESS");
 		}else{
 			CommUtil.PRINT("Thread [" + Id + "] Send Now [" + Order + "] ERROR");
@@ -57,7 +57,7 @@ public class DeviceTimedTaskBean {
 			//Cycle = obj[2];
 			Order = obj[3];
 			// 发送采集内容
-			if(m_TcpSvr.DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Id, 20), Order)){
+			if(m_TcpSvr.DisPatch(Cmd_Sta.COMM_COLLECT, CommUtil.StrBRightFillSpace(Id, 20), Order)){
 				CommUtil.PRINT("Thread [" + Id + "] Send Now [" + Order + "] SUCCESS");
 			}else{
 				CommUtil.PRINT("Thread [" + Id + "] Send Now [" + Order + "] ERROR");

@@ -445,6 +445,10 @@ public class MainServlet extends HttpServlet
         	new MacSendTaskBean().addSend(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Admin_Add_Read.do"))			         		// 
         	new MacReadTaskBean().addRead(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Read_Status.do"))			         		// 
+        	new MacReadTaskBean().updateStatus(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("Send_Status.do"))			         		// 
+        	new MacSendTaskBean().updateStatus(request, response, m_Rmi, false);
         
         
         

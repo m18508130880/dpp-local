@@ -92,15 +92,27 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 				float value = 0;
 				if(analysisBean.getType().equals("1")){
 					Long l = CommUtil.parseLong(val, 16);
-					value = Float.intBitsToFloat(l.intValue());
+					if(analysisBean.getFlow().equals("1")){
+						value = l;
+					}else if(analysisBean.getFlow().equals("2")){
+						value = Float.intBitsToFloat(l.intValue());
+					}else if(analysisBean.getFlow().equals("3")){
+						//value = Float.intBitsToFloat(l.intValue());
+					}
 					// 小端 倒序读取
 				}else if(analysisBean.getType().equals("2")){
 					String val_ = "";
-					for(int j = Addrs_E - Addrs_S; j > 0; j ++){
+					for(int j = Addrs_E - Addrs_S; j > 0; j --){
 						val_ += val.substring(2*(j-1), 2*j);
 					}
 					Long l = CommUtil.parseLong(val_, 16);
-					value = Float.intBitsToFloat(l.intValue());
+					if(analysisBean.getFlow().equals("1")){
+						value = l;
+					}else if(analysisBean.getFlow().equals("2")){
+						value = Float.intBitsToFloat(l.intValue());
+					}else if(analysisBean.getFlow().equals("3")){
+						//value = Float.intBitsToFloat(l.intValue());
+					}
 				}
 				double Amend = Double.valueOf(analysisBean.getAmend());
 				Dev_RealData += new java.text.DecimalFormat("#.####").format(Amend*value) + " ";
@@ -138,19 +150,19 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 		  	  	     "date_format('"+ Dev_CTime +"', '%Y-%m-%d %H-%i-%S'), " +
 		  	  	     "'"+ Dev_RealData +"', " +
 		  	  	     "'" + Dev_Unit + "')";
-			System.out.println("Sql["+Sql+"]");
+//			System.out.println("Sql["+Sql+"]");
 
 			String sendStr = "";
-//			if(m_MsgCtrl.getM_DBUtil().doUpdate(Sql))
-//			{
-//				ret = Cmd_Sta.STA_SUCCESS;
-//				String Project_IdAndGJ_Id = m_MsgCtrl.getM_DBUtil().GetProject_IdAndGJ_Id(this.getActionSource().trim(),Dev_Id);
-//				sendStr = CommUtil.StrBRightFillSpace("", 20);									//保留字
-//				sendStr += CommUtil.StrBRightFillSpace("0000", 4);								//命令发送状态
-//				sendStr += CommUtil.StrBRightFillSpace(Cmd_Sta.CMD_SUBMIT_2002 + "", 4);		//处理指令
-//				sendStr += CommUtil.StrBRightFillSpace(Project_IdAndGJ_Id, 10);					//项目和子系统ID
-//				m_MsgCtrl.getM_TcpSvr().DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Cmd_Sta.DATA_00000_0001, 20), sendStr);
-//			}
+			if(m_MsgCtrl.getM_DBUtil().doUpdate(Sql))
+			{
+				ret = Cmd_Sta.STA_SUCCESS;
+				String Project_IdAndGJ_Id = m_MsgCtrl.getM_DBUtil().GetProject_IdAndGJ_Id(this.getActionSource().trim(),Dev_Id);
+				sendStr = CommUtil.StrBRightFillSpace("", 20);									//保留字
+				sendStr += CommUtil.StrBRightFillSpace("0000", 4);								//命令发送状态
+				sendStr += CommUtil.StrBRightFillSpace(Cmd_Sta.CMD_SUBMIT_2002 + "", 4);		//处理指令
+				sendStr += CommUtil.StrBRightFillSpace(Project_IdAndGJ_Id, 10);					//项目和子系统ID
+				m_MsgCtrl.getM_TcpSvr().DisPatch(Cmd_Sta.COMM_DELIVER, CommUtil.StrBRightFillSpace(Cmd_Sta.DATA_00000_0001, 20), sendStr);
+			}
 			return ret;
 		}
 		

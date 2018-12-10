@@ -69,6 +69,29 @@ public class MacSendTaskBean extends RmiBean
 		outprint.write(Resp);
 	}
 	
+	public void updateStatus(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS){
+			Resp = "0000";
+			if(Status.equals("0")){
+				pRmi.DTUAction(3001, SN, "", "04");
+			}else if(Status.equals("1")){
+				pRmi.DTUAction(3001, SN, "", "03");
+			}
+		}
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
 	public String getSql(int pCmd)
 	{
 		String Sql = "";
@@ -85,6 +108,10 @@ public class MacSendTaskBean extends RmiBean
 			case 11://�༭
 				Sql = " update mac_send_task t set t.pid= '"+ PId +"', t.tid= '"+ TId +"', t.cycle= '"+ Cycle +"', t.send= '"+ Send +"' " +
 					  " where t.sn = '"+ SN +"'";
+				break;
+			case 12:// �༭״̬
+				Sql = " update mac_send_task t set t.status= '"+ Status +"' " +
+						" where t.sn = '"+ SN +"'";
 				break;
 		}
 		return Sql;

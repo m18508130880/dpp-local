@@ -137,24 +137,7 @@ public class TcpSvr extends Thread
 					System.out.println();
 					SendChannel.write(new String(Buffer, 0, 44).getBytes());
 				}
-				//DTU登入
-				else
-				{
-					//对时
-					String RespBuf = new String(Buffer, 0, 20);
-					RespBuf += CommUtil.StrBRightFillSpace("", 20);		//保留字
-					RespBuf += CommUtil.StrBRightFillSpace("0000", 4);		//命令发送状态
-					RespBuf += CommUtil.StrBRightFillSpace("3002", 4);		//处理指令
-					RespBuf += CommUtil.StrBRightFillSpace(Pid, 10);		//DTU的ID
-					RespBuf += CommUtil.StrBRightFillSpace("00010002", 8);			//发送的指令
-					RespBuf += CommUtil.StrBRightFillSpace("AppSvr", 10);		//操作用户
-					RespBuf += CommUtil.StrBRightFillSpace(CommUtil.getTime(), 14);		//指令内容
-					
-					//System.out.println("Login Resp[" + new String(Buffer, 0, 44) + "]");
-					//System.out.println("Login RespTime[" + RespBuf + "]");
-					//SendChannel.write(new String(Buffer, 0, 44).getBytes());
-					SendChannel.write(RespBuf.getBytes());
-				}
+				
 				SendChannel.flush();
 				objClient.setSoTimeout(0);
 				ClientStatusNotify(Pid, STATUS_CLIENT_ONLINE);
@@ -401,9 +384,10 @@ public class TcpSvr extends Thread
 	public byte[] EnCode(int msgCode, String pData)
 	{
 		byte[] byteData = null;
-		System.out.println(msgCode);
 		if(msgCode == Cmd_Sta.COMM_COLLECT){
+			System.out.println("pData["+pData+"]");
 			byteData = CommUtil.hexStrToBinaryStr(pData);
+			System.out.println("byteData["+byteData+"]");
 			return byteData;
 		}
 		try

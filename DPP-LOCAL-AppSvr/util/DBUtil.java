@@ -272,6 +272,7 @@ public class DBUtil
 	 */
 	public ArrayList<?> doSelect(String pSql, long pClass) //Bean Type
 	{
+		//System.out.println("pSql["+pSql+"]");
 		ArrayList<Object> alist = new ArrayList<Object>();
 		MacAnalysisBean analysisBean = null;
 		MacReadBean readBean = null;

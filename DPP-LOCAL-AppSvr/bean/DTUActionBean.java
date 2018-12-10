@@ -41,6 +41,8 @@ public class DTUActionBean extends BaseCmdBean {
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.openTimedTask(ClientKey);
 		}else if(Function.equals("06")){	// 关闭DTU的全部定时任务
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.closeTimedTask(ClientKey);
+		}else if(Function.equals("10")){	// 重新建立client
+			m_MsgCtrl.getM_TcpSvr().ClientClose(ClientKey);
 		}else{
 			ret = Cmd_Sta.STA_ERROR;
 		}
