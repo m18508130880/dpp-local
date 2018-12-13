@@ -293,6 +293,9 @@ public class MainServlet extends HttpServlet
         	new DataGXBean().HistoryData(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("User_Announce.do"))				        //tab数据显示
         	new CorpInfoBean().ExecCmd(request, response, m_Rmi, false);    
+
+        else if (strUrl.equalsIgnoreCase("User_DataNow.do"))					        //获取实时数据
+        	new DataNowBean().getDataNow(request, response, m_Rmi, false);  
         
         /***********************************user-图表分析*****************************************************/
         else if (strUrl.equalsIgnoreCase("getSumOutGJ.do"))				        	//画剖面图前取得排出口数量

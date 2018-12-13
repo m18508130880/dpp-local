@@ -303,8 +303,8 @@ public class TcpSvr extends Thread
 					{
 						objChannel.objSocket.close();		//关掉SOCKET连接
 						objChannel.objSocket = null;
-						ClientStatusNotify(pClientKey, STATUS_CLIENT_OFFLINE);
 					}
+					ClientStatusNotify(pClientKey, STATUS_CLIENT_OFFLINE);
 					objClientTable.remove(pClientKey);		//在哈希表里移除客户端
 					ClientContainer.Remove(pClientKey);
 				//	m_DbUtil.Update_Client_Status(pClientKey, "0");

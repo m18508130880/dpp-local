@@ -121,7 +121,7 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 				Dev_Unit += analysisBean.getUnit() + " ";
 			}
 		}else{
-			isError = true;
+			//isError = true;
 		}
 	}
 
@@ -129,11 +129,11 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	public int execRequest(MsgCtrl m_MsgCtrl)
 	{
 		int ret = Cmd_Sta.STA_ERROR;
-		if(isError){
-			sleep(2000);
-			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
-			return ret;
-		}
+//		if(isError){
+//			sleep(2000);
+//			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
+//			return ret;
+//		}
 		// TODO Auto-generated method stub
 		String Sql = "";
 		if(!Dev_CData.equalsIgnoreCase("NULL") && Dev_CData.length() > 0)
