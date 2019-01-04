@@ -87,6 +87,11 @@ public class DeviceTimedTaskBean {
 
 			objThrdTable.put(SN, timedThrd);
 			CommUtil.PRINT("open Thread["+SN+"]");
+			try{
+				Thread.sleep(4000);
+			}catch(Exception e){
+				e.printStackTrace();
+			}
 		}
 	}
 	

@@ -19,6 +19,7 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	ArrayList<MacReadTaskBean> readTaskList = null;
 	ArrayList<MacReadBean> readList = null;
 	private boolean isError = false;
+	private boolean isSZ = false;
 	
 	private String Dev_Unit = "";
 	private String Addrs = "";
@@ -121,7 +122,11 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 				Dev_Unit += analysisBean.getUnit() + " ";
 			}
 		}else{
-			//isError = true;
+			//01 10 31 00 00 00 CE F5
+			isError = true;
+			if(!(Addrs.equals("01") && Code.equals("10") && Sign.equals("31"))){				
+				isSZ = true;
+			}
 		}
 	}
 
@@ -129,11 +134,13 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	public int execRequest(MsgCtrl m_MsgCtrl)
 	{
 		int ret = Cmd_Sta.STA_ERROR;
-//		if(isError){
-//			sleep(2000);
-//			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
-//			return ret;
-//		}
+		if(isError){
+			sleep(2000);
+			if(!isSZ){
+				m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
+			}
+			return ret;
+		}
 		// TODO Auto-generated method stub
 		String Sql = "";
 		if(!Dev_CData.equalsIgnoreCase("NULL") && Dev_CData.length() > 0)

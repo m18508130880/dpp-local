@@ -93,10 +93,12 @@ public class MsgCtrl extends Thread
 						break;
 					}
 					case Cmd_Sta.CMD_SUBMIT_2002://¸æ¾¯¼ÆËã
-						System.out.println("dealData["+dealData+"]");
-						String Project_IdAndSysId = dealData.substring(28, 39);
-						System.out.println(CommUtil.getDateTime());
-						m_AlertCtrl.doAlert(Project_IdAndSysId);
+						if(dealData.length() > 38){
+							System.out.println("dealData["+dealData+"]");
+							String Project_IdAndSysId = dealData.substring(28, 39);
+							System.out.println(CommUtil.getDateTime());
+							m_AlertCtrl.doAlert(Project_IdAndSysId);
+						}
 						break;
 				}
 			}

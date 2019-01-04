@@ -84,7 +84,7 @@ public class MsgCtrl extends Thread
 
 				dealData = new String(data, 40, data.length - 40);
 				String dealReserve = dealData.substring(0,  20);
-				String dealCmd = dealData.substring(24, 28);	
+				String dealCmd = dealData.substring(24, 28);
 				switch(msgHead.getUnMsgCode())
 				{
 					case Cmd_Sta.COMM_SUBMMIT://Ã·Ωª

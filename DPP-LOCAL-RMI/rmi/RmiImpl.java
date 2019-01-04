@@ -25,6 +25,7 @@ import bean.DataBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
 import bean.DataHandBean;
+import bean.DataNowAddBean;
 import bean.DataNowBean;
 import bean.DevBZBean;
 import bean.DevGJBean;
@@ -295,6 +296,9 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_DEVSW:
 						rmiBean = new DevSWBean();
+						break;
+					case RmiBean.RMI_DATA_ADD:
+						rmiBean = new DataNowAddBean();
 						break;
 						
 					/**************…Ë±∏±‡º≠*************/

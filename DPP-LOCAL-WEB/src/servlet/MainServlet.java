@@ -20,9 +20,11 @@ import bean.CheckTaskBean;
 import bean.CheckTaskGJBean;
 import bean.CheckTaskGXBean;
 import bean.CorpInfoBean;
+import bean.DataBean;
 import bean.DataGJBean;
 import bean.DataGXBean;
 import bean.DataHandBean;
+import bean.DataNowAddBean;
 import bean.DataNowBean;
 import bean.DevBZBean;
 import bean.DevGJBean;
@@ -117,7 +119,7 @@ public class MainServlet extends HttpServlet
         	return;
         }
         else if (strUrl.equalsIgnoreCase("dtu.do")){						     	// 查询DTU数据
-        	new DataNowBean().getDTU(request, response, m_Rmi, false);
+        	new DataNowAddBean().getDTU(request, response, m_Rmi, false);
         }
         else if(strUrl.equalsIgnoreCase("AdminILogout.do"))                      //第二层:admin安全退出
         {
@@ -406,10 +408,12 @@ public class MainServlet extends HttpServlet
         	new DevGXBean().getSysIdNow(request, response, m_Rmi, false);
         
         /************************************user-天气接口*****************************************************/
-        else if (strUrl.equalsIgnoreCase("getWeatherAll.do"))			         		//获取全部天气
-        	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
-        	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
+//        else if (strUrl.equalsIgnoreCase("getWeatherAll.do"))			         		//获取全部天气
+//        	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
+//        else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
+//        	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getWeatherHistory.do"))			         		//获取每天历史最大天气
+        	new WeatherBean().getWeatherHistory(request, response, m_Rmi, false);
         
         /************************************数据分析*****************************************************/
         else if (strUrl.equalsIgnoreCase("getAllGJ.do"))			         			//获取全部管井
@@ -452,6 +456,16 @@ public class MainServlet extends HttpServlet
         	new MacReadTaskBean().updateStatus(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Send_Status.do"))			         		// 
         	new MacSendTaskBean().updateStatus(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("SendNow.do"))			         		// 
+        	new MacSendTaskBean().sendNow(request, response, m_Rmi, false);
+        
+        /************************************获取采集数据************************************************/
+        else if (strUrl.equalsIgnoreCase("000007_HQ.do"))			         		// 
+        	new DataBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("000007_DataNow.do"))			        // 
+        	new DataNowAddBean().getDataNow(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("000007_DataH.do"))			        // 
+        	new DataBean().getDataNow(request, response, m_Rmi, false);
         
         
         

@@ -85,9 +85,26 @@ public class MacSendTaskBean extends RmiBean
 				pRmi.DTUAction(3001, SN, "", "04");
 			}else if(Status.equals("1")){
 				pRmi.DTUAction(3001, SN, "", "03");
+			}else if(Status.equals("1")){
+				pRmi.DTUAction(3001, SN, "", "01");
 			}
 		}
 		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
+	public void sendNow(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		pRmi.DTUAction(3001, "", PId, "02");
+		Resp = "0000";
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 		outprint.write(Resp);
 	}

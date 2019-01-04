@@ -68,6 +68,8 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_MAC_CONFIG					= 63;
 	public static final int	RMI_READ_TASK					= 64;
 	public static final int	RMI_SEND_TASK					= 65;
+	
+	public static final int	RMI_DATA_ADD					= 66;
 
 	public MsgBean    msgBean = null;
 	public String     className;

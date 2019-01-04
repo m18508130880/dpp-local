@@ -19,15 +19,19 @@ public class DTUActionBean extends BaseCmdBean {
 		// TODO Auto-generated method stub
 		this.setActionSource(srcKey);
 		this.setReserve(strRequest.substring(0, 20));
-		SN = CommUtil.BSubstring(strRequest, 20, 8).trim();
-		ClientKey = CommUtil.BSubstring(strRequest, 28, 10).trim();
-		Function = CommUtil.BSubstring(strRequest, 38, 2).trim();
+		SN = CommUtil.BSubstring(strRequest, 28, 8).trim();
+		ClientKey = CommUtil.BSubstring(strRequest, 36, 10).trim();
+		Function = CommUtil.BSubstring(strRequest, 46, 2).trim();
+		System.out.println("SN["+SN+"]");
+		System.out.println("ClientKey["+ClientKey+"]");
+		System.out.println("Function["+Function+"]");
 	}
 
 	@Override
 	public int execRequest(MsgCtrl m_MsgCtrl)
 	{
 		// TODO Auto-generated method stub
+		System.out.println("Function["+Function+"]");
 		int ret = Cmd_Sta.STA_SUCCESS;
 		if(Function.equals("01")){	// 立即发送单个
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNow(SN);

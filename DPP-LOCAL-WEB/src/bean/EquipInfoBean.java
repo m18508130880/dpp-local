@@ -50,7 +50,7 @@ public class EquipInfoBean extends RmiBean
 		    	break;
 		}
 		//≤È—ØDeviceDetail
-		DataNowBean dataNowBean = new DataNowBean();
+		DataNowAddBean dataNowBean = new DataNowAddBean();
     	msgBean = pRmi.RmiExec(0, dataNowBean, 0, 0);
     	request.getSession().setAttribute("Data_Now_" + Sid, ((Object)msgBean.getMsg()));
     	
