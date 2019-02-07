@@ -7,6 +7,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -17,6 +18,8 @@ import rmi.RmiBean;
 import util.CommUtil;
 import util.CurrStatus;
 import util.MsgBean;
+
+import com.alibaba.fastjson.JSONObject;
 
 public class EquipInfoBean extends RmiBean 
 {
@@ -56,6 +59,35 @@ public class EquipInfoBean extends RmiBean
     	
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	public void getEquipInfo(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		
+		msgBean = pRmi.RmiExec(0, this, 0, 0);
+		
+		List<Object> CData = new ArrayList<Object>();
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			ArrayList<?> gjList = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> gjListIterator = gjList.iterator();
+			while (gjListIterator.hasNext()) {
+				EquipInfoBean bean = (EquipInfoBean)gjListIterator.next();
+				CData.add(bean);
+			}
+		}
+		//System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		String jsonObj = JSONObject.toJSONString(CData);
+		response.setCharacterEncoding("UTF-8");
+		outprint = response.getWriter();
+		outprint.write(jsonObj);
+		outprint.flush();
 	}
 	
 	public void getAllId(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone)

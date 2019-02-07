@@ -233,6 +233,8 @@ public class MainServlet extends HttpServlet
         	new EquipInfoBean().Restart(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("Equip_Compare_Time.do"))					 //设备对时指令
         	new EquipInfoBean().Compare_Time(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getEquipInfo.do"))					 	 //ajax获取设备信息
+        	new EquipInfoBean().getEquipInfo(request, response, m_Rmi, false);
 
         /**************************************admin-管井**********************************************/  
         else if (strUrl.equalsIgnoreCase("Admin_ToPo_GJ.do"))					//GIS监控-管井
@@ -410,9 +412,9 @@ public class MainServlet extends HttpServlet
         /************************************user-天气接口*****************************************************/
 //        else if (strUrl.equalsIgnoreCase("getWeatherAll.do"))			         		//获取全部天气
 //        	new WeatherBean().getWeatherAll(request, response, m_Rmi, false);
-//        else if (strUrl.equalsIgnoreCase("getWeatherNow.do"))			         		//获取实时天气
-//        	new WeatherBean().getWeatherNow(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("getWeatherHistory.do"))			         		//获取每天历史最大天气
+        else if (strUrl.equalsIgnoreCase("getWeather.do"))			         		//获取实时天气
+        	new WeatherBean().getWeather(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getWeatherHistory.do"))			         	//获取每天历史最大天气
         	new WeatherBean().getWeatherHistory(request, response, m_Rmi, false);
         
         /************************************数据分析*****************************************************/
@@ -460,12 +462,14 @@ public class MainServlet extends HttpServlet
         	new MacSendTaskBean().sendNow(request, response, m_Rmi, false);
         
         /************************************获取采集数据************************************************/
-        else if (strUrl.equalsIgnoreCase("000007_HQ.do"))			         		// 
+        else if (strUrl.equalsIgnoreCase("000007_HQ.do"))			         	//
         	new DataBean().ExecCmd(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("000007_DataNow.do"))			        // 
         	new DataNowAddBean().getDataNow(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("000007_DataH.do"))			        // 
         	new DataBean().getDataNow(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getRising.do"))			        // 获取涨幅情况 
+        	new DataBean().getRising(request, response, m_Rmi, false);
         
         
         

@@ -50,6 +50,10 @@ public class DataBean extends RmiBean
 		    	request.getSession().setAttribute("000007_HQ_" + Sid, ((Object)msgBean.getMsg()));
 		    	currStatus.setJsp("000007_HQ_SW.jsp?Sid=" + Sid);
 		    	break;
+		    case 3://温度数据
+		    	request.getSession().setAttribute("000007_HQ_" + Sid, ((Object)msgBean.getMsg()));
+		    	currStatus.setJsp("000007_HQ_WD.jsp?Sid=" + Sid);
+		    	break;
 		    case 1://流速数据
 		    	request.getSession().setAttribute("TextLLJ_" + Sid, ((Object)msgBean.getMsg()));
 		    	currStatus.setJsp("TextLLJ.jsp?Sid=" + Sid);
@@ -124,6 +128,42 @@ public class DataBean extends RmiBean
 			Ex.printStackTrace();
 		}
 	}
+	// 获取涨幅情况
+	public void getRising(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		msgBean = pRmi.RmiExec(9, this, 0, 25);
+		String rising = "";
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			ArrayList<?> list = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> iterator = list.iterator();
+			int i = 0;
+			while (iterator.hasNext())
+			{
+				DataBean bean = (DataBean) iterator.next();
+				if(i == 1){
+					bean.getValue();
+					if(Double.valueOf(Value) < Double.valueOf(bean.getValue())){
+						rising = "rising";
+					}else if(Double.valueOf(Value) > Double.valueOf(bean.getValue())){
+						rising = "falling";
+					}else {
+						rising = "keep";
+					}
+				}
+				i ++;
+			}
+		}
+		PrintWriter outprint = response.getWriter();
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		response.setCharacterEncoding("UTF-8");
+		outprint.write(rising);
+		outprint.flush();
+	}
 	
 	public String getSql(int pCmd)
 	{
@@ -144,6 +184,13 @@ public class DataBean extends RmiBean
 						" where cpm_id = '" + Cpm_Id + "'" +
 						" and Attr_id = '" + Attr_Id + "'" +
 						" ORDER BY t.ctime desc LIMIT 25 OFFSET 0";
+				break;
+			case 9:// 获取历史前两个数据
+				Sql = " select '' AS sn, t.cpm_id, t.id, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, t.lev, t.des " +
+						" FROM data t" +
+						" where cpm_id = '" + Cpm_Id + "'" +
+						" and Attr_id = '" + Attr_Id + "'" +
+						" ORDER BY t.ctime desc LIMIT 2 OFFSET 0";
 				break;
 			case 20://数据图表
 				Sql = " {? = call rmi_graph('"+ Id +"', '"+ currStatus.getFunc_Id() +"', '"+ currStatus.getVecDate().get(0).toString().substring(0,10) +"')}";

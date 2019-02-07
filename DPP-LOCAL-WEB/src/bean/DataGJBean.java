@@ -165,8 +165,13 @@ public class DataGJBean extends RmiBean
 				break;
     		case 3:  //月
     			pBTime = Year + "-" + Month + "-01 00:00:00";
-				pETime = Year + "-" + (Integer.valueOf(Month) + 1) + "-01 00:00:00";
+    			pETime = Year + "-" + (Integer.valueOf(Month) + 1) + "-01 00:00:00";
+    			if(Integer.valueOf(Month) >= 12){
+    				pETime = (Integer.valueOf(Year) + 1) + "-" + (Integer.valueOf(Month) + 1 - 12) + "-01 00:00:00";    				
+    			}
 				currStatus.setVecDate(CommUtil.getDate(pBTime, pETime));
+				System.out.println("pBTime["+pBTime+"]");
+				System.out.println("pETime["+pETime+"]");
 				Level = 1;
 				msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
 				request.getSession().setAttribute("Water_Max_" + Sid, ((Object) msgBean.getMsg()));
@@ -216,6 +221,7 @@ public class DataGJBean extends RmiBean
     			break;
 		
 		}
+		//System.out.println("ok");
 		DevGJBean dBean = new DevGJBean();
 		dBean.setId(GJ_Id);
 		dBean.setProject_Id(currStatus.getFunc_Project_Id());
@@ -442,7 +448,7 @@ public class DataGJBean extends RmiBean
 		String UPLOAD_NAME = SimFormat.format(new Date()) + ".xls";
 		DecimalFormat df = new DecimalFormat("###.##");
 		try {
-			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/waterData/";
+			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-CJKJ/files/waterData/";
 			String SheetName = "日查询";
 			Label cell = null;
 			WritableWorkbook book = Workbook.createWorkbook(new File(PATH + UPLOAD_NAME));
@@ -572,7 +578,7 @@ public class DataGJBean extends RmiBean
 		String UPLOAD_NAME = SimFormat.format(new Date()) + ".xls";
 		DecimalFormat df = new DecimalFormat("###.##");
 		try {
-			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/waterData/";
+			String PATH = "/www/DPP-LOCAL/DPP-LOCAL-CJKJ/files/waterData/";
 			String SheetName = "月查询";
 			Label cell = null;
 			WritableWorkbook book = Workbook.createWorkbook(new File(PATH + UPLOAD_NAME));

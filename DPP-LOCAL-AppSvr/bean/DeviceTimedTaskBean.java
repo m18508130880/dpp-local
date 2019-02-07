@@ -71,6 +71,9 @@ public class DeviceTimedTaskBean {
 	 */
 	public void openTimedTask(String pClientKey){
 		String taskList = m_DBUtil.Func("Func_Send_GetAll", pClientKey); // 取出当前clien的所有定时任务
+		if(taskList == null || taskList.length() <= 0){
+			return;
+		}
 		String [] task = taskList.split(";");
 		for(int i = 0; i < task.length; i ++){
 			String [] obj = task[i].split("\\|");

@@ -118,6 +118,33 @@ public class WeatherBean extends RmiBean
 //		outprint.write(Resp);
 	}
 	
+	public void getWeather(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+		ArrayList<Object> arrayList = new ArrayList<Object>();
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			ArrayList<?> weather = (ArrayList<?>) msgBean.getMsg();
+			Iterator<?> iterator = weather.iterator();
+			while (iterator.hasNext())
+			{
+				WeatherBean bean = (WeatherBean) iterator.next();
+				arrayList.add(bean);
+			}
+		}
+		
+		PrintWriter outprint = response.getWriter();
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		String jsonObj = JSONObject.toJSONString(arrayList);
+		response.setCharacterEncoding("UTF-8");
+		outprint.write(jsonObj);
+		outprint.flush();
+	}
+	
 	public void getWeatherHistory(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
 	{
 		getHtmlData(request);
@@ -166,7 +193,14 @@ public class WeatherBean extends RmiBean
 					  " AND Station_Id_C = '" + Station_Id_C + "'" + 
 					  " GROUP BY DATE_FORMAT(ctime, '%Y-%m-%d')" +
 					  " ORDER BY ctime DESC";
-				break;			
+				break;
+			case 2:// ²éÑ¯ÀúÊ·
+				Sql = " select t.ctime, t.pre_1h, t.wep_now " + 
+					  " from weather t " + 
+					  " where t.Station_Id_C = '" + Station_Id_C + "'"+
+				  	  " and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+					  " ORDER BY t.ctime DESC ";
+				break;	
 		}
 		return Sql;
 	}
