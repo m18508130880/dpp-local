@@ -181,13 +181,13 @@ public class WeatherBean extends RmiBean
 		switch (pCmd)
 		{
 			case 0:// 查询每天历史最大天气数据
-				Sql = " select t.ctime, max(t.pre_1h) as pre_1h, t.wep_now " + 
+				Sql = " select t.ctime, t.tem, max(t.pre_1h) as pre_1h, t.wep_now " + 
 					  " from weather t " + 
 					  " where t.Station_Id_C = '" + Station_Id_C + "'"+
 				  	  " GROUP BY SUBSTR(ctime,1,10) ORDER BY ctime DESC ";
 				break;			
 			case 1:// 查询每天历史最大天气数据
-				Sql = " SELECT ctime, pre_1h, WEP_Now " + 
+				Sql = " SELECT ctime, t.tem, pre_1h, WEP_Now " + 
 					  " FROM weather " +
 					  " WHERE pre_1h IN (SELECT MAX(pre_1h) FROM weather WHERE pre_1h > 0 AND Station_Id_C = '" + Station_Id_C + "' GROUP BY DATE_FORMAT(ctime, '%Y-%m-%d')) "+
 					  " AND Station_Id_C = '" + Station_Id_C + "'" + 
@@ -195,11 +195,19 @@ public class WeatherBean extends RmiBean
 					  " ORDER BY ctime DESC";
 				break;
 			case 2:// 查询历史
-				Sql = " select t.ctime, t.pre_1h, t.wep_now " + 
+				Sql = " select t.ctime, t.tem, t.pre_1h, t.wep_now " + 
 					  " from weather t " + 
 					  " where t.Station_Id_C = '" + Station_Id_C + "'"+
 				  	  " and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 					  " ORDER BY t.ctime DESC ";
+				break;	
+			case 3:// 查询时间段
+				Sql = " select t.ctime, t.tem, t.pre_1h, t.wep_now " + 
+						" from weather t " + 
+						" where t.Station_Id_C = '" + Station_Id_C + "'"+
+						" and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+						" and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+						" ORDER BY t.ctime DESC ";
 				break;	
 		}
 		return Sql;
@@ -215,8 +223,9 @@ public class WeatherBean extends RmiBean
 		try
 		{
 			setCTime(pRs.getString(1));
-			setPRE_1h(pRs.getString(2));
-			setWEP_Now(pRs.getString(3));
+			setTEM(pRs.getString(2));
+			setPRE_1h(pRs.getString(3));
+			setWEP_Now(pRs.getString(4));
 		}
 		catch (SQLException sqlExp)
 		{
