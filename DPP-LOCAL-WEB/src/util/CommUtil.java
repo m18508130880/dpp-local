@@ -1007,7 +1007,70 @@ public class CommUtil
 		return new String(bytes);
 	}
     
-	
+	/**
+	 * 计算淤泥沉积厚度
+	 * @param I 管道坡度
+	 * @param D 管径(m)
+	 * @param y 水位深度(m)
+	 * @param v 流速(m/s)
+	 * @param n 摩阻系数
+	 * @return 淤泥沉积厚度
+	 */
+	public static double siltDepth(double I, double D, double y, double v, double n) {
+		// 根据结构数据，算出满管流的流速，未知I
+		double v0 = (1.0/n)*Math.pow(D/4.0, 2.0/3.0)*Math.pow(I, 1.0/2.0);
+		// 管中心到水面线两端的夹角的理论值
+		double OL = getOL(v/v0);
+		// 根据实测的水位算出管中心到水面线两端的夹角
+		double O = 2.0*Math.acos(1.0 - 2.0*y/D);
+		// 实际水位的过水面积
+		double A = (D*D/8.0)*(O - Math.sin(O));
+		// 理论水位的过水面积
+		double AL = (D*D/8.0)*(OL - Math.sin(OL));
+		// 淤泥所占的面积
+		double s = A - AL;
+		if(s <= 0){
+			return 0;
+		}
+		double h = bowArea(s, D/2.0);
+		return h;
+	}
+	public static double getOL(double v0){
+		double a = Math.PI;
+		int sn = 0;
+		while(true){
+			double v = Math.pow((1.0 - Math.sin(a)/a),2.0/3.0);
+			if(Math.abs(v - v0) < 0.01){
+				break;
+			}
+			a -= Math.PI/180.0;
+			sn ++;
+		}
+//		System.out.println("计算第["+sn+"]次");
+//		double S = Math.pow((1.0 - Math.sin(a)/a),2.0/3.0);
+//		System.out.println("计算出的v/v0["+S+"]，误差["+(S-v0)/S*100+"%]");
+		return a;
+	}
+	public static double bowArea(double s, double r){
+//		System.out.println("弓形面积["+s+"]");
+//		System.out.println("管道面积["+Math.PI*r*r+"]");
+		double h = r; 
+		int sn = 0;
+		while(true){
+			double a = Math.acos((r-h)/r);
+			double S = (a/Math.PI)*(Math.PI*r*r) - (r-h)*Math.sin(a)*r;
+			h = h - (S - s);
+			if(Math.abs(S - s) < 0.00001){
+				break;
+			}
+			sn ++;
+		}
+//		System.out.println("计算第["+sn+"]次，弓形高度["+h+"mm]");
+//		double a = Math.acos((r-h)/r);
+//		double S = (a/Math.PI)*(Math.PI*r*r) - (r-h)*Math.sin(a)*r;
+//		System.out.println("用得出的弓形高度计算出的面积["+S+"]，误差["+(S-s)/S*100+"%]");
+		return h;
+	}
 	/** 判断一个字符串是不是数字[可以判断小数，正负数，整数]
 	 * @param str
 	 * @return
