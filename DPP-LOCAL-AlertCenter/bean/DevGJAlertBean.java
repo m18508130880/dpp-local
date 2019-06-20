@@ -10,6 +10,9 @@ public class DevGJAlertBean
 	private String Out_Id;
 	private String Value;
 	private String Flag;
+	private String Top_Height;
+	private String Base_Height;
+	private String Equip_Height;
 	
 	public boolean getData(ResultSet pRs)
 	{
@@ -21,6 +24,9 @@ public class DevGJAlertBean
 			setOut_Id(pRs.getString(3));
 			setValue(pRs.getString(4));
 			setFlag(pRs.getString(5));
+			setTop_Height(pRs.getString(6));
+			setBase_Height(pRs.getString(7));
+			setEquip_Height(pRs.getString(8));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -70,6 +76,30 @@ public class DevGJAlertBean
 	public void setValue(String value)
 	{
 		Value = value;
+	}
+
+	public String getTop_Height() {
+		return Top_Height;
+	}
+
+	public void setTop_Height(String top_Height) {
+		Top_Height = top_Height;
+	}
+
+	public String getBase_Height() {
+		return Base_Height;
+	}
+
+	public void setBase_Height(String base_Height) {
+		Base_Height = base_Height;
+	}
+
+	public String getEquip_Height() {
+		return Equip_Height;
+	}
+
+	public void setEquip_Height(String equip_Height) {
+		Equip_Height = equip_Height;
 	}
 	
 	

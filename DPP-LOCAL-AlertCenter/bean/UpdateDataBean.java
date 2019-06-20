@@ -56,11 +56,11 @@ public class UpdateDataBean extends BaseCmdBean {
 				{
 					String project_Id = Project_SysId[i].split(",")[0];
 					String SysId = Project_SysId[i].split(",")[1];
-					Sql = " SELECT id, in_id, out_id, curr_data, flag FROM view_dev_gj WHERE Project_Id = '"+project_Id+"' AND id LIKE '"+SysId+"%' GROUP BY id";
+					Sql = " SELECT id, in_id, out_id, curr_data, flag, top_height, base_height, equip_height FROM view_dev_gj WHERE Project_Id = '"+project_Id+"' AND id LIKE '"+SysId+"%' GROUP BY id";
 					gjList = (ArrayList<DevGJAlertBean>) alertCtrl.getM_DBUtil().doSelect(Sql, 1);
 					objGJGXTable.put(project_Id + SysId, gjList);
 					SysId = dealGXID(SysId);
-					Sql = " SELECT id, length, end_id FROM view_dev_gx WHERE Project_Id = '"+project_Id+"' AND id LIKE '"+SysId+"%' GROUP BY id";
+					Sql = " SELECT id, length, end_id, start_height, end_height, diameter FROM dev_gx WHERE Project_Id = '"+project_Id+"' AND id LIKE '"+SysId+"%' GROUP BY id";
 					gxList = (ArrayList<DevGXAlertBean>) alertCtrl.getM_DBUtil().doSelect(Sql, 2);
 					objGJGXTable.put(project_Id + SysId, gxList);
 				}

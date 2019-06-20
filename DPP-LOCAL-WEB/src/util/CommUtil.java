@@ -1008,7 +1008,7 @@ public class CommUtil
 	}
     
 	/**
-	 * 计算淤泥沉积厚度
+	 * 计算淤泥沉积厚度 cj
 	 * @param I 管道坡度
 	 * @param D 管径(m)
 	 * @param y 水位深度(m)

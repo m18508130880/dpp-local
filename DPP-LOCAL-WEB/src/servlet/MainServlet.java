@@ -16,6 +16,7 @@ import util.CommUtil;
 import bean.AlertInfoBean;
 import bean.AnalogBean;
 import bean.AnalogComputeBean;
+import bean.TaskListBean;
 import bean.CheckTaskBean;
 import bean.CheckTaskGJBean;
 import bean.CheckTaskGXBean;
@@ -396,16 +397,20 @@ public class MainServlet extends HttpServlet
         	new UserInfoBean().ajaxGetAll(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getCheck_Task.do"))			         		//ajax查询检查任务
         	new CheckTaskBean().ajaxGetAll(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("getCheck_GJ.do"))			         			//ajax查询管井
+        else if (strUrl.equalsIgnoreCase("getCheck_GJ.do"))			         			//
         	new CheckTaskGJBean().getCheckGJ(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("getCheck_GX.do"))			         			//ajax查询管线
+        else if (strUrl.equalsIgnoreCase("getCheck_GX.do"))			         			//
         	new CheckTaskGXBean().getCheckGX(request, response, m_Rmi, false);
-        else if (strUrl.equalsIgnoreCase("Check_Task.do"))			         			//ajax查询管线
+        else if (strUrl.equalsIgnoreCase("Check_Task.do"))			         			//
         	new CheckTaskBean().ExecCmd(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("ajaxGetToday.do"))			         			//检查任务列表
+        	new TaskListBean().ajaxGetToday(request, response, m_Rmi, false);
 
         /************************************user-数据分析*****************************************************/
-        else if (strUrl.equalsIgnoreCase("getSysId.do"))			         			//获取全部系统
+        else if (strUrl.equalsIgnoreCase("getSysId.do"))			         			//获取管井全部系统
         	new DevGJBean().getSysId(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getSysGX.do"))			         			//获取管线全部系统
+        	new DevGXBean().getSysId(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getSysIdNow.do"))			         			//分析当前系统的数据
         	new DevGXBean().getSysIdNow(request, response, m_Rmi, false);
         
@@ -460,6 +465,8 @@ public class MainServlet extends HttpServlet
         	new MacSendTaskBean().updateStatus(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("SendNow.do"))			         		// 
         	new MacSendTaskBean().sendNow(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("ClientClose.do"))			         		// 
+        	new MacSendTaskBean().clientClose(request, response, m_Rmi, false);
         
         /************************************获取采集数据************************************************/
         else if (strUrl.equalsIgnoreCase("000007_HQ.do"))			         	//
@@ -470,8 +477,18 @@ public class MainServlet extends HttpServlet
         	new DataBean().getDataNow(request, response, m_Rmi, false);
         else if (strUrl.equalsIgnoreCase("getRising.do"))			        // 获取涨幅情况 
         	new DataBean().getRising(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getSiltDepth.do"))			        // 获取淤泥沉积厚度
+        	new DevGXBean().getSiltDepth(request, response, m_Rmi, false);
+        else if (strUrl.equalsIgnoreCase("getSWAVG.do"))			        //获取高运行水位排行
+        	new DataGJBean().getSWAVG(request, response, m_Rmi, false);	
         
         
+
+        /************************************获取采集数据************************************************/
+        else if (strUrl.equalsIgnoreCase("getWaterLevGX.do"))			        //获取井内的水位的管线
+        	new DevGXBean().getWaterLevGX(request, response, m_Rmi, false);	
+        else if (strUrl.equalsIgnoreCase("getWaterLevGJ.do"))			        //获取井内的水位的管井
+        	new DevGXBean().getWaterLevGJ(request, response, m_Rmi, false);	
         
     }
     

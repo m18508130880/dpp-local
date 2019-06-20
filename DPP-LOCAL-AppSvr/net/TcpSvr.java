@@ -125,20 +125,23 @@ public class TcpSvr extends Thread
 				
 				//登入验证
 				String Pid = null;
-				if(null == (Pid = CheckClient(Buffer, objClient)))
-					continue;
+				Pid = CheckClient(Buffer, objClient);
+				// 2019-06-20 cj 去除登录重连
+//				if(null == (Pid = CheckClient(Buffer, objClient)))
+//					continue;
 				
 				//登入回复
-				DataOutputStream SendChannel = new DataOutputStream(objClient.getOutputStream());
 				
 				//RMI登入
 				if(0 ==Integer.parseInt(Pid.trim()))
 				{
+					// 去除RMI外的登录返回
+					DataOutputStream SendChannel = new DataOutputStream(objClient.getOutputStream());
 					System.out.println();
 					SendChannel.write(new String(Buffer, 0, 44).getBytes());
+					SendChannel.flush();
 				}
 				
-				SendChannel.flush();
 				objClient.setSoTimeout(0);
 				ClientStatusNotify(Pid, STATUS_CLIENT_ONLINE);
 		 		continue;
@@ -293,7 +296,7 @@ public class TcpSvr extends Thread
 	public synchronized void ClientClose(String pClientKey)
 	{
 		try
-		{			
+		{
 			if(!objClientTable.isEmpty() && objClientTable.containsKey(pClientKey))
 			{
 				synchronized(markClientTable)
@@ -583,6 +586,14 @@ public class TcpSvr extends Thread
 							
 							CommUtil.PRINT("Client  Recv [" + m_ClientKey + "]");
 							CommUtil.printMsg(cBuff, nLen);
+							
+							if(nLen <= 20 & !m_ClientKey.trim().equals("0000000000")){ // *2019-06-14心跳包不处理
+								nRecvLen = 0;
+								nRcvPos = 0;
+								nCursor = 0;
+								ctRslt = 0;
+								break;
+							}
 							
 							data.insertElementAt(new Integer(nLen),0);
 							data.insertElementAt(new Integer(nCursor),1);

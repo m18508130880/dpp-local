@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -399,6 +400,69 @@ public class DataGJBean extends RmiBean
 	    }
 	}
 	
+	// 一个月的常水位排行
+	public void getSWAVG(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		PrintWriter outprint = response.getWriter();
+		try{
+			getHtmlData(request);
+			currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+			currStatus.getHtmlData(request, pFromZone);
+			ArrayList<Object> CData = new ArrayList<Object>();
+			
+			msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 25);
+			if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+			{
+				if(null != msgBean.getMsg())
+				{
+					String resp = ((String) msgBean.getMsg()).substring(4);
+					String [] swList = resp.split(";");
+					for(int i = 0; i < swList.length; i ++){
+						String [] obj = swList[i].split("\\|");
+						Map<String, String> sw = new HashMap<String, String>();
+						sw.put("id", obj[0]);
+						sw.put("topHeight", obj[1]);
+						sw.put("baseHeight", obj[2]);
+						sw.put("equipHeight", obj[3]);
+						sw.put("value", obj[4]);
+						String poor = String.valueOf(Double.valueOf(obj[3]) - Double.valueOf(obj[4]));
+						sw.put("poor", poor);
+						CData.add(sw);
+					}
+					CData = swTop(CData);
+				}
+				response.setCharacterEncoding("UTF-8");
+				String jsonObj = JSONObject.toJSONString(CData);
+				outprint.write(jsonObj);
+				outprint.flush();
+			}
+			request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		}
+	    catch (IOException e)
+	    {
+	    	e.printStackTrace();
+	    }
+	    finally
+	    {
+	    	outprint.close();
+	    }
+	}
+	
+	@SuppressWarnings("unchecked")
+	public ArrayList<Object> swTop(ArrayList<Object> swList){
+		for(int i = 0; i < swList.size(); i ++){
+			for(int j = i+1; j < swList.size(); j ++){
+				Map<String, String> swi = (Map<String, String>) swList.get(i);
+				Map<String, String> swj = (Map<String, String>) swList.get(j);
+				if(Double.valueOf(swi.get("poor")) > Double.valueOf(swj.get("poor"))){
+					swList.set(i, swj);
+					swList.set(j, swi);
+				}
+			}
+		}
+		return swList;
+	}
+	
 	// 获取有水位计的管井
 	public void getGJ_Id(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
 	{
@@ -714,6 +778,7 @@ public class DataGJBean extends RmiBean
 					  " FROM view_data_now_gj t " +
 					  " where t.project_id = "+ currStatus.getFunc_Project_Id() + 
 					  " and t.gj_id like '%" + currStatus.getFunc_Sub_Type_Id() + "%' " +
+					  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 					  " ORDER BY t.project_id, t.gj_id";
 				break;
 			case 1:
@@ -723,6 +788,7 @@ public class DataGJBean extends RmiBean
 						  "   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 						  "   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 					  	  "   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+						  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 						  " GROUP BY SUBSTR(ctime,1,13)" +
 						  " ORDER BY t.ctime " ;
 				break;
@@ -736,6 +802,7 @@ public class DataGJBean extends RmiBean
 							"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 							"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 							"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+							  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 							" GROUP BY SUBSTR(ctime,1,10)" +
 							" ORDER BY t.ctime " ;
 						break;
@@ -746,6 +813,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,10)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -756,6 +824,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,10)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -771,6 +840,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,10)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -781,6 +851,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,10)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -791,6 +862,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,10)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -806,6 +878,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,7)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -816,6 +889,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,7)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -826,6 +900,7 @@ public class DataGJBean extends RmiBean
 								"   and t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
 								"   and t.ctime >= date_format('"+currStatus.getVecDate().get(0).toString()+"', '%Y-%m-%d %H-%i-%S')" +
 								"   and t.ctime <= date_format('"+currStatus.getVecDate().get(1).toString()+"', '%Y-%m-%d %H-%i-%S')" +
+								  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 								" GROUP BY SUBSTR(ctime,1,7)" +
 								" ORDER BY t.ctime " ;
 						break;
@@ -835,6 +910,7 @@ public class DataGJBean extends RmiBean
 				Sql = " select t.sn, t.project_id, t.project_name, t.gj_id, t.gj_name, t.attr_name, t.ctime, t.value, t.unit, t.lev, t.des, t.top_height, t.base_height, t.material, t.equip_height, t.road " +
 					  " FROM view_data_gj t " +
 					  " where t.project_id = '" + currStatus.getFunc_Project_Id() + "'" +
+					  " and t.attr_id like '%" + currStatus.getFunc_Sort_Id() + "%' " +
 					  " and ctime > DATE_SUB(NOW(),INTERVAL 1 HOUR) " +
 					  " ORDER BY t.ctime" ;
 				break;
@@ -853,6 +929,9 @@ public class DataGJBean extends RmiBean
 				break;
 			case 22: // 管井内一个月/一季度/一年内的常水位
 				Sql = "{? = call Func_Often_WaterLev('" + currStatus.getFunc_Project_Id() + "','" + GJ_Id + "','" + currStatus.getVecDate().get(1).toString() + "')}";
+				break;
+			case 23: // 一个月的常水位
+				Sql = "{? = call Func_sw_avg('" + currStatus.getFunc_Project_Id() + "')}";
 				break;
 		}
 		return Sql;

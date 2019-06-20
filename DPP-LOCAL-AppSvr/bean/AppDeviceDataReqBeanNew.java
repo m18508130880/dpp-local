@@ -19,6 +19,7 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	ArrayList<MacReadTaskBean> readTaskList = null;
 	ArrayList<MacReadBean> readList = null;
 	private boolean isError = false;
+	private boolean isText = false;
 	private boolean isSZ = false;
 	
 	private String Dev_Unit = "";
@@ -124,8 +125,14 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 		}else{
 			//01 10 31 00 00 00 CE F5
 			isError = true;
-			if(!(Addrs.equals("01") && Code.equals("10") && Sign.equals("31"))){				
-				isSZ = true;
+			if(Dev_Id.equals("0511010002")){	// 浣纱渠数据错误时，不重新查询
+				isError = false;				
+			}
+//			if(!(Addrs.equals("01") && Code.equals("10") && Sign.equals("31"))){				
+//				isSZ = true;
+//			}
+			if(Dev_Id.contains("0999")){
+				isText = true;
 			}
 		}
 	}
@@ -134,11 +141,19 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 	public int execRequest(MsgCtrl m_MsgCtrl)
 	{
 		int ret = Cmd_Sta.STA_ERROR;
+		if(isText){
+			return ret;
+		}
 		if(isError){
-			sleep(2000);
-			if(!isSZ){
-				m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
+			try {
+				Thread.sleep(2000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
+//			if(!isSZ){
+//			}
+			//m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNowAll(Dev_Id);
 			return ret;
 		}
 		// TODO Auto-generated method stub
@@ -177,11 +192,6 @@ public class AppDeviceDataReqBeanNew extends BaseCmdBean {
 		//setStatus(CommUtil.IntToStringLeftFillZero(ret, 4));
 		//execResponse();
 		return ret;
-	}
-	
-	private void sleep(int i) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	public void noticeTimeOut()

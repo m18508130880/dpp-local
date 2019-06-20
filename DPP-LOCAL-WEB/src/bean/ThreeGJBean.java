@@ -216,7 +216,11 @@ public class ThreeGJBean extends RmiBean
 				System.out.println(cenGJ.getSize());
 				radii = Float.valueOf(cenGJ.getSize().split("\\*")[0]);
 			}else{
-				radii = Float.valueOf(cenGJ.getSize());
+				if(cenGJ.getSize().length() <= 1){
+					radii = 0;
+				}else{
+					radii = Float.valueOf(cenGJ.getSize());
+				}
 			}
 			cenRadii = radii/10/2;
 			cenModel = getGJModel(cenGJ, cenHeight, cenRadii);

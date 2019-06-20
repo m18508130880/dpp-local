@@ -62,6 +62,12 @@ public class DeviceTimedTaskBean {
 			}else{
 				CommUtil.PRINT("Thread [" + Id + "] Send Now [" + Order + "] ERROR");
 			}
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -78,8 +84,14 @@ public class DeviceTimedTaskBean {
 		for(int i = 0; i < task.length; i ++){
 			String [] obj = task[i].split("\\|");
 			SN = obj[0];
-			if(objThrdTable.containsKey(SN)){	// 如果此任务已存在，到下一个
-				continue;
+			if(objThrdTable.containsKey(SN)){	// 如果此任务已存在，关闭此任务
+				// 取到线程
+				timedThrd = (TimedThrd) objThrdTable.get(SN);
+				// 线程interrupted，使线程停止
+				timedThrd.interrupt();
+				// 线程tab里移除关闭的线程
+				objThrdTable.remove(SN);
+				CommUtil.PRINT("close Thread["+SN+"]");
 			}
 			Id = obj[1];
 			Cycle = obj[2];
@@ -91,7 +103,7 @@ public class DeviceTimedTaskBean {
 			objThrdTable.put(SN, timedThrd);
 			CommUtil.PRINT("open Thread["+SN+"]");
 			try{
-				Thread.sleep(4000);
+				Thread.sleep(2500);
 			}catch(Exception e){
 				e.printStackTrace();
 			}

@@ -17,7 +17,7 @@ import util.MsgBean;
  */
 public abstract class RmiBean implements Serializable
 {
-	public final static String UPLOAD_PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB/files/excel/";
+	public final static String UPLOAD_PATH = "/www/DPP-LOCAL/DPP-LOCAL-WEB-CJKJ/files/excel/";
 	
 	/**************************system**********************/
 
@@ -71,6 +71,7 @@ public abstract class RmiBean implements Serializable
 	public static final int	RMI_SEND_TASK					= 65;
 	
 	public static final int	RMI_DATA_ADD					= 66;
+	public static final int	RMI_TASK_LIST					= 67;
 	
 	public MsgBean    msgBean = null;
 	public String     className;

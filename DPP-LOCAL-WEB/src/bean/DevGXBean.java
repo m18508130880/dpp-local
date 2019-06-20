@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -133,6 +134,119 @@ public class DevGXBean extends RmiBean
 		}
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
 	   	response.sendRedirect(currStatus.getJsp());
+	}
+	
+	// 获取井内的水位的管井
+	public void getWaterLevGJ(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+
+		msgBean = pRmi.RmiExec(4, this, 0, 25);
+				
+		@SuppressWarnings("rawtypes")
+		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		DevGJBean tmpGJBean = new DevGJBean();
+		tmpGJBean.setProject_Id(currStatus.getFunc_Project_Id());
+		tmpGJBean.setSubsys_Id(Id.substring(2, 5));
+		
+		msgBean = pRmi.RmiExec(5, tmpGJBean, 0, 25);
+		@SuppressWarnings("rawtypes")
+		ArrayList gjObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		AnalogBean analog = new AnalogBean();
+		@SuppressWarnings("rawtypes")
+		ArrayList gjList = analog.AnalogGJList(gjObj, gxObj, Id);
+
+		String jsonObj = JSONObject.toJSONString(gjList);
+		response.setCharacterEncoding("UTF-8");
+		outprint.write(jsonObj);
+		outprint.flush();
+	}
+	
+	// 获取井内的水位的管线
+	public void getWaterLevGX(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+
+		msgBean = pRmi.RmiExec(4, this, 0, 25);
+				
+		@SuppressWarnings("rawtypes")
+		ArrayList gxObj = (ArrayList)(Object)msgBean.getMsg();
+		
+		String jsonObj = JSONObject.toJSONString(gxObj);
+		response.setCharacterEncoding("UTF-8");
+		outprint.write(jsonObj);
+		outprint.flush();
+	}
+		
+	// 获取子系统号
+	public void getSysId(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus) request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		msgBean = pRmi.RmiExec(27, this, 0, 25);
+		if (msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = (String) msgBean.getMsg();
+		}
+		System.out.println(Resp);
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	// 获取淤泥沉积厚度
+	public void getSiltDepth(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		msgBean = pRmi.RmiExec(currStatus.getCmd(), this, 0, 0);
+		if(msgBean.getStatus() == MsgBean.STA_SUCCESS)
+		{
+			Resp = ((String)msgBean.getMsg()).substring(4);
+		}
+		System.out.println("Resp["+Resp+"]");
+		// 0000WG003010|3.932|3.88|33.8|500
+		//#2018-12|0.28280753167945694;2019-01|0.296970461586121;2019-02|0.31421909427966016;
+		//#2018-12|0.0950613778333036;2019-01|0.09386236059479519;2019-02|0.10414308792372887;
+		String [] gx = (Resp.split("#")[0]).split("\\|");
+		System.out.println("Resp["+gx+"]");
+		String [] vList = (Resp.split("#")[1]).split(";");
+		System.out.println("Resp["+vList+"]");
+		String [] yList = (Resp.split("#")[2]).split(";");
+		System.out.println("Resp["+yList+"]");
+		String resp = "";
+		double n = 0.014;
+		for(int i = 0; i < vList.length; i ++){
+			BigDecimal v = new BigDecimal(vList[i].split("\\|")[1]+"");
+			BigDecimal y = new BigDecimal(yList[i].split("\\|")[1]);
+			BigDecimal I = new BigDecimal((Double.valueOf(gx[1]) - Double.valueOf(gx[2]))/Double.valueOf(gx[3]) + "");
+			BigDecimal D = new BigDecimal(Double.valueOf(gx[4])/1000 + "");
+			System.out.println("I["+I+"], D["+D+"], y["+y+"], v["+v+"], n["+n+"]");
+			double h_ = CommUtil.siltDepth(I.doubleValue(), D.doubleValue(), y.doubleValue(), v.doubleValue(), n);
+			System.out.println("h_["+h_+"]");
+			resp += vList[i].split("\\|")[0] + "|" + String.valueOf(h_) + ";";
+		}
+		System.out.println("Resp["+resp+"]");
+		
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(resp);
 	}
 	
 	// 画剖面图之前计算排出口数量
@@ -2144,6 +2258,12 @@ public class DevGXBean extends RmiBean
 				break;
 			case 25://获取模拟管线状态
 				Sql = "{? = call Func_GX_Analog('"+ currStatus.getFunc_Project_Id() + "')}";
+				break;
+			case 26://计算淤泥时获取对应的管线和相关参数
+				Sql = "{? = call Get_GX_Silt('"+ currStatus.getFunc_Project_Id() + "', '" + currStatus.getFunc_Sort_Id() + "')}";
+				break;
+			case 27:// 获取子系统号
+				Sql = "{? = call Func_SysGX_Get('" + Project_Id + "')}";
 				break;
 			case 40://编辑设备EquipInfo
 				Sql = "{call pro_update_dev_gx('" + Equip_Id + "', '" + Equip_Name + "', '" + Id + "' , '" + Project_Id + "', '" + After_Project_Id + "')}";

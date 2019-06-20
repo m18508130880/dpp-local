@@ -153,8 +153,8 @@ public class UserInfoBean extends RmiBean
 			    	msgBean = pRmi.RmiExec(1, roleBeanManage, 0, 25);
 			    	request.getSession().setAttribute("User_Manage_Role_" + Sid, ((Object)msgBean.getMsg()));
 			    	
-			    //	Url = "index.jsp?Sid=" + Sid;
-			    	Url = "project_choose.jsp?Sid=" + Sid;
+			    	Url = "index.jsp?Sid=" + Sid;
+//			    	Url = "project_choose.jsp?Sid=" + Sid;
 				//	Url = "user/MapMain.jsp?Sid=" + Sid;
 					
 				}

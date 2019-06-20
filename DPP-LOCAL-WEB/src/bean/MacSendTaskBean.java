@@ -109,6 +109,21 @@ public class MacSendTaskBean extends RmiBean
 		outprint.write(Resp);
 	}
 	
+	public void clientClose(HttpServletRequest request, HttpServletResponse response, Rmi pRmi, boolean pFromZone) throws ServletException, IOException
+	{
+		getHtmlData(request);
+		currStatus = (CurrStatus)request.getSession().getAttribute("CurrStatus_" + Sid);
+		currStatus.getHtmlData(request, pFromZone);
+		
+		PrintWriter outprint = response.getWriter();
+		String Resp = "9999";
+		
+		pRmi.DTUAction(3001, "", PId, "10");
+		Resp = "0000";
+		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);
+		outprint.write(Resp);
+	}
+	
 	public String getSql(int pCmd)
 	{
 		String Sql = "";

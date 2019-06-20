@@ -58,6 +58,10 @@ public class DataBean extends RmiBean
 		    	request.getSession().setAttribute("TextLLJ_" + Sid, ((Object)msgBean.getMsg()));
 		    	currStatus.setJsp("TextLLJ.jsp?Sid=" + Sid);
 		    	break;
+		    case 4://°±µªÊý¾Ý
+		    	request.getSession().setAttribute("000007_HQ_" + Sid, ((Object)msgBean.getMsg()));
+		    	currStatus.setJsp("000007_HQ_NH.jsp?Sid=" + Sid);
+		    	break;
 		}
 		
 		request.getSession().setAttribute("CurrStatus_" + Sid, currStatus);

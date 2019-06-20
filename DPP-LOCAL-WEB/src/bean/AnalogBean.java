@@ -10127,20 +10127,30 @@ public class AnalogBean {
 				// "["+nextGJ.getCurr_Data()+"]");
 				if (nextGJ.getEquip_Id().length() > 10
 						|| Double.valueOf(nextGJ.getCurr_Data()) != 0) {
-					// if (Double.valueOf(nextGJ.getCurr_Data()) > 0 ||
-					// Double.valueOf(nextGJ.getCurr_Data()) < 0)
-					// {
-					// System.out.println(nextGJ.getId()+"["+nextGJ.getCurr_Data()+"]");
-					DevGJData devGJ = new DevGJData();
-					devGJ.sn = sn;
-					devGJ.Base_Height = nextGJ.getBase_Height();
-					devGJ.Top_Height = nextGJ.getTop_Height();
-					devGJ.Equip_Height = nextGJ.getEquip_Height();
-					devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height())
-							- CommUtil.StrToFloat(nextGJ.getEquip_Height())
-							+ CommUtil.StrToFloat(nextGJ.getCurr_Data());
-					// System.out.println(nextGJ.getId()+"["+devGJ.water+"]");
-					devList.add(devGJ);
+					newTime = df.parse(df.format(new Date()));
+					if(nextGJ.getEquip_Time() == null || nextGJ.getEquip_Time().trim().length() <= 0 || nextGJ.getEquip_Time().trim().equals("0")){
+						equip_time = newTime;
+					}else {
+						equip_time = df.parse(nextGJ.getEquip_Time());
+					}
+					between = (newTime.getTime() - equip_time.getTime()) / 1000;// 除以1000是为了转换成秒
+					hour = between / 3600;
+					if(hour < 2){
+						// if (Double.valueOf(nextGJ.getCurr_Data()) > 0 ||
+						// Double.valueOf(nextGJ.getCurr_Data()) < 0)
+						// {
+						// System.out.println(nextGJ.getId()+"["+nextGJ.getCurr_Data()+"]");
+						DevGJData devGJ = new DevGJData();
+						devGJ.sn = sn;
+						devGJ.Id = nextGJ.getId();
+						devGJ.Base_Height = nextGJ.getBase_Height();
+						devGJ.Top_Height = nextGJ.getTop_Height();
+						devGJ.Equip_Height = nextGJ.getEquip_Height();
+						devGJ.water = CommUtil.StrToFloat(nextGJ.getTop_Height())
+								- CommUtil.StrToFloat(nextGJ.getEquip_Height())
+								+ CommUtil.StrToFloat(nextGJ.getCurr_Data());
+						devList.add(devGJ);
+					}
 					// }
 				}
 				outGXId = nextGJ.getOut_Id();
@@ -10166,7 +10176,6 @@ public class AnalogBean {
 		} while (option == 0);
 
 		// 如果没有设备井，返回由选择管井到终点的管井列表
-		// System.out.println("devList.size()["+devList.size()+"]");
 		if (0 == devList.size()) {
 			return gjList;
 		}
@@ -10269,7 +10278,6 @@ public class AnalogBean {
 						float waterLev = iLev_1 + (iLev_1 - iLev)
 								* (i - devGJDataI.sn)
 								/ (devGJDataI.sn - devGJDataI_1.sn);
-						System.out.println("waterLev[" + waterLev + "]");
 						// 倒序时，需要取到正确的入口管线
 						DevGXBean gxBean = null;
 						String[] sId = gjBean.getIn_Id().split(",");
@@ -10300,7 +10308,11 @@ public class AnalogBean {
 				gjBean.setCurr_Data(String.valueOf(devGJData1.water));// 赋予当前管井的水位高度
 			}
 		}
-
+		for(int i = 0; i < gjList.size(); i ++){
+			DevGJBean gjBean = (DevGJBean) gjList.get(i);
+			System.out.println("Id["+gjBean.getId()+"]");
+			System.out.println("Id["+gjBean.getCurr_Data()+"]");
+		}
 		/*
 		 * int count = 0; DevGJData devGJData1 = ((DevGJData) devList.get(0));
 		 * // 取到第一个有设备的管井 DevGJData devGJDataN = ((DevGJData)

@@ -43,6 +43,7 @@ import bean.MacSendBean;
 import bean.MacSendTaskBean;
 import bean.MapImageBean;
 import bean.ProjectInfoBean;
+import bean.TaskListBean;
 import bean.TextLLJBean;
 import bean.ThreeGJBean;
 import bean.ThreeGXBean;
@@ -319,6 +320,9 @@ public class RmiImpl extends UnicastRemoteObject implements Rmi
 						break;
 					case RmiBean.RMI_READ_TASK:
 						rmiBean = new MacReadTaskBean();
+						break;
+					case RmiBean.RMI_TASK_LIST:
+						rmiBean = new TaskListBean();
 						break;
 				}
 				rmiBean.getData(rs);

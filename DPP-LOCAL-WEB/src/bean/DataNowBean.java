@@ -129,20 +129,20 @@ public class DataNowBean extends RmiBean
 //				break;
 			case 0://≤È—Ø               
 				Sql = " select t.sn, t.gj_id, t.gj_name, t.longitude, t.latitude, t.project_id, t.top_height, t.base_height, equip_height, " + 
-					  " t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit " +
+					  " t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, t.onoff " +
 					  " from view_data_now t "+
 					  " where t.project_id = '"+Project_Id+"' order by t.sn";
 				break;
 			case 1://≤È—Ø               
 				Sql = " select t.sn, t.gj_id, t.gj_name, t.longitude, t.latitude, t.project_id, t.top_height, t.base_height, equip_height, " + 
-					  " t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit " +
+					  " t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, t.onoff " +
 					  " from view_data_now t "+
 					  " where t.pid like '%"+PId+"' " + 
 					  " order by t.sn";
 				break;
 			case 2://≤È—Ø               
 				Sql = " select t.sn, t.gj_id, t.gj_name, t.longitude, t.latitude, t.project_id, t.top_height, t.base_height, equip_height, " + 
-						" t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit " +
+						" t.pid, t.tid, t.addrs, t.code, t.sign, t.cname, t.attr_id, t.attr_name, t.ctime, t.value, t.unit, t.onoff " +
 						" from view_data_now t "+
 						" where t.project_id = '"+Project_Id+"' " + 
 						" and t.pid = '" + PId + "' " + 
@@ -190,6 +190,7 @@ public class DataNowBean extends RmiBean
 			setCTime(pRs.getString(18));
 			setValue(pRs.getString(19));
 			setUnit(pRs.getString(20));
+			setOnOff(pRs.getString(21));
 		}
 		catch (SQLException sqlExp)
 		{
@@ -233,6 +234,7 @@ public class DataNowBean extends RmiBean
 			setCTime(CommUtil.StrToGB2312(request.getParameter("CTime")));
 			setValue(CommUtil.StrToGB2312(request.getParameter("Value")));
 			setUnit(CommUtil.StrToGB2312(request.getParameter("Unit")));
+			setOnOff(CommUtil.StrToGB2312(request.getParameter("OnOff")));
 
 			setSid(CommUtil.StrToGB2312(request.getParameter("Sid")));
 		}
@@ -279,6 +281,15 @@ public class DataNowBean extends RmiBean
 	private String CTime;
 	private String Value;
 	private String Unit;
+	private String OnOff;
+
+	public String getOnOff() {
+		return OnOff;
+	}
+
+	public void setOnOff(String onOff) {
+		OnOff = onOff;
+	}
 
 	public String getSN()
 	{

@@ -31,7 +31,6 @@ public class DTUActionBean extends BaseCmdBean {
 	public int execRequest(MsgCtrl m_MsgCtrl)
 	{
 		// TODO Auto-generated method stub
-		System.out.println("Function["+Function+"]");
 		int ret = Cmd_Sta.STA_SUCCESS;
 		if(Function.equals("01")){	// 立即发送单个
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.collectDataNow(SN);
@@ -46,7 +45,7 @@ public class DTUActionBean extends BaseCmdBean {
 		}else if(Function.equals("06")){	// 关闭DTU的全部定时任务
 			m_MsgCtrl.getM_TcpSvr().dveiceTimedTask.closeTimedTask(ClientKey);
 		}else if(Function.equals("10")){	// 重新建立client
-			m_MsgCtrl.getM_TcpSvr().ClientClose(ClientKey);
+			m_MsgCtrl.getM_TcpSvr().ClientClose(CommUtil.StrBRightFillSpace(ClientKey, 20));
 		}else{
 			ret = Cmd_Sta.STA_ERROR;
 		}
